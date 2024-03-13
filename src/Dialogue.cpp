@@ -128,7 +128,7 @@ void Dialogue::GenerateTimeStamp(const std::tm& a_time)
 {
 	auto dateStr = std::format("{:03}{:02}{:02}", a_time.tm_year, a_time.tm_mon, a_time.tm_mday);
 	auto hourMinStr = std::format("{:02}{:02}", a_time.tm_hour, a_time.tm_min);
-	
+
 	date = string::to_num<std::uint32_t>(dateStr);
 	hourMin = string::to_num<std::uint32_t>(hourMinStr);
 	timeStamp = string::to_num<std::uint64_t>(dateStr.append(hourMinStr));

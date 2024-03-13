@@ -13,7 +13,7 @@ namespace Hooks
 				MANAGER(Input)->ProcessInputEvents(a_events);
 			}
 
-			if (MANAGER(GlobalHistory)->IsGlobalHistoryOpen()) {		
+			if (MANAGER(GlobalHistory)->IsGlobalHistoryOpen()) {
 				constexpr RE::InputEvent* const dummy[] = { nullptr };
 				func(a_dispatcher, dummy);
 			} else {

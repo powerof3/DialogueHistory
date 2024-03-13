@@ -81,7 +81,7 @@ namespace ImGui
 
 		ImGuiStyle style;
 		auto&      colors = style.Colors;
-		
+
 		style.WindowBorderSize = borderSize;
 		style.FrameBorderSize = borderSize;
 		style.IndentSpacing = indentSpacing;

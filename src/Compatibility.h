@@ -13,7 +13,7 @@ namespace DisplayTweaks
 namespace PhotoMode
 {
 	bool IsPhotoModeActive();
-	
+
 	// members
 	inline RE::TESGlobal* activeGlobal{ nullptr };
 }

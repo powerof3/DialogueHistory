@@ -143,7 +143,7 @@ namespace LocalHistory
 		} else {
 			UpdateDialogue();
 			ImGui::Styles::GetSingleton()->RefreshStyle();
-		}	
+		}
 		ImGui::Renderer::RenderMenus(a_opened);
 	}
 

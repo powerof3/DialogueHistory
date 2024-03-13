@@ -1,8 +1,8 @@
 #include "Input.h"
 
 #include "GlobalHistory.h"
-#include "LocalHistory.h"
 #include "Hotkeys.h"
+#include "LocalHistory.h"
 
 namespace Input
 {

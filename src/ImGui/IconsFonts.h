@@ -12,7 +12,7 @@ namespace IconFont
 
 		bool Load();
 		void Resize(float a_scale);
-		
+
 		// members
 		ImVec2 imageSize{};
 	};
@@ -37,7 +37,7 @@ namespace IconFont
 
 	class Manager final : public ISingleton<Manager>
 	{
-	public:		
+	public:
 		void LoadSettings(CSimpleIniA& a_ini);
 		void LoadMCMSettings(const CSimpleIniA& a_ini);
 

@@ -46,7 +46,7 @@ namespace ImGui::Renderer
 					logger::error("ImGui initialization failed (DX11)"sv);
 					return;
 				}
-				
+
 				logger::info("ImGui initialized.");
 
 				MANAGER(IconFont)->LoadIcons();

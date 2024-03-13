@@ -3,7 +3,7 @@
 float DisplayTweaks::GetResolutionScale()
 {
 	static auto height = RE::BSGraphics::Renderer::GetScreenSize().height;
-	
+
 	return borderlessUpscale ?
 	           resolutionScale :
 	           height / 1080.0f;

@@ -93,7 +93,7 @@ namespace GlobalHistory
 					{
 						for (auto it = sortedDialogues.begin(); it != sortedDialogues.end(); it++) {
 							auto& [date, timeMap] = *it;
-							auto rootOpen = ImGui::TreeNodeEx(date.format.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth);							
+							auto rootOpen = ImGui::TreeNodeEx(date.format.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth);
 							if (ImGui::IsItemToggledOpen()) {
 								currentDialogue = std::nullopt;
 							}
@@ -170,10 +170,10 @@ namespace GlobalHistory
 	{
 		globalHistoryOpen = a_open;
 		menuOpenedJustNow = a_open;
-		
+
 		if (a_open) {
 			ImGui::Styles::GetSingleton()->RefreshStyle();
-				
+
 			RE::UIBlurManager::GetSingleton()->IncrementBlurCount();
 			RE::SendHUDMessage::PushHUDMode("DialogueMode");
 			RE::UIMessageQueue::GetSingleton()->AddMessage(RE::CursorMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kShow, nullptr);
@@ -191,7 +191,7 @@ namespace GlobalHistory
 			RE::PlaySound("UIMenuCancel");
 		}
 
-		RE::Main::GetSingleton()->freezeTime = a_open;		
+		RE::Main::GetSingleton()->freezeTime = a_open;
 
 		ImGui::Renderer::RenderMenus(a_open);
 	}
