@@ -1,6 +1,6 @@
-# Photo Mode
+# Dialogue History
 
-SKSE plugin that adds photomode for Skyrim Special Edition
+SKSE plugin that adds dialogue history for Skyrim Special Edition
 
 ## Requirements
 * [CMake](https://cmake.org/)
@@ -21,8 +21,8 @@ SKSE plugin that adds photomode for Skyrim Special Edition
 
 ## Building
 ```
-git clone https://github.com/powerof3/PhotoMode.git
-cd PhotoMode
+git clone https://github.com/powerof3/DialogueHistory.git
+cd DialogueHistory
 # pull commonlib /extern to override the path settings
 git submodule init
 # to update submodules to checked in build
