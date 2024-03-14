@@ -123,7 +123,7 @@ namespace GlobalHistory
 				ImGui::SameLine();
 				ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical, ImGui::GetUserStyleVar(ImGui::USER_STYLE::kSeparatorThickness));
 				ImGui::SameLine();
-				
+
 				if (currentDialogue) {
 					ImGui::BeginChild("##History", ImVec2(0, ImGui::GetContentRegionAvail().y), ImGuiChildFlags_None, windowFlags | ImGuiWindowFlags_NoBackground);
 					{
