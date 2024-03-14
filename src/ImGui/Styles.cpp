@@ -83,7 +83,8 @@ namespace ImGui
 		auto&      colors = style.Colors;
 
 		style.WindowBorderSize = borderSize;
-		style.FrameBorderSize = borderSize;
+		style.ChildBorderSize = borderSize;
+		style.FrameBorderSize = 0.0f;
 		style.IndentSpacing = indentSpacing;
 
 		colors[ImGuiCol_WindowBg] = background;

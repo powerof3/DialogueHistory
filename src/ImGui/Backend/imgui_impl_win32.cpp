@@ -1018,7 +1018,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 	float ImGui_ImplWin32_GetDpiScaleForHwnd(void* hwnd)
 	{
 		HMONITOR monitor = ::MonitorFromWindow((HWND)hwnd, MONITOR_DEFAULTTONEAREST);
-		return ImGui_ImplWin32_GetDpiScaleForMonitor(monitor);
+		return SKSE::ImGui_ImplWin32_GetDpiScaleForMonitor(monitor);
 	}
 
 	//---------------------------------------------------------------------------------------------------------

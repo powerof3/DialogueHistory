@@ -315,12 +315,7 @@ namespace Input
 	{
 		MANAGER(Hotkeys)->TryToggleDialogueHistory(a_events);
 
-		bool drawLocalHistory = MANAGER(LocalHistory)->ShouldDraw();
 		bool drawGlobalHistory = MANAGER(GlobalHistory)->IsGlobalHistoryOpen();
-
-		if (!drawLocalHistory && !drawGlobalHistory) {
-			return;
-		}
 
 		auto& io = ImGui::GetIO();
 		auto  cursorMenu = RE::UI::GetSingleton()->GetMenu<RE::CursorMenu>();
@@ -338,8 +333,7 @@ namespace Input
 				}
 			} else if (const auto buttonEvent = event->AsButtonEvent()) {
 				const auto device = event->GetDevice();
-
-				auto key = buttonEvent->GetIDCode();
+				const auto key = buttonEvent->GetIDCode();
 
 				switch (device) {
 				case RE::INPUT_DEVICE::kKeyboard:

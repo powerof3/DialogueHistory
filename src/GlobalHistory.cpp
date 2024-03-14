@@ -62,17 +62,14 @@ namespace GlobalHistory
 
 		ImGui::Begin("##Main", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBringToFrontOnFocus);
 		{
+			constexpr auto windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar;
+
 			ImGui::SetNextWindowPos(ImGui::GetNativeViewportCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 
-			static auto windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar;
-
-			ImGui::SetNextWindowSize(ImGui::GetNativeViewportSize() / 1.25);
-
-			ImGui::Begin("##GlobalHistory", nullptr, windowFlags);
+			ImGui::BeginChild("##GlobalHistory", ImGui::GetNativeViewportSize() / 1.25, ImGuiChildFlags_Border, windowFlags);
 			{
 				ImGui::ExtendWindowPastBorder();
 
-				static bool test = false;
 				ImGui::PushFont(MANAGER(IconFont)->GetLargeFont());
 				{
 					ImGui::CenteredText("$DH_Title"_T, false);
@@ -86,7 +83,6 @@ namespace GlobalHistory
 				ImGui::Spacing();
 
 				auto childSize = ImGui::GetContentRegionAvail();
-
 				ImGui::BeginChild("##Map", { childSize.x / 2.75f, childSize.y }, ImGuiChildFlags_None, windowFlags | ImGuiWindowFlags_NoBackground);
 				{
 					ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 0.0f);
@@ -99,7 +95,7 @@ namespace GlobalHistory
 							}
 							if (rootOpen) {
 								for (auto& [hourMin, dialogue] : timeMap) {
-									auto leafFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+									auto leafFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanAvailWidth;
 									auto is_selected = currentDialogue && currentDialogue == dialogue;
 									if (is_selected) {
 										leafFlags |= ImGuiTreeNodeFlags_Selected;
@@ -127,18 +123,16 @@ namespace GlobalHistory
 				ImGui::SameLine();
 				ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical, ImGui::GetUserStyleVar(ImGui::USER_STYLE::kSeparatorThickness));
 				ImGui::SameLine();
-
-				childSize = ImGui::GetContentRegionAvail();
-
-				ImGui::BeginChild("##History", ImVec2(0, childSize.y), ImGuiChildFlags_None, windowFlags | ImGuiWindowFlags_NoBackground);
-				{
-					if (currentDialogue) {
+				
+				if (currentDialogue) {
+					ImGui::BeginChild("##History", ImVec2(0, ImGui::GetContentRegionAvail().y), ImGuiChildFlags_None, windowFlags | ImGuiWindowFlags_NoBackground);
+					{
 						currentDialogue->Draw();
 					}
+					ImGui::EndChild();
 				}
-				ImGui::EndChild();
 			}
-			ImGui::End();
+			ImGui::EndChild();
 
 			ImGui::PushFont(MANAGER(IconFont)->GetLargeFont());
 			{
