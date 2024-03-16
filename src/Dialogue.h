@@ -13,6 +13,9 @@ struct glz::meta<RE::BGSNumericIDIndex>
 // unique id + formatted time string (ie. year+day+month)
 struct TimeStamp
 {
+	TimeStamp() = default;
+	TimeStamp(std::uint64_t a_timeStamp, const std::string& a_format);
+
 	bool operator<(const TimeStamp& a_rhs) const
 	{
 		return time < a_rhs.time;
@@ -26,16 +29,17 @@ struct TimeStamp
 		return time == a_rhs.time;
 	}
 
+	static std::uint64_t GenerateTimeStamp(std::uint32_t a_year, std::uint32_t a_month, std::uint32_t a_day, std::uint32_t a_hour, std::uint32_t a_minute);
+	static std::string   GetFormattedYearMonthDay(std::uint32_t a_year, std::uint32_t a_month, std::uint32_t a_day);
+	static std::string   GetFormattedHourMin(std::uint32_t a_hour, std::uint32_t a_minute, bool a_12HourFormat);
+
 	void FromYearMonthDay(std::uint32_t a_year, std::uint32_t a_month, std::uint32_t a_day);
 	void FromHourMin(std::uint32_t a_hour, std::uint32_t a_minute, const std::string& a_speaker, bool a_12HourFormat);
 	void SwitchHourFormat(bool a_12HourFormat);
 
 	// members
-	std::uint32_t time{};
+	std::uint64_t time{};
 	std::string   format{};
-
-private:
-	std::string GetFormattedHourMin(std::uint32_t a_hour, std::uint32_t a_minute, bool a_12HourFormat);
 };
 
 struct Dialogue
@@ -46,9 +50,8 @@ struct Dialogue
 		Line(RE::TESObjectREFR* a_speaker, const std::string& a_line, const std::string& a_voice);
 
 		// members
-		RE::BGSNumericIDIndex id;
-		std::string           line;
-		std::string           voice;
+		std::string line;
+		std::string voice;
 
 		// skip write
 		std::string name{};
@@ -59,12 +62,11 @@ struct Dialogue
 		{
 			using T = Line;
 			static constexpr auto value = glz::object(
-				"id", &T::id,
 				"line", &T::line,
 				"wav", &T::voice,
 				"name", glz::hide(&T::name),
-				"hovered", glz::hide(&T::hovered),
-				"isPC", glz::hide(&T::isPlayer));
+				"pc", glz::hide(&T::isPlayer),
+				"hovered", glz::hide(&T::hovered));
 		};
 	};
 
@@ -87,24 +89,36 @@ struct Dialogue
 		return dialogue.empty();
 	}
 
-	void GenerateTimeStamp(const std::tm& a_time);
-	void ExtractTimeStamp(std::uint32_t& a_year, std::uint32_t& a_month, std::uint32_t& a_day, std::uint32_t& a_hour, std::uint32_t& a_minute) const;
+	void Initialize(RE::TESObjectREFR* a_speaker);
+	void Initialize(const std::tm& a_time);
+
+	void        ExtractTimeStamp(std::uint32_t& a_year, std::uint32_t& a_month, std::uint32_t& a_day, std::uint32_t& a_hour, std::uint32_t& a_minute) const;
+	std::string TimeStampToString(bool a_use12HourFormat) const;
 
 	void AddDialogue(RE::TESObjectREFR* a_speaker, const std::string& a_line, const std::string& a_voice);
 	void Draw();
 	void Clear();
 
 	// members
-	std::uint64_t     timeStamp;
-	std::uint32_t     date;
-	std::uint32_t     hourMin;
-	std::vector<Line> dialogue{};
+	std::uint64_t         timeStamp;
+	RE::BGSNumericIDIndex id;
+	RE::BGSNumericIDIndex loc;
+	std::vector<Line>     dialogue{};
+
+	std::string locName;
+	std::string timeAndLoc;
+	std::string speakerName;
 
 	struct glaze
 	{
 		using T = Dialogue;
 		static constexpr auto value = glz::object(
 			"time", &T::timeStamp,
-			"lines", &T::dialogue);
+			"id", &T::id,
+			"loc", &T::loc,
+			"lines", &T::dialogue,
+			"locName", glz::hide(&T::locName),
+			"timeLoc", glz::hide(&T::timeAndLoc),
+			"speakerName", glz::hide(&T::speakerName));
 	};
 };

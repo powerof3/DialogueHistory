@@ -18,7 +18,7 @@ namespace GlobalHistory
 	{
 		use12HourFormat = a_ini.GetBoolValue("Settings", "b12HourFormat", use12HourFormat);
 
-		if (!sortedDialogues.empty()) {
+		if (!dialoguesByDate.empty()) {
 			RefreshTimeStamps();
 		}
 	}
@@ -66,71 +66,86 @@ namespace GlobalHistory
 
 			ImGui::SetNextWindowPos(ImGui::GetNativeViewportCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 
-			ImGui::BeginChild("##GlobalHistory", ImGui::GetNativeViewportSize() / 1.25, ImGuiChildFlags_Border, windowFlags);
+			ImGui::BeginChild("##GlobalHistory", ImGui::GetNativeViewportSize() / 1.20f, ImGuiChildFlags_Border, windowFlags);
 			{
 				ImGui::ExtendWindowPastBorder();
 
 				ImGui::PushFont(MANAGER(IconFont)->GetLargeFont());
 				{
-					ImGui::CenteredText("$DH_Title"_T, false);
+					ImGui::Indent();
+					ImGui::TextUnformatted("$DH_Title"_T);
+					ImGui::Unindent();
 				}
 				ImGui::PopFont();
 
-				ImGui::Spacing();
-				ImGui::Spacing();
+				ImGui::Spacing(2);
 				ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal, ImGui::GetUserStyleVar(ImGui::USER_STYLE::kSeparatorThickness));
-				ImGui::Spacing();
-				ImGui::Spacing();
+				ImGui::Spacing(2);
 
 				auto childSize = ImGui::GetContentRegionAvail();
-				ImGui::BeginChild("##Map", { childSize.x / 2.75f, childSize.y }, ImGuiChildFlags_None, windowFlags | ImGuiWindowFlags_NoBackground);
+
+				ImGui::BeginGroup();
 				{
-					ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 0.0f);
+					ImGui::BeginChild("##Map", { childSize.x / 2.75f, childSize.y * 0.9125f }, ImGuiChildFlags_None, windowFlags | ImGuiWindowFlags_NoBackground);
 					{
-						for (auto it = sortedDialogues.begin(); it != sortedDialogues.end(); it++) {
-							auto& [date, timeMap] = *it;
-							auto rootOpen = ImGui::TreeNodeEx(date.format.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth);
-							if (ImGui::IsItemToggledOpen()) {
-								currentDialogue = std::nullopt;
-							}
-							if (rootOpen) {
-								for (auto& [hourMin, dialogue] : timeMap) {
-									auto leafFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanAvailWidth;
-									auto is_selected = currentDialogue && currentDialogue == dialogue;
-									if (is_selected) {
-										leafFlags |= ImGuiTreeNodeFlags_Selected;
-										ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImGui::GetStyleColorVec4(ImGuiCol_Header));
-									}
-									ImGui::TreeNodeEx(hourMin.format.c_str(), leafFlags);
-									if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
-										if (dialogue != currentDialogue) {
-											currentDialogue = dialogue;
-											RE::PlaySound("UIMenuFocus");
-										}
-									}
-									if (is_selected) {
-										ImGui::PopStyleColor();
-									}
-								}
-								ImGui::TreePop();
-							}
+						if (sortByLocation) {
+							DrawDialogueTree(dialoguesByLocation);
+						} else {
+							DrawDialogueTree(dialoguesByDate);
 						}
 					}
-					ImGui::PopStyleVar();
+					ImGui::EndChild();
+
+					ImGui::SameLine();
+					ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical, ImGui::GetUserStyleVar(ImGui::USER_STYLE::kSeparatorThickness));
+					ImGui::SameLine();
+
+					childSize = ImGui::GetContentRegionAvail();
+
+					if (currentDialogue) {
+						ImGui::BeginChild("##History", ImVec2(0, childSize.y * 0.9125f), ImGuiChildFlags_None, windowFlags | ImGuiWindowFlags_NoBackground);
+						{
+							currentDialogue->Draw();
+						}
+						ImGui::EndChild();
+					}
+				}
+				ImGui::EndGroup();
+
+				ImGui::Spacing(2);
+				ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal, ImGui::GetUserStyleVar(ImGui::USER_STYLE::kSeparatorThickness));
+
+				childSize = ImGui::GetContentRegionAvail();
+
+				ImGui::BeginChild("##BottomBar", ImVec2(childSize.x, childSize.y), ImGuiChildFlags_None, windowFlags | ImGuiWindowFlags_NoBackground);
+				{
+					childSize = ImGui::GetContentRegionMax();
+					
+					ImGui::SetCursorPosY(childSize.y * 0.25f);
+
+					static float toggleHeight = ImGui::GetFrameHeight() / 1.5f;
+					ImGui::SetCursorPosX(childSize.x * 0.5f - (ImGui::CalcTextSize("Date").x + ImGui::GetStyle().ItemSpacing.x + toggleHeight * 0.5f));
+
+					ImGui::BeginGroup();
+					{
+						auto cursorY = ImGui::GetCursorPosY();
+
+						ImGui::SetCursorPosY(cursorY - (toggleHeight * 0.25f));
+						ImGui::TextUnformatted("Date");
+						ImGui::SameLine();
+
+						ImGui::SetCursorPosY(cursorY);
+						if (ImGui::ToggleButton("##MapToggle", &sortByLocation)) {
+							currentDialogue = std::nullopt;
+						}
+
+						ImGui::SameLine();
+						ImGui::SetCursorPosY(cursorY - (toggleHeight * 0.25f));
+						ImGui::TextUnformatted("Location");
+					}
+					ImGui::EndGroup();
 				}
 				ImGui::EndChild();
-
-				ImGui::SameLine();
-				ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical, ImGui::GetUserStyleVar(ImGui::USER_STYLE::kSeparatorThickness));
-				ImGui::SameLine();
-
-				if (currentDialogue) {
-					ImGui::BeginChild("##History", ImVec2(0, ImGui::GetContentRegionAvail().y), ImGuiChildFlags_None, windowFlags | ImGuiWindowFlags_NoBackground);
-					{
-						currentDialogue->Draw();
-					}
-					ImGui::EndChild();
-				}
 			}
 			ImGui::EndChild();
 
@@ -145,6 +160,9 @@ namespace GlobalHistory
 
 				ImGui::SetCursorScreenPos({ posX, posY });
 				ImGui::ButtonIconWithLabel("$DH_Exit_Button"_T, icon);
+				if (ImGui::IsItemClicked()) {
+					SetGlobalHistoryOpen(false);
+				}
 			}
 			ImGui::PopFont();
 		}
@@ -196,22 +214,33 @@ namespace GlobalHistory
 		SetGlobalHistoryOpen(open);
 	}
 
+	bool Manager::Use12HourFormat() const
+	{
+		return use12HourFormat;
+	}
+
 	void Manager::SaveDialogueHistory(RE::TESObjectREFR* a_speaker, const std::tm& a_time, const Dialogue& a_dialogue)
 	{
+		dialogues.push_back(a_dialogue);
+
 		TimeStamp date;
 		date.FromYearMonthDay(a_time.tm_year, a_time.tm_mon, a_time.tm_mday);
 
 		TimeStamp hourMin;
 		hourMin.FromHourMin(a_time.tm_hour, a_time.tm_min, a_speaker->GetDisplayFullName(), use12HourFormat);
 
-		dialogues.push_back(a_dialogue);
-		sortedDialogues[date][hourMin] = a_dialogue;
+		dialoguesByDate[date][hourMin] = a_dialogue;
+
+		TimeStamp speaker(a_dialogue.timeStamp, a_speaker->GetDisplayFullName());
+		dialoguesByLocation[a_dialogue.locName][speaker] = a_dialogue;
 	}
 
 	void Manager::RefreshTimeStamps()
 	{
-		for (auto& [dayMonth, hourMinMap] : sortedDialogues) {
+		for (auto& [dayMonth, hourMinMap] : dialoguesByDate) {
 			for (auto it = hourMinMap.begin(); it != hourMinMap.end(); it++) {
+				it->second.timeAndLoc.clear();
+
 				auto node = hourMinMap.extract(it);
 				node.key().SwitchHourFormat(use12HourFormat);
 				hourMinMap.insert(std::move(node));
@@ -282,8 +311,6 @@ namespace GlobalHistory
 			return;
 		}
 
-		logger::info("{}", jsonPath->string());
-
 		Clear();
 
 		if (std::filesystem::exists(*jsonPath)) {
@@ -299,30 +326,30 @@ namespace GlobalHistory
 			return;
 		}
 
+		std::string playerName = RE::PlayerCharacter::GetSingleton()->GetDisplayFullName();
+
 		if (!dialogues.empty()) {
 			std::erase_if(dialogues, [&](auto& dialogue) {
-				std::string speakerName;
-				bool        missingActor = false;
+				auto speakerActor = RE::TESForm::LookupByID<RE::Actor>(dialogue.id.GetNumericID());
+				if (!speakerActor) {
+					return true;
+				}
 
-				for (auto& [id, line, voice, name, isPlayer, hovered] : dialogue.dialogue) {
-					if (auto actor = RE::TESForm::LookupByID<RE::Actor>(id.GetNumericID())) {
-						isPlayer = actor->IsPlayerRef();
-						name = actor->GetDisplayFullName();
-						if (speakerName.empty() && !actor->IsPlayerRef()) {
-							speakerName = name;
-						}
-					} else {
-						missingActor = true;
-						break;
-					}
+				if (auto cellOrLoc = RE::TESForm::LookupByID(dialogue.loc.GetNumericID())) {
+					dialogue.locName = cellOrLoc->GetName();
+				} else {
+					dialogue.locName = "???";
+				}
+
+				dialogue.speakerName = speakerActor->GetDisplayFullName();
+
+				for (auto& [line, voice, name, isPlayer, hovered] : dialogue.dialogue) {
+					isPlayer = voice.empty();
+					name = !isPlayer ? dialogue.speakerName : playerName;
 					if (line.empty() || line == " ") {
 						line = "...";
 					}
 					hovered = false;
-				}
-
-				if (missingActor) {
-					return true;
 				}
 
 				std::uint32_t year, month, day, hour, min;
@@ -330,13 +357,14 @@ namespace GlobalHistory
 
 				TimeStamp date;
 				date.FromYearMonthDay(year, month, day);
-				dialogue.date = date.time;
 
 				TimeStamp hourMin;
-				hourMin.FromHourMin(hour, min, speakerName, use12HourFormat);
-				dialogue.hourMin = hourMin.time;
+				hourMin.FromHourMin(hour, min, dialogue.speakerName, use12HourFormat);
 
-				sortedDialogues[date][hourMin] = dialogue;
+				TimeStamp speaker(dialogue.timeStamp, dialogue.speakerName);
+
+				dialoguesByDate[date][hourMin] = dialogue;
+				dialoguesByLocation[dialogue.locName][speaker] = dialogue;
 
 				return false;
 			});
@@ -358,7 +386,8 @@ namespace GlobalHistory
 	void Manager::Clear()
 	{
 		dialogues.clear();
-		sortedDialogues.clear();
+		dialoguesByDate.clear();
+		dialoguesByLocation.clear();
 	}
 
 	void Manager::PlayVoiceline(const std::string& a_voiceline)

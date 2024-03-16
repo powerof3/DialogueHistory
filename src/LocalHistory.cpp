@@ -80,6 +80,10 @@ namespace LocalHistory
 
 				ImGui::SetCursorScreenPos({ posX, posY });
 				ImGui::ButtonIconWithLabel(localHistoryOpen ? "$DH_Exit_Button"_T : "$DH_Title"_T, icons);
+				// no dialogue menu click because the real menu registers as a click too
+				if (ImGui::IsItemClicked() && localHistoryOpen) {
+					SetLocalHistoryOpen(false);
+				}
 			}
 			ImGui::PopFont();
 		}
@@ -218,13 +222,14 @@ namespace LocalHistory
 		} else {
 			currentSpeaker = nullptr;
 		}
+		localDialogue.Initialize(currentSpeaker);
 
 		char timeStamp[MAX_PATH]{};
 		calendar->GetTimeDateString(timeStamp, MAX_PATH, false);
 		gameTimeString = timeStamp;
 
 		gameTime = calendar->GetTime();
-		localDialogue.GenerateTimeStamp(gameTime);
+		localDialogue.Initialize(gameTime);
 	}
 
 	RE::BSEventNotifyControl Manager::ProcessEvent(const RE::MenuOpenCloseEvent* a_evn, RE::BSTEventSource<RE::MenuOpenCloseEvent>*)

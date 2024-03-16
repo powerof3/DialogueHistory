@@ -32,7 +32,7 @@ namespace IconFont
 		name = R"(Data/Interface/ImGui_Lib/Fonts/)" + name;
 
 		const auto resolutionScale = DisplayTweaks::GetResolutionScale();
-		size = static_cast<float>(a_ini.GetLongValue(a_section, "iSize", 30.0)) * resolutionScale;
+		size = static_cast<float>(a_ini.GetLongValue(a_section, "iSize", 30)) * resolutionScale;
 
 		spacing = static_cast<float>(a_ini.GetDoubleValue(a_section, "fSpacing", -1.5));
 	}
@@ -214,10 +214,12 @@ namespace ImGui
 	{
 		ImVec2 size;
 		BeginGroup();
-		for (auto& iconData : a_textures) {
-			auto pos = ImGui::GetCursorPos();
-			size = ImGui::ButtonIcon(iconData);
-			ImGui::SetCursorPos({ pos.x + size.x, pos.y });
+		{
+			for (auto& iconData : a_textures) {
+				auto pos = ImGui::GetCursorPos();
+				size = ImGui::ButtonIcon(iconData);
+				ImGui::SetCursorPos({ pos.x + size.x, pos.y });
+			}
 		}
 		EndGroup();
 		return size;
@@ -225,27 +227,35 @@ namespace ImGui
 
 	void ButtonIconWithLabel(const char* a_text, const IconTexture* a_IconData)
 	{
-		auto size = ButtonIcon(a_IconData);
-		ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x * 0.40);
+		ImGui::BeginGroup();
+		{
+			auto size = ButtonIcon(a_IconData);
+			ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x * 0.40);
 
-		auto posY = ImGui::GetCursorPosY();
-		auto textSize = ImGui::CalcTextSize(a_text);
+			auto posY = ImGui::GetCursorPosY();
+			auto textSize = ImGui::CalcTextSize(a_text);
 
-		ImGui::SetCursorPosY(posY + (size.y - textSize.y) / 2);
-		ImGui::Text(a_text);
-		ImGui::SetCursorPosY(posY);
+			ImGui::SetCursorPosY(posY + (size.y - textSize.y) / 2);
+			ImGui::TextUnformatted(a_text);
+			ImGui::SetCursorPosY(posY);
+		}
+		ImGui::EndGroup();
 	}
 
 	void ButtonIconWithLabel(const char* a_text, const std::set<const IconTexture*>& a_textures)
 	{
-		auto size = ImGui::ButtonIcon(a_textures);
-		ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x * 0.40);
+		ImGui::BeginGroup();
+		{
+			auto size = ImGui::ButtonIcon(a_textures);
+			ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x * 0.40);
 
-		auto posY = ImGui::GetCursorPosY();
-		auto textSize = ImGui::CalcTextSize(a_text);
+			auto posY = ImGui::GetCursorPosY();
+			auto textSize = ImGui::CalcTextSize(a_text);
 
-		ImGui::SetCursorPosY(posY + (size.y - textSize.y) / 2);
-		ImGui::Text(a_text);
-		ImGui::SetCursorPosY(posY);
+			ImGui::SetCursorPosY(posY + (size.y - textSize.y) / 2);
+			ImGui::TextUnformatted(a_text);
+			ImGui::SetCursorPosY(posY);
+		}
+		ImGui::EndGroup();
 	}
 }

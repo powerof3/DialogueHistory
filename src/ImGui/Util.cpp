@@ -26,14 +26,58 @@ namespace ImGui
 			ImGui::SetCursorPosX((windowSize.x - textSize.x) * 0.5f);
 		}
 
-		ImGui::Text(label);
+		ImGui::TextUnformatted(label);
 	}
 
 	void TextColoredWrapped(const ImVec4& col, const char* fmt, ...)
 	{
 		PushStyleColor(ImGuiCol_Text, col);
-		TextWrapped(fmt);
+		PushTextWrapPos(0.0f);
+		TextUnformatted(fmt);
+		PopTextWrapPos();
 		PopStyleColor();
+	}
+
+	bool ToggleButton(const char* str_id, bool* v)
+	{
+		bool pressed = false;
+		
+		ImVec2      p = ImGui::GetCursorScreenPos();
+		ImDrawList* draw_list = ImGui::GetWindowDrawList();
+		ImVec4*     colors = ImGui::GetStyle().Colors;
+
+		float height = ImGui::GetFrameHeight() / 1.5f;
+		float width = height * 2.0f;
+		float radius = height * 0.50f;
+
+		ImGui::InvisibleButton(str_id, ImVec2(width, height));
+		if (ImGui::IsItemClicked()) {
+			*v = !*v;
+			pressed = true;
+		}
+
+		float t = *v ? 1.0f : 0.0f;
+
+		ImGuiContext& g = *GImGui;
+		float         ANIM_SPEED = 0.05f;
+		if (g.LastActiveId == g.CurrentWindow->GetID(str_id))  // && g.LastActiveIdTimer < ANIM_SPEED)
+		{
+			float t_anim = ImSaturate(g.LastActiveIdTimer / ANIM_SPEED);
+			t = *v ? (t_anim) : (1.0f - t_anim);
+		}
+
+		ImU32 col_bg = GetColorU32(colors[ImGuiCol_Header]);
+		draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), col_bg, height * 0.5f);
+		draw_list->AddCircleFilled(ImVec2(p.x + radius + t * (width - radius * 2.0f), p.y + radius), radius - 1.5f, IM_COL32(255, 255, 255, 255));
+
+		return pressed;
+	}
+
+	void Spacing(std::uint32_t a_numSpaces)
+	{
+		for (std::uint32_t i = 0; i < a_numSpaces; i++) {
+			Spacing();
+		}
 	}
 
 	ImVec2 GetNativeViewportPos()
