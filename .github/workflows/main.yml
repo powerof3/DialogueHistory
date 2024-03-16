@@ -14,12 +14,16 @@ jobs:
     uses: adya/pack-skse-mod/.github/workflows/pack.yml@main
     with:
       FOMOD_INCLUDE_PDB: true
-      FOMOD_MOD_NAME: "PhotoMode"
+      FOMOD_MOD_NAME: "Dialogue History"
       FOMOD_MOD_AUTHOR: "powerofthree"
-      FOMOD_MOD_NEXUS_ID: "91701"
-      FOMOD_SE_MIN_GAME_VERSION: '1.5'
-      FOMOD_AE_NAME: 'SSE v1.6+ ("Anniversary Edition")'
-      FOMOD_AE_DESCR: 'Select this if you are using Skyrim Anniversary Edition v1.6 or higher.'
-      FOMOD_AE_MIN_GAME_VERSION: '1.6'
+      FOMOD_MOD_NEXUS_ID: "114238"
+      FOMOD_AE353_PATH: 'AE640/SKSE/Plugins'
+      FOMOD_AE353_NAME: 'SSE v1.6.640 ("Anniversary Edition")'
+      FOMOD_AE353_DESCR: 'Select this if you are using Skyrim Anniversary Edition v1.6.640'
+      FOMOD_AE353_MIN_GAME_VERSION: '1.6.629.0'
+      FOMOD_AE_NAME: 'SSE v1.6.1130+ ("Anniversary Edition")'
+      FOMOD_AE_DESCR: 'Select this if you are using Skyrim Anniversary Edition v1.6.1130 or higher (latest update).'
+      FOMOD_AE_MIN_GAME_VERSION: '1.6.1130.0'
       FOMOD_REQUIRED_INSTALLATION_DIR: "Skyrim/Data"
       PUBLISH_ARCHIVE_TYPE: '7z'
+      VCPKG_COMMIT_ID: 'cf4ebef2294e164875ce17d7937f44d3e3ea156e'
