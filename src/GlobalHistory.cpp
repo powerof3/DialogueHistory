@@ -120,7 +120,7 @@ namespace GlobalHistory
 				ImGui::BeginChild("##BottomBar", ImVec2(childSize.x, childSize.y), ImGuiChildFlags_None, windowFlags | ImGuiWindowFlags_NoBackground);
 				{
 					childSize = ImGui::GetContentRegionMax();
-					
+
 					ImGui::SetCursorPosY(childSize.y * 0.25f);
 
 					static float toggleHeight = ImGui::GetFrameHeight() / 1.5f;

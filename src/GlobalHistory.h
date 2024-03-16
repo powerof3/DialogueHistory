@@ -55,7 +55,7 @@ namespace GlobalHistory
 
 		template <class T>
 		void DrawDialogueTree(const std::map<T, TimeStampMap<Dialogue>, comparator>& a_map);
-		
+
 		std::optional<std::filesystem::path> GetSaveDirectory();
 		std::optional<std::filesystem::path> GetDialogueHistoryFile(const std::string& a_save);
 
@@ -88,7 +88,7 @@ namespace GlobalHistory
 				if constexpr (std::is_same_v<std::string, T>) {
 					rootOpen = ImGui::TreeNodeEx(root.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth);
 				} else {
-					rootOpen = ImGui::TreeNodeEx(root.format.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth);				
+					rootOpen = ImGui::TreeNodeEx(root.format.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth);
 				}
 				if (ImGui::IsItemToggledOpen()) {
 					currentDialogue = std::nullopt;

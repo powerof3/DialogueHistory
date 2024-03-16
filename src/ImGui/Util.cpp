@@ -41,7 +41,7 @@ namespace ImGui
 	bool ToggleButton(const char* str_id, bool* v)
 	{
 		bool pressed = false;
-		
+
 		ImVec2      p = ImGui::GetCursorScreenPos();
 		ImDrawList* draw_list = ImGui::GetWindowDrawList();
 		ImVec4*     colors = ImGui::GetStyle().Colors;

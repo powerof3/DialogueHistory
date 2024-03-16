@@ -111,7 +111,7 @@ std::string TimeStamp::GetFormattedHourMin(std::uint32_t a_hour, std::uint32_t a
 void TimeStamp::FromYearMonthDay(std::uint32_t a_year, std::uint32_t a_month, std::uint32_t a_day)
 {
 	time = string::to_num<std::uint32_t>(std::format("{:03}{:02}{:02}", a_year, a_month, a_day));
-	format =  std::format("{}##{}", GetFormattedYearMonthDay(a_year, a_month, a_day), time);
+	format = std::format("{}##{}", GetFormattedYearMonthDay(a_year, a_month, a_day), time);
 }
 
 void TimeStamp::FromHourMin(std::uint32_t a_hour, std::uint32_t a_minute, const std::string& a_speaker, bool a_12HourFormat)
@@ -187,7 +187,7 @@ std::string Dialogue::TimeStampToString(bool a_use12HourFormat) const
 
 void Dialogue::AddDialogue(RE::TESObjectREFR* a_speaker, const std::string& a_line, const std::string& a_voice)
 {
-	Initialize(a_speaker);	
+	Initialize(a_speaker);
 	dialogue.emplace_back(a_speaker, a_line, a_voice);
 }
 
@@ -213,7 +213,7 @@ void Dialogue::Draw()
 
 			ImGui::Spacing(5);
 		}
-		
+
 		for (auto& [response, voice, name, isPlayer, hovered] : dialogue) {
 			auto speakerColor = isPlayer ? GetUserStyleColorVec4(USER_STYLE::kPlayerName) : GetUserStyleColorVec4(USER_STYLE::kSpeakerName);
 			ImGui::TextColoredWrapped(speakerColor, std::format("{}: ", name).c_str());
