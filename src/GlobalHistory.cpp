@@ -131,7 +131,9 @@ namespace GlobalHistory
 						auto cursorY = ImGui::GetCursorPosY();
 
 						ImGui::SetCursorPosY(cursorY - (toggleHeight * 0.25f));
-						ImGui::TextUnformatted("Date");
+						ImGui::BeginDisabled(sortByLocation);
+						ImGui::TextUnformatted("$DH_Date"_T);
+						ImGui::EndDisabled();
 						ImGui::SameLine();
 
 						ImGui::SetCursorPosY(cursorY);
@@ -141,7 +143,9 @@ namespace GlobalHistory
 
 						ImGui::SameLine();
 						ImGui::SetCursorPosY(cursorY - (toggleHeight * 0.25f));
-						ImGui::TextUnformatted("Location");
+						ImGui::BeginDisabled(!sortByLocation);
+						ImGui::TextUnformatted("$DH_Location"_T);
+						ImGui::EndDisabled();
 					}
 					ImGui::EndGroup();
 				}

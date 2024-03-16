@@ -1,0 +1,138 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Exit-9B/MCM-Helper/main/docs/config.schema.json",
+  "modName": "DialogueHistory",
+  "displayName": "$DH_Title_MCM",
+  "minMcmVersion": 13,
+  "pluginRequirements": [ "DialogueHistory.esp" ],
+  "cursorFillMode": "topToBottom",
+  "pages": [
+    {
+      "pageDisplayName": "$DH_Controls_Page",
+      "cursorFillMode": "topToBottom",
+      "content": [
+        {
+          "text": "$DH_LocalHistory_Header",
+          "type": "header"
+        },
+        {
+          "id": "iLocalHistoryKey:Controls",
+          "text": "$DH_PrimaryKey_Text",
+          "type": "keymap",
+          "ignoreConflicts": true,
+          "valueOptions": {
+            "sourceType": "ModSettingInt"
+          }
+        },
+        {
+          "id": "iLocalHistoryKeyModifier:Controls",
+          "text": "$DH_ModifierKey_Text",
+          "type": "keymap",
+          "ignoreConflicts": true,
+          "valueOptions": {
+            "sourceType": "ModSettingInt"
+          }
+        },
+        {
+          "type": "empty"
+        },
+        {
+          "text": "$DH_GlobalHistory_Header",
+          "type": "header"
+        },
+        {
+          "id": "iGlobalHistoryKey:Controls",
+          "text": "$DH_PrimaryKey_Text",
+          "type": "keymap",
+          "ignoreConflicts": true,
+          "valueOptions": {
+            "sourceType": "ModSettingInt"
+          }
+        },
+        {
+          "id": "iGlobalHistoryKeyModifier:Controls",
+          "text": "$DH_ModifierKey_Text",
+          "type": "keymap",
+          "ignoreConflicts": true,
+          "valueOptions": {
+            "sourceType": "ModSettingInt"
+          }
+        },
+        {
+          "text": "$DH_LocalHistory_Gamepad_Header",
+          "type": "header",
+          "position": 1
+        },
+        {
+          "id": "iLocalHistoryGamePad:Controls",
+          "text": "$DH_PrimaryKey_Text",
+          "type": "keymap",
+          "ignoreConflicts": true,
+          "valueOptions": {
+            "sourceType": "ModSettingInt"
+          }
+        },
+        {
+          "id": "iLocalHistoryGamePadModifier:Controls",
+          "text": "$DH_ModifierKey_Text",
+          "type": "keymap",
+          "ignoreConflicts": true,
+          "valueOptions": {
+            "sourceType": "ModSettingInt"
+          }
+        },
+        {
+          "type": "empty"
+        },
+        {
+          "text": "$DH_GlobalHistory_Gamepad_Header",
+          "type": "header"
+        },
+        {
+          "id": "iGlobalHistoryGamePad:Controls",
+          "text": "$DH_PrimaryKey_Text",
+          "type": "keymap",
+          "ignoreConflicts": true,
+          "valueOptions": {
+            "sourceType": "ModSettingInt"
+          }
+        },
+        {
+          "id": "iGlobalHistoryGamePadModifier:Controls",
+          "text": "$DH_ModifierKey_Text",
+          "type": "keymap",
+          "ignoreConflicts": true,
+          "valueOptions": {
+            "sourceType": "ModSettingInt"
+          }
+        },
+        {
+          "type": "empty"
+        },
+        {
+          "id": "iButtonScheme:Controls",
+          "text": "$DH_ControllerButtonScheme_Text",
+          "type": "enum",
+          "valueOptions": {
+            "options": [ "$DH_AUTODETECT", "$DH_XBOX", "$DH_PLAYSTATION" ],
+            "sourceType": "ModSettingInt"
+          }
+        }
+      ]
+    },
+    {
+      "pageDisplayName": "$DH_SettingsPage",
+      "cursorFillMode": "topToBottom",
+      "content": [
+        {
+          "id": "b12HourFormat:Settings",
+          "text": "$DH_12HourFormat_Text",
+          "type": "toggle",
+          "help": "$DH_12HourFormat_Help",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        }
+      ]
+    }
+  ]
+}

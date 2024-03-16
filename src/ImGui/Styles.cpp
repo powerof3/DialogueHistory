@@ -57,11 +57,11 @@ namespace ImGui
 		get_value(borderSize, "Window", "fBorderSize");
 
 		get_value(text, "Text", "rColor");
-		get_value(textDisabledAlpha, "Text", "rDisabledTextAlpha");
 		get_value(playerName, "Text", "rPlayerNameColor");
 		get_value(playerLine, "Text", "rPlayerLineColor");
 		get_value(speakerName, "Text", "rSpeakerNameColor");
 		get_value(speakerLine, "Text", "rSpeakerLineColor");
+		get_value(textDisabledAlpha, "Text", "rDisabledTextAlpha");
 
 		get_value(header, "GlobalHistory", "rSelectedColor");
 		get_value(headerHovered, "GlobalHistory", "rHoveredColor");
