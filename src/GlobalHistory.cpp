@@ -191,7 +191,7 @@ namespace GlobalHistory
 			ImGui::Styles::GetSingleton()->RefreshStyle();
 
 			RE::UIBlurManager::GetSingleton()->IncrementBlurCount();
-			RE::SendHUDMessage::PushHUDMode("DialogueMode");
+			RE::SendHUDMessage::PushHUDMode("JournalMode");
 			RE::UIMessageQueue::GetSingleton()->AddMessage(RE::CursorMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kShow, nullptr);
 
 			RE::PlaySound("UIMenuOK");
@@ -201,7 +201,7 @@ namespace GlobalHistory
 			voiceHandle.Stop();
 
 			RE::UIBlurManager::GetSingleton()->DecrementBlurCount();
-			RE::SendHUDMessage::PopHUDMode("DialogueMode");
+			RE::SendHUDMessage::PopHUDMode("JournalMode");
 			RE::UIMessageQueue::GetSingleton()->AddMessage(RE::CursorMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kHide, nullptr);
 
 			RE::PlaySound("UIMenuCancel");
