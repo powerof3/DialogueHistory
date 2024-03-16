@@ -22,7 +22,7 @@ namespace GlobalHistory
 
 		bool Use12HourFormat() const;
 
-		void SaveDialogueHistory(RE::TESObjectREFR* a_speaker, const std::tm& a_time, const Dialogue& a_dialogue);
+		void SaveDialogueHistory(const std::tm& a_time, const Dialogue& a_dialogue);
 		void RefreshTimeStamps();
 
 		void SaveToFile(const std::string& a_save);

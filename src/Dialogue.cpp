@@ -241,4 +241,5 @@ void Dialogue::Clear()
 {
 	timeStamp = 0;
 	dialogue.clear();
+	speakerName.clear();
 }

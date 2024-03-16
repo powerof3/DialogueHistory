@@ -209,7 +209,7 @@ namespace LocalHistory
 			return;
 		}
 
-		MANAGER(GlobalHistory)->SaveDialogueHistory(currentSpeaker, gameTime, localDialogue);
+		MANAGER(GlobalHistory)->SaveDialogueHistory(gameTime, localDialogue);
 	}
 
 	void Manager::UpdateDialogue()

@@ -219,7 +219,7 @@ namespace GlobalHistory
 		return use12HourFormat;
 	}
 
-	void Manager::SaveDialogueHistory(RE::TESObjectREFR* a_speaker, const std::tm& a_time, const Dialogue& a_dialogue)
+	void Manager::SaveDialogueHistory(const std::tm& a_time, const Dialogue& a_dialogue)
 	{
 		dialogues.push_back(a_dialogue);
 
@@ -227,11 +227,11 @@ namespace GlobalHistory
 		date.FromYearMonthDay(a_time.tm_year, a_time.tm_mon, a_time.tm_mday);
 
 		TimeStamp hourMin;
-		hourMin.FromHourMin(a_time.tm_hour, a_time.tm_min, a_speaker->GetDisplayFullName(), use12HourFormat);
+		hourMin.FromHourMin(a_time.tm_hour, a_time.tm_min, a_dialogue.speakerName, use12HourFormat);
 
 		dialoguesByDate[date][hourMin] = a_dialogue;
 
-		TimeStamp speaker(a_dialogue.timeStamp, a_speaker->GetDisplayFullName());
+		TimeStamp speaker(a_dialogue.timeStamp, a_dialogue.speakerName);
 		dialoguesByLocation[a_dialogue.locName][speaker] = a_dialogue;
 	}
 
