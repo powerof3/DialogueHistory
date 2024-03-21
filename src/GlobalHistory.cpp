@@ -400,7 +400,7 @@ namespace GlobalHistory
 	void Manager::PlayVoiceline(const std::string& a_voiceline)
 	{
 #undef GetObject
-		
+
 		if (a_voiceline.empty()) {
 			return;
 		}
