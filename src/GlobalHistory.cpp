@@ -341,6 +341,9 @@ namespace GlobalHistory
 
 				if (auto cellOrLoc = RE::TESForm::LookupByID(dialogue.loc.GetNumericID())) {
 					dialogue.locName = cellOrLoc->GetName();
+					if (dialogue.locName.empty()) {
+						dialogue.locName = "$DH_UnknownLocation"_T;
+					}
 				} else {
 					dialogue.locName = "???";
 				}
@@ -396,6 +399,8 @@ namespace GlobalHistory
 
 	void Manager::PlayVoiceline(const std::string& a_voiceline)
 	{
+#undef GetObject
+		
 		if (a_voiceline.empty()) {
 			return;
 		}
@@ -408,6 +413,12 @@ namespace GlobalHistory
 		file.GenerateFromPath(a_voiceline.c_str());
 
 		RE::BSAudioManager::GetSingleton()->BuildSoundDataFromFile(voiceHandle, file, 128 | 0x10, 128);
+
+		auto soundOutput = RE::BGSDefaultObjectManager::GetSingleton()->GetObject<RE::BGSSoundOutput>(RE::DEFAULT_OBJECTS::kDialogueOutputModel2D);
+		if (soundOutput) {
+			voiceHandle.SetOutputModel(soundOutput);
+		}
+
 		voiceHandle.Play();
 	}
 }

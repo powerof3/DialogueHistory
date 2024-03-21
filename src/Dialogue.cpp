@@ -152,6 +152,9 @@ void Dialogue::Initialize(RE::TESObjectREFR* a_speaker)
 		if (cellOrLoc) {
 			loc.SetNumericID(cellOrLoc->GetFormID());
 			locName = cellOrLoc->GetName();
+			if (locName.empty()) {
+				locName = "$DH_UnknownLocation"_T;
+			}
 		}
 		speakerName = a_speaker->GetDisplayFullName();
 	}
