@@ -66,7 +66,7 @@ namespace ImGui::Renderer
 			if (!initialized.load()) {
 				return func(a_menu);
 			}
-		
+
 			if (renderMenus.load()) {
 				// refresh style
 				ImGui::Styles::GetSingleton()->OnStyleRefresh();
