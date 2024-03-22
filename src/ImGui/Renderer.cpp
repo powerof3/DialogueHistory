@@ -63,7 +63,11 @@ namespace ImGui::Renderer
 		static void thunk(RE::IMenu* a_menu)
 		{
 			// Skip if Imgui is not loaded
-			if (initialized.load() && renderMenus.load()) {
+			if (!initialized.load()) {
+				return func(a_menu);
+			}
+		
+			if (renderMenus.load()) {
 				// refresh style
 				ImGui::Styles::GetSingleton()->OnStyleRefresh();
 

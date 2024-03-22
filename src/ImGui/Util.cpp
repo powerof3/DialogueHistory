@@ -37,7 +37,8 @@ namespace ImGui
 		PopTextWrapPos();
 		PopStyleColor();
 	}
-
+	
+	// https://github.com/ocornut/imgui/issues/1537#issuecomment-355569554
 	bool ToggleButton(const char* str_id, bool* v)
 	{
 		bool pressed = false;

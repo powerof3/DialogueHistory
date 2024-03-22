@@ -313,8 +313,6 @@ namespace Input
 
 	void Manager::ProcessInputEvents(RE::InputEvent* const* a_events)
 	{
-		MANAGER(Hotkeys)->TryToggleDialogueHistory(a_events);
-
 		bool drawGlobalHistory = MANAGER(GlobalHistory)->IsGlobalHistoryOpen();
 
 		auto& io = ImGui::GetIO();
@@ -377,9 +375,11 @@ namespace Input
 					}
 					break;
 				default:
-					continue;
+					break;
 				}
 			}
 		}
+
+		MANAGER(Hotkeys)->TryToggleDialogueHistory(a_events);
 	}
 }

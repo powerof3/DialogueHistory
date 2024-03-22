@@ -34,6 +34,10 @@ namespace GlobalHistory
 			"CustomMenu"sv
 		};
 
+		if (IsGlobalHistoryOpen()) {
+			return true;
+		}
+
 		if (const auto UI = RE::UI::GetSingleton();
 			!UI || !UI->IsShowingMenus() || std::ranges::any_of(badMenus, [&](const auto& menuName) { return UI->IsMenuOpen(menuName); })) {
 			return false;

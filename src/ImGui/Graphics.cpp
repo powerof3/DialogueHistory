@@ -53,10 +53,6 @@ namespace ImGui
 			image.reset();
 		}
 
-		if (!result) {
-			logger::info("{}", *stl::utf16_to_utf8(path));
-		}
-
 		return result;
 	}
 }
