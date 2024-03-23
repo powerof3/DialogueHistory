@@ -6,7 +6,7 @@
 namespace IconFont
 {
 	IconTexture::IconTexture(std::wstring_view a_iconName) :
-		ImGui::Texture(LR"(Data/Interface/ImGui_Lib/Icons/)", a_iconName)
+		ImGui::Texture(LR"(Data/Interface/ImGuiIcons/Icons/)", a_iconName)
 	{}
 
 	bool IconTexture::Load()
@@ -29,7 +29,7 @@ namespace IconFont
 	void Font::LoadSettings(const CSimpleIniA& a_ini, const char* a_section)
 	{
 		name = a_ini.GetValue(a_section, "sFont", "Jost-Regular.ttf");
-		name = R"(Data/Interface/ImGui_Lib/Fonts/)" + name;
+		name = R"(Data/Interface/ImGuiIcons/Fonts/)" + name;
 
 		const auto resolutionScale = DisplayTweaks::GetResolutionScale();
 		size = static_cast<float>(a_ini.GetLongValue(a_section, "iSize", 30)) * resolutionScale;
