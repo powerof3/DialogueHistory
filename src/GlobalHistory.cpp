@@ -30,7 +30,7 @@ namespace GlobalHistory
 		if (IsGlobalHistoryOpen()) {
 			return true;
 		}
-		
+
 		static constexpr std::array badMenus{
 			RE::MainMenu::MENU_NAME,
 			RE::MistMenu::MENU_NAME,
@@ -232,7 +232,7 @@ namespace GlobalHistory
 		if (!IsValid()) {
 			return;
 		}
-		
+
 		SetGlobalHistoryOpen(!IsGlobalHistoryOpen());
 	}
 

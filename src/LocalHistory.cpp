@@ -138,7 +138,7 @@ namespace LocalHistory
 		if (!IsDialogueMenuOpen()) {
 			return;
 		}
-		
+
 		SetLocalHistoryOpen(!IsLocalHistoryOpen());
 	}
 
@@ -172,7 +172,7 @@ namespace LocalHistory
 		if (a_blurBG) {
 			a_blurBG = blurMenu;
 		}
-		
+
 		if (a_opened) {
 			RE::PlaySound("UIMenuOK");
 			if (a_blurBG) {

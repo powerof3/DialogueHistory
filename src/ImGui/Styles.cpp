@@ -45,8 +45,8 @@ namespace ImGui
 
 	void Styles::LoadStyles(CSimpleIniA& a_ini)
 	{
-#define GET_VALUE(a_value, a_section, a_key)                                                                                                         \
-	bool a_value##_hex = false;                                                                                                                      \
+#define GET_VALUE(a_value, a_section, a_key)                                                                                                        \
+	bool a_value##_hex = false;                                                                                                                     \
 	std::tie(user.a_value, a_value##_hex) = ToStyle<decltype(user.a_value)>(a_ini.GetValue(a_section, a_key, ToString(def.a_value, true).c_str())); \
 	a_ini.SetValue(a_section, a_key, ToString(user.a_value, a_value##_hex).c_str());
 
