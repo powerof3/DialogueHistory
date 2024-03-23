@@ -12,7 +12,7 @@ namespace Hotkeys
 	public:
 		void LoadHotKeys(const CSimpleIniA& a_ini);
 
-		bool TryToggleDialogueHistory(const RE::InputEvent* const* a_event);
+		void TryToggleDialogueHistory(const RE::InputEvent* const* a_event);
 
 		static std::uint32_t         EscapeKey();
 		const IconFont::IconTexture* EscapeIcon() const;

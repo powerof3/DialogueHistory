@@ -11,6 +11,8 @@ namespace LocalHistory
 	public:
 		static void Register();
 
+		void LoadMCMSettings(const CSimpleIniA& a_ini);
+
 		void Draw();
 		bool ShouldDraw();
 
@@ -42,5 +44,8 @@ namespace LocalHistory
 		RE::TESObjectREFR* currentSpeaker;
 
 		Dialogue localDialogue{};
+
+		bool unpauseMenu{ false };
+		bool blurMenu{ true };
 	};
 }

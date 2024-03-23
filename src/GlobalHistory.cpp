@@ -17,6 +17,8 @@ namespace GlobalHistory
 	void Manager::LoadMCMSettings(const CSimpleIniA& a_ini)
 	{
 		use12HourFormat = a_ini.GetBoolValue("Settings", "b12HourFormat", use12HourFormat);
+		unpauseMenu = a_ini.GetBoolValue("Settings", "bUnpauseGlobalHistory", unpauseMenu);
+		blurMenu = a_ini.GetBoolValue("Settings", "bBlurGlobalHistory", blurMenu);
 
 		if (!dialoguesByDate.empty()) {
 			RefreshTimeStamps();
@@ -25,6 +27,10 @@ namespace GlobalHistory
 
 	bool Manager::IsValid()
 	{
+		if (IsGlobalHistoryOpen()) {
+			return true;
+		}
+		
 		static constexpr std::array badMenus{
 			RE::MainMenu::MENU_NAME,
 			RE::MistMenu::MENU_NAME,
@@ -33,10 +39,6 @@ namespace GlobalHistory
 			"LootMenu"sv,
 			"CustomMenu"sv
 		};
-
-		if (IsGlobalHistoryOpen()) {
-			return true;
-		}
 
 		if (const auto UI = RE::UI::GetSingleton();
 			!UI || !UI->IsShowingMenus() || std::ranges::any_of(badMenus, [&](const auto& menuName) { return UI->IsMenuOpen(menuName); })) {
@@ -176,7 +178,7 @@ namespace GlobalHistory
 		}
 		ImGui::End();
 
-		if ((ImGui::IsKeyReleased(ImGuiKey_Escape) || ImGui::IsKeyReleased(ImGuiKey_NavGamepadCancel))) {
+		if (ImGui::IsKeyReleased(ImGuiKey_Escape) || ImGui::IsKeyReleased(ImGuiKey_NavGamepadCancel)) {
 			SetGlobalHistoryOpen(false);
 		}
 	}
@@ -194,8 +196,12 @@ namespace GlobalHistory
 		if (a_open) {
 			ImGui::Styles::GetSingleton()->RefreshStyle();
 
-			RE::UIBlurManager::GetSingleton()->IncrementBlurCount();
-			RE::SendHUDMessage::PushHUDMode("JournalMode");
+			if (blurMenu) {
+				RE::UIBlurManager::GetSingleton()->IncrementBlurCount();
+			}
+
+			// hides compass but not notifications
+			RE::SendHUDMessage::PushHUDMode("WorldMapMode");
 			RE::UIMessageQueue::GetSingleton()->AddMessage(RE::CursorMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kShow, nullptr);
 
 			RE::PlaySound("UIMenuOK");
@@ -204,22 +210,30 @@ namespace GlobalHistory
 			currentDialogue = std::nullopt;
 			voiceHandle.Stop();
 
-			RE::UIBlurManager::GetSingleton()->DecrementBlurCount();
-			RE::SendHUDMessage::PopHUDMode("JournalMode");
+			if (blurMenu) {
+				RE::UIBlurManager::GetSingleton()->DecrementBlurCount();
+			}
+
+			RE::SendHUDMessage::PopHUDMode("WorldMapMode");
 			RE::UIMessageQueue::GetSingleton()->AddMessage(RE::CursorMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kHide, nullptr);
 
 			RE::PlaySound("UIMenuCancel");
 		}
 
-		RE::Main::GetSingleton()->freezeTime = a_open;
+		if (!unpauseMenu) {
+			RE::Main::GetSingleton()->freezeTime = a_open;
+		}
 
 		ImGui::Renderer::RenderMenus(a_open);
 	}
 
 	void Manager::ToggleActive()
 	{
-		auto open = !IsGlobalHistoryOpen();
-		SetGlobalHistoryOpen(open);
+		if (!IsValid()) {
+			return;
+		}
+		
+		SetGlobalHistoryOpen(!IsGlobalHistoryOpen());
 	}
 
 	bool Manager::Use12HourFormat() const

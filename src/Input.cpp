@@ -337,7 +337,12 @@ namespace Input
 				case RE::INPUT_DEVICE::kKeyboard:
 					{
 						inputDevice = DEVICE::kKeyboard;
-						io.AddKeyEvent(ToImGuiKey(static_cast<KEY>(key)), buttonEvent->IsPressed());
+						auto imKey = ToImGuiKey(static_cast<KEY>(key));
+						// esc is still released if you close journal menu and then open global history
+						if (imKey == ImGuiKey_Escape && !drawGlobalHistory) {
+							continue;
+						}
+						io.AddKeyEvent(imKey, buttonEvent->IsPressed());
 					}
 					break;
 				case RE::INPUT_DEVICE::kMouse:
@@ -376,6 +381,12 @@ namespace Input
 					break;
 				default:
 					break;
+				}
+
+				if (buttonEvent->QUserEvent() == RE::UserEvents::GetSingleton()->screenshot && buttonEvent->IsDown()) {
+					if (drawGlobalHistory) {
+						RE::MenuControls::GetSingleton()->QueueScreenshot();
+					}
 				}
 			}
 		}

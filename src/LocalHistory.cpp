@@ -12,6 +12,12 @@ namespace LocalHistory
 		RE::UI::GetSingleton()->AddEventSink<RE::MenuOpenCloseEvent>(GetSingleton());
 	}
 
+	void Manager::LoadMCMSettings(const CSimpleIniA& a_ini)
+	{
+		unpauseMenu = a_ini.GetBoolValue("Settings", "bUnpauseLocalHistory", unpauseMenu);
+		blurMenu = a_ini.GetBoolValue("Settings", "bBlurLocalHistory", blurMenu);
+	}
+
 	void Manager::Draw()
 	{
 		if (!ShouldDraw()) {
@@ -129,6 +135,10 @@ namespace LocalHistory
 
 	void Manager::ToggleActive()
 	{
+		if (!IsDialogueMenuOpen()) {
+			return;
+		}
+		
 		SetLocalHistoryOpen(!IsLocalHistoryOpen());
 	}
 
@@ -159,6 +169,10 @@ namespace LocalHistory
 
 	void Manager::SetupLocalHistoryMenu(bool a_opened, bool a_blurBG)
 	{
+		if (a_blurBG) {
+			a_blurBG = blurMenu;
+		}
+		
 		if (a_opened) {
 			RE::PlaySound("UIMenuOK");
 			if (a_blurBG) {
@@ -186,7 +200,9 @@ namespace LocalHistory
 			}
 		}
 
-		RE::Main::GetSingleton()->freezeTime = a_opened;
+		if (!unpauseMenu) {
+			RE::Main::GetSingleton()->freezeTime = a_opened;
+		}
 	}
 
 	void Manager::AddDialogue(RE::TESObjectREFR* a_speaker, const std::string& a_response, const std::string& a_voice)

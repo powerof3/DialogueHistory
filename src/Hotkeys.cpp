@@ -13,18 +13,14 @@ namespace Hotkeys
 		globalHistory.LoadKeys(a_ini);
 	}
 
-	bool Manager::TryToggleDialogueHistory(const RE::InputEvent* const* a_event)
+	void Manager::TryToggleDialogueHistory(const RE::InputEvent* const* a_event)
 	{
-		if (MANAGER(LocalHistory)->IsDialogueMenuOpen()) {
-			return localHistory.ProcessKeyPress(a_event, []() {
-				MANAGER(LocalHistory)->ToggleActive();
-			});
-		} else if (MANAGER(GlobalHistory)->IsValid()) {
-			return globalHistory.ProcessKeyPress(a_event, []() {
-				MANAGER(GlobalHistory)->ToggleActive();
-			});
-		}
-		return false;
+		localHistory.ProcessKeyPress(a_event, []() {
+			MANAGER(LocalHistory)->ToggleActive();
+		});
+		globalHistory.ProcessKeyPress(a_event, []() {
+			MANAGER(GlobalHistory)->ToggleActive();
+		});
 	}
 
 	void Manager::KeyCombo::KeyComboImpl::LoadKeys(const CSimpleIniA& a_ini, std::string_view a_setting)

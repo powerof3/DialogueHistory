@@ -71,8 +71,10 @@ namespace GlobalHistory
 		RE::BSSoundHandle                    voiceHandle{};
 		bool                                 finishLoading{ false };
 		std::optional<std::filesystem::path> saveDirectory;
-		bool                                 use12HourFormat{ false };
 		bool                                 sortByLocation{ false };
+		bool                                 use12HourFormat{ false };
+		bool                                 unpauseMenu{ false };
+		bool                                 blurMenu{ true };
 	};
 
 	template <class T>

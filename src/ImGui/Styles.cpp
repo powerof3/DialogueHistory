@@ -10,13 +10,13 @@ namespace ImGui
 	{
 		switch (a_style) {
 		case USER_STYLE::kSpeakerName:
-			return speakerName;
+			return user.speakerName;
 		case USER_STYLE::kSpeakerLine:
-			return speakerLine;
+			return user.speakerLine;
 		case USER_STYLE::kPlayerName:
-			return playerName;
+			return user.playerName;
 		case USER_STYLE::kPlayerLine:
-			return playerLine;
+			return user.playerLine;
 		default:
 			return ImVec4();
 		}
@@ -26,11 +26,11 @@ namespace ImGui
 	{
 		switch (a_style) {
 		case USER_STYLE::kButtons:
-			return buttonScale;
+			return user.buttonScale;
 		case USER_STYLE::kDisabledTextAlpha:
-			return textDisabledAlpha;
+			return user.textDisabledAlpha;
 		case USER_STYLE::kSeparatorThickness:
-			return separatorThickness;
+			return user.separatorThickness;
 		default:
 			return 1.0f;
 		}
@@ -45,30 +45,31 @@ namespace ImGui
 
 	void Styles::LoadStyles(CSimpleIniA& a_ini)
 	{
-		auto get_value = [&]<typename T>(T& a_value, const char* a_section, const char* a_key) {
-			a_value = ToStyle<T>(a_ini.GetValue(a_section, a_key, ToString(a_value).c_str()));
-			a_ini.SetValue(a_section, a_key, ToString(a_value).c_str());
-		};
+#define GET_VALUE(a_value, a_section, a_key)                                                                                                         \
+	bool a_value##_hex = false;                                                                                                                      \
+	std::tie(user.a_value, a_value##_hex) = ToStyle<decltype(user.a_value)>(a_ini.GetValue(a_section, a_key, ToString(def.a_value, true).c_str())); \
+	a_ini.SetValue(a_section, a_key, ToString(user.a_value, a_value##_hex).c_str());
 
-		get_value(buttonScale, "Icon", "fButtonScale");
+		GET_VALUE(background, "Window", "rBackgroundColor");
+		GET_VALUE(border, "Window", "rBorderColor");
+		GET_VALUE(borderSize, "Window", "fBorderSize");
 
-		get_value(background, "Window", "rBackgroundColor");
-		get_value(border, "Window", "rBorderColor");
-		get_value(borderSize, "Window", "fBorderSize");
+		GET_VALUE(text, "Text", "rColor");
+		GET_VALUE(playerName, "Text", "rPlayerNameColor");
+		GET_VALUE(playerLine, "Text", "rPlayerLineColor");
+		GET_VALUE(speakerName, "Text", "rSpeakerNameColor");
+		GET_VALUE(speakerLine, "Text", "rSpeakerLineColor");
+		GET_VALUE(textDisabledAlpha, "Text", "rDisabledTextAlpha");
 
-		get_value(text, "Text", "rColor");
-		get_value(playerName, "Text", "rPlayerNameColor");
-		get_value(playerLine, "Text", "rPlayerLineColor");
-		get_value(speakerName, "Text", "rSpeakerNameColor");
-		get_value(speakerLine, "Text", "rSpeakerLineColor");
-		get_value(textDisabledAlpha, "Text", "rDisabledTextAlpha");
+		GET_VALUE(header, "GlobalHistory", "rSelectedColor");
+		GET_VALUE(headerHovered, "GlobalHistory", "rHoveredColor");
 
-		get_value(header, "GlobalHistory", "rSelectedColor");
-		get_value(headerHovered, "GlobalHistory", "rHoveredColor");
+		GET_VALUE(indentSpacing, "Widget", "fIndentSpacing");
+		GET_VALUE(separator, "Widget", "rSeparatorColor");
+		GET_VALUE(separatorThickness, "Widget", "fSeparatorThickness");
+		GET_VALUE(button, "Widget", "rToggleColor");
 
-		get_value(indentSpacing, "Widget", "fIndentSpacing");
-		get_value(separator, "Widget", "rSeparatorColor");
-		get_value(separatorThickness, "Widget", "fSeparatorThickness");
+#undef GET_VALUE
 	}
 
 	void Styles::OnStyleRefresh()
@@ -82,22 +83,24 @@ namespace ImGui
 		ImGuiStyle style;
 		auto&      colors = style.Colors;
 
-		style.WindowBorderSize = borderSize;
-		style.ChildBorderSize = borderSize;
+		style.WindowBorderSize = user.borderSize;
+		style.ChildBorderSize = user.borderSize;
 		style.FrameBorderSize = 0.0f;
-		style.IndentSpacing = indentSpacing;
+		style.IndentSpacing = user.indentSpacing;
 
-		colors[ImGuiCol_WindowBg] = background;
-		colors[ImGuiCol_ChildBg] = background;
+		colors[ImGuiCol_WindowBg] = user.background;
+		colors[ImGuiCol_ChildBg] = user.background;
 
-		colors[ImGuiCol_Border] = border;
-		colors[ImGuiCol_Separator] = separator;
+		colors[ImGuiCol_Border] = user.border;
+		colors[ImGuiCol_Separator] = user.separator;
 
-		colors[ImGuiCol_Text] = text;
+		colors[ImGuiCol_Text] = user.text;
 
-		colors[ImGuiCol_Header] = header;
+		colors[ImGuiCol_Header] = user.header;
 		colors[ImGuiCol_HeaderActive] = colors[ImGuiCol_Header];
-		colors[ImGuiCol_HeaderHovered] = headerHovered;
+		colors[ImGuiCol_HeaderHovered] = user.headerHovered;
+
+		colors[ImGuiCol_Button] = user.button;
 
 		colors[ImGuiCol_NavHighlight] = ImVec4();
 

@@ -11,7 +11,7 @@
       "cursorFillMode": "topToBottom",
       "content": [
         {
-          "text": "$DH_LocalHistory_Header",
+          "text": "$DH_OpenLocalHistory_Header",
           "type": "header"
         },
         {
@@ -36,7 +36,7 @@
           "type": "empty"
         },
         {
-          "text": "$DH_GlobalHistory_Header",
+          "text": "$DH_OpenGlobalHistory_Header",
           "type": "header"
         },
         {
@@ -58,7 +58,7 @@
           }
         },
         {
-          "text": "$DH_LocalHistory_Gamepad_Header",
+          "text": "$DH_OpenLocalHistory_Gamepad_Header",
           "type": "header",
           "position": 1
         },
@@ -84,7 +84,7 @@
           "type": "empty"
         },
         {
-          "text": "$DH_GlobalHistory_Gamepad_Header",
+          "text": "$DH_OpenGlobalHistory_Gamepad_Header",
           "type": "header"
         },
         {
@@ -128,6 +128,56 @@
           "text": "$DH_12HourFormat_Text",
           "type": "toggle",
           "help": "$DH_12HourFormat_Help",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "type": "empty"
+        },
+        {
+          "text": "$DH_GlobalHistory_Header",
+          "type": "header"
+        },
+        {
+          "id": "bUnpauseGlobalHistory:Settings",
+          "text": "$DH_UnpauseMenu_Text",
+          "type": "toggle",
+          "help": "$DH_UnpauseMenu_Help",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "id": "bBlurGlobalHistory:Settings",
+          "text": "$DH_BlurMenu_Text",
+          "type": "toggle",
+          "help": "$DH_BlurMenu_Help",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "type": "empty"
+        },
+        {
+          "text": "$DH_LocalHistory_Header",
+          "type": "header"
+        },
+        {
+          "id": "bUnpauseLocalHistory:Settings",
+          "text": "$DH_UnpauseMenu_Text",
+          "type": "toggle",
+          "help": "$DH_UnpauseMenu_Help",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "id": "bBlurLocalHistory:Settings",
+          "text": "$DH_BlurMenu_Text",
+          "type": "toggle",
+          "help": "$DH_BlurMenu_Help",
           "valueOptions": {
             "sourceType": "ModSettingBool"
           }

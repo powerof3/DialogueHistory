@@ -149,6 +149,22 @@ namespace Hooks
 		static inline REL::Relocation<decltype(thunk)> func;
 	};
 
+	struct TakeScreenshot
+	{
+		static void thunk(char const* a_path, RE::BSGraphics::TextureFileFormat a_format)
+		{
+			func(a_path, a_format);
+
+			if (MANAGER(GlobalHistory)->IsGlobalHistoryOpen()) {
+				// reshow cursor after Debug.Notification hides it
+				SKSE::GetTaskInterface()->AddUITask([] {
+					RE::UIMessageQueue::GetSingleton()->AddMessage(RE::CursorMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kShow, nullptr);
+				});
+			}
+		}
+		static inline REL::Relocation<decltype(thunk)> func;
+	};
+
 	void Install()
 	{
 		logger::info("{:*^30}", "HOOKS");
@@ -167,6 +183,9 @@ namespace Hooks
 
 		REL::Relocation<std::uintptr_t> hudMenuUserEvent(RELOCATION_ID(50748, 51643), 0x1E);
 		stl::write_thunk_call<IsMenuOpen>(hudMenuUserEvent.address());
+
+		REL::Relocation<std::uintptr_t> take_ss{ RELOCATION_ID(35556, 36555), OFFSET(0x48E, 0x454) };  // Main::Swap
+		stl::write_thunk_call<TakeScreenshot>(take_ss.address());
 
 		logger::info("Installed dialogue hooks");
 	}
