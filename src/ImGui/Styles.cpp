@@ -63,11 +63,13 @@ namespace ImGui
 
 		GET_VALUE(header, "GlobalHistory", "rSelectedColor");
 		GET_VALUE(headerHovered, "GlobalHistory", "rHoveredColor");
+		GET_VALUE(frameBG, "GlobalHistory", "rSearchBoxColor");
+		GET_VALUE(frameBorderSize, "GlobalHistory", "rSearchBoxBorderSize");
+		GET_VALUE(button, "GlobalHistory", "rToggleColor");
 
 		GET_VALUE(indentSpacing, "Widget", "fIndentSpacing");
 		GET_VALUE(separator, "Widget", "rSeparatorColor");
 		GET_VALUE(separatorThickness, "Widget", "fSeparatorThickness");
-		GET_VALUE(button, "Widget", "rToggleColor");
 
 #undef GET_VALUE
 	}
