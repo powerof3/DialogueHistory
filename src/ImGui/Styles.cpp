@@ -85,11 +85,12 @@ namespace ImGui
 
 		style.WindowBorderSize = user.borderSize;
 		style.ChildBorderSize = user.borderSize;
-		style.FrameBorderSize = 0.0f;
+		style.FrameBorderSize = user.frameBorderSize;
 		style.IndentSpacing = user.indentSpacing;
 
 		colors[ImGuiCol_WindowBg] = user.background;
 		colors[ImGuiCol_ChildBg] = user.background;
+		colors[ImGuiCol_FrameBg] = user.frameBG;
 
 		colors[ImGuiCol_Border] = user.border;
 		colors[ImGuiCol_Separator] = user.separator;

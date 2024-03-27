@@ -56,6 +56,9 @@ namespace ImGui
 			float  separatorThickness{ 3.0f };
 
 			ImVec4 button{ 1.0f, 1.0f, 1.0f, 1.0f };
+			
+			ImVec4 frameBG{ 0.0f, 0.0f, 0.0f, 1.0f };
+			float  frameBorderSize{ 1.5f };
 
 			ImVec4 speakerName{ 0.208f, 0.784f, 0.992f, 1.0f };
 			ImVec4 speakerLine{ 1.0f, 1.0f, 1.0f, 1.0f };

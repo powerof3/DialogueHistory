@@ -7,11 +7,15 @@ namespace ImGui
 	void ExtendWindowPastBorder()
 	{
 		const ImGuiWindow* window = GetCurrentWindowRead();
+		const auto         borderSize = window->WindowBorderSize;
+
+		if (borderSize == 0.0f) {
+			return;
+		}
+
 		const ImGuiWindow* rootWindow = FindWindowByName("##Main");
 
-		const auto borderSize = window->WindowBorderSize;
 		const auto newWindowPos = ImVec2{ window->Pos.x - borderSize, window->Pos.y - borderSize };
-
 		rootWindow->DrawList->AddRect(newWindowPos, newWindowPos + ImVec2(window->Size.x + 2 * borderSize, window->Size.y + 2 * borderSize), GetColorU32(ImGuiCol_WindowBg), 0.0f, 0, borderSize);
 	}
 

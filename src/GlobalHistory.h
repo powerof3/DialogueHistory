@@ -4,6 +4,8 @@
 
 namespace GlobalHistory
 {
+	inline std::string nameFilter{};
+
 	class Manager :
 		public ISingleton<Manager>,
 		public RE::BSTEventSink<RE::TESLoadGameEvent>
@@ -50,22 +52,70 @@ namespace GlobalHistory
 
 		template <class D>
 		using TimeStampMap = std::map<TimeStamp, D, comparator>;
-		using DialogueDateMap = TimeStampMap<TimeStampMap<Dialogue>>;
-		using DialogueLocationMap = std::map<std::string, TimeStampMap<Dialogue>, comparator>;
+		using DialogueDate = TimeStampMap<TimeStampMap<Dialogue>>;
+		using DialogueLocation = std::map<std::string, TimeStampMap<Dialogue>, comparator>;
 
 		template <class T>
-		void DrawDialogueTree(const std::map<T, TimeStampMap<Dialogue>, comparator>& a_map);
+		struct DialogueMap
+		{
+			bool empty() const { return map.empty(); };
+
+			const T& get_map()
+			{
+				if (nameFilter.empty()) {
+					return map;
+				}
+
+				if (cachedFilter == nameFilter) {
+					return filteredMap;
+				}
+
+				cachedFilter = nameFilter;
+				filteredMap = map;
+
+				std::erase_if(filteredMap, [](auto& item) {
+					auto& [root, dialogueMap] = item;
+					std::erase_if(dialogueMap, [&](const auto& item) {
+						const auto& [timeStamp, dialogue] = item;
+						return !string::icontains(dialogue.speakerName, nameFilter);
+					});
+					return dialogueMap.empty();
+				});
+
+				return filteredMap;
+			}
+
+			void clear_filter()
+			{
+				filteredMap.clear();
+				cachedFilter.clear();
+			}
+			
+			void clear()
+			{
+				map.clear();
+				clear_filter();
+			}
+			
+			// members
+			T           map{};
+			T           filteredMap{};
+			std::string cachedFilter{};
+		};
+
+		template <class T>
+		void DrawDialogueTree(DialogueMap<T>& a_map);
 
 		std::optional<std::filesystem::path> GetSaveDirectory();
 		std::optional<std::filesystem::path> GetDialogueHistoryFile(const std::string& a_save);
 
 		EventResult ProcessEvent(const RE::TESLoadGameEvent* a_evn, RE::BSTEventSource<RE::TESLoadGameEvent>*) override;
 
-		// members
+		// membersMap
 		bool                                 globalHistoryOpen{ false };
 		bool                                 menuOpenedJustNow{ false };
-		DialogueDateMap                      dialoguesByDate{};      // 8th of Last Seed, 4E 201 -> 13:53, Lydia
-		DialogueLocationMap                  dialoguesByLocation{};  // Dragonsreach -> Lydia
+		DialogueMap<DialogueDate>            dialoguesByDate{};      // 8th of Last Seed, 4E 201 -> 13:53, Lydia
+		DialogueMap<DialogueLocation>        dialoguesByLocation{};  // Dragonsreach -> Lydia
 		std::vector<Dialogue>                dialogues{};
 		std::optional<Dialogue>              currentDialogue{ std::nullopt };
 		RE::BSSoundHandle                    voiceHandle{};
@@ -78,16 +128,17 @@ namespace GlobalHistory
 	};
 
 	template <class T>
-	inline void Manager::DrawDialogueTree(const std::map<T, TimeStampMap<Dialogue>, comparator>& a_map)
+	inline void Manager::DrawDialogueTree(DialogueMap<T>& a_map)
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 0.0f);
 		{
-			for (auto& [root, leafMap] : a_map) {
+			const auto& map = a_map.get_map();
+			for (auto& [root, leafMap] : map) {
 				if (menuOpenedJustNow) {
 					ImGui::SetNextItemOpen(true);
 				}
 				bool rootOpen;
-				if constexpr (std::is_same_v<std::string, T>) {
+				if constexpr (std::is_same_v<DialogueLocation, T>) {
 					rootOpen = ImGui::TreeNodeEx(root.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth);
 				} else {
 					rootOpen = ImGui::TreeNodeEx(root.format.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth);

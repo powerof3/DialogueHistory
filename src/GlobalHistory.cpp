@@ -127,10 +127,16 @@ namespace GlobalHistory
 				{
 					childSize = ImGui::GetContentRegionMax();
 
-					ImGui::SetCursorPosY(childSize.y * 0.25f);
+					ImGui::SameLine();
+					ImGui::SetCursorPosY(childSize.y * 0.125f);
+					ImGui::SetNextItemWidth(childSize.x * 0.25f);
+					if (ImGui::InputTextWithHint("##Name", "$DH_Name_Text"_T, &nameFilter)) {
+						currentDialogue = std::nullopt;
+					}
 
 					static float toggleHeight = ImGui::GetFrameHeight() / 1.5f;
 					ImGui::SetCursorPosX(childSize.x * 0.5f - (ImGui::CalcTextSize("Date").x + ImGui::GetStyle().ItemSpacing.x + toggleHeight * 0.5f));
+					ImGui::SetCursorPosY(childSize.y * 0.25f);
 
 					ImGui::BeginGroup();
 					{
@@ -138,7 +144,7 @@ namespace GlobalHistory
 
 						ImGui::SetCursorPosY(cursorY - (toggleHeight * 0.25f));
 						ImGui::BeginDisabled(sortByLocation);
-						ImGui::TextUnformatted("$DH_Date"_T);
+						ImGui::TextUnformatted("$DH_Date_Text"_T);
 						ImGui::EndDisabled();
 						ImGui::SameLine();
 
@@ -150,7 +156,7 @@ namespace GlobalHistory
 						ImGui::SameLine();
 						ImGui::SetCursorPosY(cursorY - (toggleHeight * 0.25f));
 						ImGui::BeginDisabled(!sortByLocation);
-						ImGui::TextUnformatted("$DH_Location"_T);
+						ImGui::TextUnformatted("$DH_Location_Text"_T);
 						ImGui::EndDisabled();
 					}
 					ImGui::EndGroup();
@@ -208,6 +214,11 @@ namespace GlobalHistory
 
 		} else {
 			currentDialogue = std::nullopt;
+
+			nameFilter.clear();
+			dialoguesByDate.clear_filter();
+			dialoguesByLocation.clear_filter();
+
 			voiceHandle.Stop();
 
 			if (blurMenu) {
@@ -251,15 +262,15 @@ namespace GlobalHistory
 		TimeStamp hourMin;
 		hourMin.FromHourMin(a_time.tm_hour, a_time.tm_min, a_dialogue.speakerName, use12HourFormat);
 
-		dialoguesByDate[date][hourMin] = a_dialogue;
+		dialoguesByDate.map[date][hourMin] = a_dialogue;
 
 		TimeStamp speaker(a_dialogue.timeStamp, a_dialogue.speakerName);
-		dialoguesByLocation[a_dialogue.locName][speaker] = a_dialogue;
+		dialoguesByLocation.map[a_dialogue.locName][speaker] = a_dialogue;
 	}
 
 	void Manager::RefreshTimeStamps()
 	{
-		for (auto& [dayMonth, hourMinMap] : dialoguesByDate) {
+		for (auto& [dayMonth, hourMinMap] : dialoguesByDate.map) {
 			for (auto it = hourMinMap.begin(); it != hourMinMap.end(); it++) {
 				it->second.timeAndLoc.clear();
 
@@ -388,8 +399,8 @@ namespace GlobalHistory
 
 				TimeStamp speaker(dialogue.timeStamp, dialogue.speakerName);
 
-				dialoguesByDate[date][hourMin] = dialogue;
-				dialoguesByLocation[dialogue.locName][speaker] = dialogue;
+				dialoguesByDate.map[date][hourMin] = dialogue;
+				dialoguesByLocation.map[dialogue.locName][speaker] = dialogue;
 
 				return false;
 			});

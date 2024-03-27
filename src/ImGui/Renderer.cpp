@@ -8,6 +8,20 @@
 
 namespace ImGui::Renderer
 {
+	struct WndProc
+	{
+		static LRESULT thunk(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+		{
+			auto& io = ImGui::GetIO();
+			if (uMsg == WM_KILLFOCUS) {
+				io.ClearInputKeys();
+			}
+
+			return func(hWnd, uMsg, wParam, lParam);
+		}
+		static inline WNDPROC func;
+	};
+
 	struct CreateD3DAndSwapChain
 	{
 		static void thunk()
@@ -52,6 +66,15 @@ namespace ImGui::Renderer
 				MANAGER(IconFont)->LoadIcons();
 
 				initialized.store(true);
+
+				WndProc::func = reinterpret_cast<WNDPROC>(
+					SetWindowLongPtrA(
+						desc.OutputWindow,
+						GWLP_WNDPROC,
+						reinterpret_cast<LONG_PTR>(WndProc::thunk)));
+				if (!WndProc::func) {
+					logger::error("SetWindowLongPtrA failed!");
+				}
 			}
 		}
 		static inline REL::Relocation<decltype(thunk)> func;

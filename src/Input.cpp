@@ -329,6 +329,10 @@ namespace Input
 				if (drawGlobalHistory && cursorMenu) {
 					cursorMenu->ProcessThumbstick(thumbstickEvent);
 				}
+			} else if (const auto charEvent = event->AsCharEvent()) {
+				if (drawGlobalHistory) {
+					io.AddInputCharacter(charEvent->keycode);
+				}
 			} else if (const auto buttonEvent = event->AsButtonEvent()) {
 				const auto device = event->GetDevice();
 				const auto key = buttonEvent->GetIDCode();
