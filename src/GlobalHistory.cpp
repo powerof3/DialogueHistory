@@ -73,7 +73,7 @@ namespace GlobalHistory
 			ImGui::SetNextWindowPos(ImGui::GetNativeViewportCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 
 			ImGui::PushFont(MANAGER(IconFont)->GetGlobalHistoryFont());
-			
+
 			ImGui::BeginChild("##GlobalHistory", ImGui::GetNativeViewportSize() / 1.25f, ImGuiChildFlags_Border, windowFlags);
 			{
 				ImGui::ExtendWindowPastBorder();
