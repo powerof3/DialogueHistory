@@ -49,8 +49,10 @@ namespace IconFont
 
 	void Manager::LoadSettings(CSimpleIniA& a_ini)
 	{
-		smallFont.LoadSettings(a_ini, "Font");
-		largeFont.LoadSettings(a_ini, "LargeFont");
+		localHistoryFont.LoadSettings(a_ini, "LocalHistoryFont");
+		globalHistoryFont.LoadSettings(a_ini, "GlobalHistoryFont");
+		headerFont.LoadSettings(a_ini, "TitleFont");
+		buttonFont.LoadSettings(a_ini, "ButtonFont");
 	}
 
 	void Manager::LoadMCMSettings(const CSimpleIniA& a_ini)
@@ -113,25 +115,37 @@ namespace IconFont
 		builder.AddText(RE::BSScaleformManager::GetSingleton()->validNameChars.c_str());
 		builder.BuildRanges(&ranges);
 
-		smallFont.LoadFont(ranges);
-		largeFont.LoadFont(ranges);
+		headerFont.LoadFont(ranges);
+		buttonFont.LoadFont(ranges);
+		localHistoryFont.LoadFont(ranges);
+		globalHistoryFont.LoadFont(ranges);
 
 		io.Fonts->Build();
 
 		ImGui_ImplDX11_InvalidateDeviceObjects();
 		ImGui_ImplDX11_CreateDeviceObjects();
 
-		io.FontDefault = smallFont.font;
+		io.FontDefault = globalHistoryFont.font;
 	}
 
-	ImFont* Manager::GetLargeFont() const
+	ImFont* Manager::GetButtonFont() const
 	{
-		return largeFont.font;
+		return buttonFont.font;
 	}
 
-	ImFont* Manager::GetSmallFont() const
+	ImFont* Manager::GetHeaderFont() const
 	{
-		return smallFont.font;
+		return headerFont.font;
+	}
+
+	ImFont* Manager::GetLocalHistoryFont() const
+	{
+		return localHistoryFont.font;
+	}
+
+	ImFont* Manager::GetGlobalHistoryFont() const
+	{
+		return globalHistoryFont.font;
 	}
 
 	const IconTexture* Manager::GetIcon(std::uint32_t key)

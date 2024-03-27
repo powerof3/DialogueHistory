@@ -31,15 +31,17 @@ namespace LocalHistory
 
 		ImGui::Begin("##Main", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBringToFrontOnFocus);
 		{
+			ImGui::PushFont(MANAGER(IconFont)->GetLocalHistoryFont());
+			
 			if (localHistoryOpen) {
 				ImGui::SetNextWindowPos(ImGui::GetNativeViewportCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-				ImGui::SetNextWindowSize(ImGui::GetNativeViewportSize() / 1.25);
+				ImGui::SetNextWindowSize(ImGui::GetNativeViewportSize() / 1.25f);
 
 				ImGui::Begin("##LocalHistory", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 				{
 					ImGui::ExtendWindowPastBorder();
 
-					ImGui::PushFont(MANAGER(IconFont)->GetLargeFont());
+					ImGui::PushFont(MANAGER(IconFont)->GetHeaderFont());
 					{
 						ImGui::CenteredText(gameTimeString.c_str(), false);
 					}
@@ -55,8 +57,10 @@ namespace LocalHistory
 				}
 				ImGui::End();
 			}
+			
+			ImGui::PopFont();
 
-			ImGui::PushFont(MANAGER(IconFont)->GetLargeFont());
+			ImGui::PushFont(MANAGER(IconFont)->GetButtonFont());
 			{
 				const auto& icons = MANAGER(Hotkeys)->LocalHistoryIcons();
 

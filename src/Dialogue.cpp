@@ -203,7 +203,7 @@ void Dialogue::Draw()
 	ImGui::Indent();
 	{
 		if (isGlobalHistoryOpen) {
-			ImGui::PushFont(MANAGER(IconFont)->GetLargeFont());
+			ImGui::PushFont(MANAGER(IconFont)->GetHeaderFont());
 			{
 				ImGui::CenteredText(speakerName.c_str(), false);
 			}

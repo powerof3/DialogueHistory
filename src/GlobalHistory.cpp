@@ -72,11 +72,13 @@ namespace GlobalHistory
 
 			ImGui::SetNextWindowPos(ImGui::GetNativeViewportCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 
-			ImGui::BeginChild("##GlobalHistory", ImGui::GetNativeViewportSize() / 1.20f, ImGuiChildFlags_Border, windowFlags);
+			ImGui::PushFont(MANAGER(IconFont)->GetGlobalHistoryFont());
+			
+			ImGui::BeginChild("##GlobalHistory", ImGui::GetNativeViewportSize() / 1.25f, ImGuiChildFlags_Border, windowFlags);
 			{
 				ImGui::ExtendWindowPastBorder();
 
-				ImGui::PushFont(MANAGER(IconFont)->GetLargeFont());
+				ImGui::PushFont(MANAGER(IconFont)->GetHeaderFont());
 				{
 					ImGui::Indent();
 					ImGui::TextUnformatted("$DH_Title"_T);
@@ -165,7 +167,9 @@ namespace GlobalHistory
 			}
 			ImGui::EndChild();
 
-			ImGui::PushFont(MANAGER(IconFont)->GetLargeFont());
+			ImGui::PopFont();
+
+			ImGui::PushFont(MANAGER(IconFont)->GetButtonFont());
 			{
 				const auto icon = MANAGER(Hotkeys)->EscapeIcon();
 
