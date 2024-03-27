@@ -90,13 +90,13 @@ namespace GlobalHistory
 				filteredMap.clear();
 				cachedFilter.clear();
 			}
-			
+
 			void clear()
 			{
 				map.clear();
 				clear_filter();
 			}
-			
+
 			// members
 			T           map{};
 			T           filteredMap{};
