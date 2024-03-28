@@ -212,7 +212,7 @@ void Dialogue::Draw()
 				timeAndLoc = std::format("{} - {}", TimeStampToString(MANAGER(GlobalHistory)->Use12HourFormat()), locName);
 			}
 			ImGui::CenteredText(timeAndLoc.c_str(), false);
-			ImGui::Spacing(3);
+			ImGui::Spacing(4);
 		}
 
 		auto childSize = ImGui::GetContentRegionAvail();

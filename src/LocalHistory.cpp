@@ -219,6 +219,13 @@ namespace LocalHistory
 		}
 
 		localDialogue.AddDialogue(a_speaker, a_response, a_voice);
+
+		// erase duplicate opening lines
+		if (auto& dialogue = localDialogue.dialogue; dialogue.size() == 2 &&
+													 dialogue[0].line == dialogue[1].line &&
+													 dialogue[0].voice == dialogue[1].voice) {
+			dialogue.erase(dialogue.begin());
+		}
 	}
 
 	void Manager::SaveDialogueHistory()

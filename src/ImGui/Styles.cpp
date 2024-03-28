@@ -68,6 +68,9 @@ namespace ImGui
 		GET_VALUE(button, "GlobalHistory", "rToggleColor");
 
 		GET_VALUE(indentSpacing, "Widget", "fIndentSpacing");
+		GET_VALUE(scrollbarGrab, "Widget", "rScrollbarGrabColor");
+		GET_VALUE(scrollbarGrabHovered, "Widget", "rScrollbarGrabHoveredColor");
+		GET_VALUE(scrollbarGrabActive, "Widget", "rScrollbarGrabActiveColor");
 		GET_VALUE(separator, "Widget", "rSeparatorColor");
 		GET_VALUE(separatorThickness, "Widget", "fSeparatorThickness");
 
@@ -92,6 +95,7 @@ namespace ImGui
 
 		colors[ImGuiCol_WindowBg] = user.background;
 		colors[ImGuiCol_ChildBg] = user.background;
+		colors[ImGuiCol_ScrollbarBg] = user.background;
 		colors[ImGuiCol_FrameBg] = user.frameBG;
 
 		colors[ImGuiCol_Border] = user.border;
@@ -104,6 +108,10 @@ namespace ImGui
 		colors[ImGuiCol_HeaderHovered] = user.headerHovered;
 
 		colors[ImGuiCol_Button] = user.button;
+
+		colors[ImGuiCol_ScrollbarGrab] = user.scrollbarGrab;
+		colors[ImGuiCol_ScrollbarGrabHovered] = user.scrollbarGrabHovered;
+		colors[ImGuiCol_ScrollbarGrabActive] = user.scrollbarGrabActive;
 
 		colors[ImGuiCol_NavHighlight] = ImVec4();
 

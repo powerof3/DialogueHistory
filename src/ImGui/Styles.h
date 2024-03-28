@@ -60,6 +60,10 @@ namespace ImGui
 			ImVec4 frameBG{ 0.0f, 0.0f, 0.0f, 1.0f };
 			float  frameBorderSize{ 1.5f };
 
+			ImVec4 scrollbarGrab{ 0.31f, 0.31f, 0.31f, 1.0f };
+			ImVec4 scrollbarGrabHovered{ 0.41f, 0.41f, 0.41f, 1.0f };
+			ImVec4 scrollbarGrabActive{ 0.51f, 0.51f, 0.51f, 1.0f };
+
 			ImVec4 speakerName{ 0.208f, 0.784f, 0.992f, 1.0f };
 			ImVec4 speakerLine{ 1.0f, 1.0f, 1.0f, 1.0f };
 
