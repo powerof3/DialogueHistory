@@ -216,7 +216,7 @@ void Dialogue::Draw()
 		}
 
 		auto childSize = ImGui::GetContentRegionAvail();
-		
+
 		ImGui::BeginChild("##DialogueText", childSize, ImGuiChildFlags_None, ImGuiWindowFlags_NoBackground);
 		{
 			for (auto& [response, voice, name, isPlayer, hovered] : dialogue) {
