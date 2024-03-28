@@ -208,34 +208,38 @@ void Dialogue::Draw()
 				ImGui::CenteredText(speakerName.c_str(), false);
 			}
 			ImGui::PopFont();
-
 			if (timeAndLoc.empty()) {
 				timeAndLoc = std::format("{} - {}", TimeStampToString(MANAGER(GlobalHistory)->Use12HourFormat()), locName);
 			}
 			ImGui::CenteredText(timeAndLoc.c_str(), false);
-
-			ImGui::Spacing(5);
-		}
-
-		for (auto& [response, voice, name, isPlayer, hovered] : dialogue) {
-			auto speakerColor = isPlayer ? GetUserStyleColorVec4(USER_STYLE::kPlayerName) : GetUserStyleColorVec4(USER_STYLE::kSpeakerName);
-			ImGui::TextColoredWrapped(speakerColor, std::format("{}: ", name).c_str());
-
-			ImGui::SameLine();
-
-			auto lineColor = isPlayer ? GetUserStyleColorVec4(USER_STYLE::kPlayerLine) : GetUserStyleColorVec4(USER_STYLE::kSpeakerLine);
-			lineColor.w = (!isGlobalHistoryOpen || isPlayer || hovered) ? 1.0f : GetUserStyleVar(USER_STYLE::kDisabledTextAlpha);
-
-			ImGui::TextColoredWrapped(lineColor, response.c_str());
-
-			hovered = ImGui::IsItemHovered();
-
-			if (ImGui::IsItemClicked() && isGlobalHistoryOpen) {
-				MANAGER(GlobalHistory)->PlayVoiceline(voice);
-			}
-
 			ImGui::Spacing(3);
 		}
+
+		auto childSize = ImGui::GetContentRegionAvail();
+		
+		ImGui::BeginChild("##DialogueText", childSize, ImGuiChildFlags_None, ImGuiWindowFlags_NoBackground);
+		{
+			for (auto& [response, voice, name, isPlayer, hovered] : dialogue) {
+				auto speakerColor = isPlayer ? GetUserStyleColorVec4(USER_STYLE::kPlayerName) : GetUserStyleColorVec4(USER_STYLE::kSpeakerName);
+				ImGui::TextColoredWrapped(speakerColor, std::format("{}: ", name).c_str());
+
+				ImGui::SameLine();
+
+				auto lineColor = isPlayer ? GetUserStyleColorVec4(USER_STYLE::kPlayerLine) : GetUserStyleColorVec4(USER_STYLE::kSpeakerLine);
+				lineColor.w = (!isGlobalHistoryOpen || isPlayer || hovered) ? 1.0f : GetUserStyleVar(USER_STYLE::kDisabledTextAlpha);
+
+				ImGui::TextColoredWrapped(lineColor, response.c_str());
+
+				hovered = ImGui::IsItemHovered();
+
+				if (ImGui::IsItemClicked() && isGlobalHistoryOpen) {
+					MANAGER(GlobalHistory)->PlayVoiceline(voice);
+				}
+
+				ImGui::Spacing(3);
+			}
+		}
+		ImGui::EndChild();
 	}
 	ImGui::Unindent();
 }

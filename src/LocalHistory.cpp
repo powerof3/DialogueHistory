@@ -32,10 +32,10 @@ namespace LocalHistory
 		ImGui::Begin("##Main", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBringToFrontOnFocus);
 		{
 			ImGui::PushFont(MANAGER(IconFont)->GetLocalHistoryFont());
-			
+
 			if (localHistoryOpen) {
 				ImGui::SetNextWindowPos(ImGui::GetNativeViewportCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-				ImGui::SetNextWindowSize(ImGui::GetNativeViewportSize() / 1.25f);
+				ImGui::SetNextWindowSize(ImGui::GetNativeViewportSize() * 0.8f);
 
 				ImGui::Begin("##LocalHistory", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 				{
@@ -47,17 +47,15 @@ namespace LocalHistory
 					}
 					ImGui::PopFont();
 
-					ImGui::Spacing();
-					ImGui::Spacing();
+					ImGui::Spacing(2);
 					ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal, ImGui::GetUserStyleVar(ImGui::USER_STYLE::kSeparatorThickness));
-					ImGui::Spacing();
-					ImGui::Spacing();
+					ImGui::Spacing(2);
 
 					localDialogue.Draw();
 				}
 				ImGui::End();
 			}
-			
+
 			ImGui::PopFont();
 
 			ImGui::PushFont(MANAGER(IconFont)->GetButtonFont());

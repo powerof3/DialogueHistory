@@ -73,8 +73,8 @@ namespace GlobalHistory
 			ImGui::SetNextWindowPos(ImGui::GetNativeViewportCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 
 			ImGui::PushFont(MANAGER(IconFont)->GetGlobalHistoryFont());
-			
-			ImGui::BeginChild("##GlobalHistory", ImGui::GetNativeViewportSize() / 1.25f, ImGuiChildFlags_Border, windowFlags);
+
+			ImGui::BeginChild("##GlobalHistory", ImGui::GetNativeViewportSize() * 0.8f, ImGuiChildFlags_Border, windowFlags);
 			{
 				ImGui::ExtendWindowPastBorder();
 
@@ -92,9 +92,15 @@ namespace GlobalHistory
 
 				auto childSize = ImGui::GetContentRegionAvail();
 
+				float toggleHeight = ImGui::GetFrameHeight() / 1.5f;
+				float toggleButtonOffset = ImGui::CalcTextSize("$DH_Date_Text"_T).x + ImGui::GetStyle().ItemSpacing.x + toggleHeight * 0.5f;
+
 				ImGui::BeginGroup();
 				{
-					ImGui::BeginChild("##Map", { childSize.x / 2.75f, childSize.y * 0.9125f }, ImGuiChildFlags_None, windowFlags | ImGuiWindowFlags_NoBackground);
+					auto startPos = childSize.x * 0.25f;                                                        // search box end
+					auto endPos = (childSize.x * 0.5f) - toggleButtonOffset - ImGui::GetStyle().ItemSpacing.x;  // "By Date" text start
+
+					ImGui::BeginChild("##Map", { (startPos + endPos) * 0.5f, childSize.y * 0.9125f }, ImGuiChildFlags_None, ImGuiWindowFlags_NoBackground);
 					{
 						if (sortByLocation) {
 							DrawDialogueTree(dialoguesByLocation);
@@ -136,8 +142,7 @@ namespace GlobalHistory
 						currentDialogue = std::nullopt;
 					}
 
-					static float toggleHeight = ImGui::GetFrameHeight() / 1.5f;
-					ImGui::SetCursorPosX(childSize.x * 0.5f - (ImGui::CalcTextSize("Date").x + ImGui::GetStyle().ItemSpacing.x + toggleHeight * 0.5f));
+					ImGui::SetCursorPosX(childSize.x * 0.5f - toggleButtonOffset);
 					ImGui::SetCursorPosY(childSize.y * 0.25f);
 
 					ImGui::BeginGroup();
