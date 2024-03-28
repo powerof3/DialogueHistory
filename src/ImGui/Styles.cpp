@@ -95,7 +95,7 @@ namespace ImGui
 
 		colors[ImGuiCol_WindowBg] = user.background;
 		colors[ImGuiCol_ChildBg] = user.background;
-		colors[ImGuiCol_ScrollbarBg] = user.background;
+		colors[ImGuiCol_ScrollbarBg] = ImVec4();
 		colors[ImGuiCol_FrameBg] = user.frameBG;
 
 		colors[ImGuiCol_Border] = user.border;
