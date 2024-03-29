@@ -1,5 +1,6 @@
 #include "GlobalHistory.h"
 
+#include "NPCNameProvider.h"
 #include "Hooks.h"
 #include "Hotkeys.h"
 #include "ImGui/IconsFonts.h"
@@ -386,7 +387,7 @@ namespace GlobalHistory
 					dialogue.locName = "???";
 				}
 
-				dialogue.speakerName = speakerActor->GetDisplayFullName();
+				dialogue.speakerName = NPCNameProvider::GetSingleton()->GetName(speakerActor);
 
 				for (auto& [line, voice, name, isPlayer, hovered] : dialogue.dialogue) {
 					isPlayer = voice.empty();
