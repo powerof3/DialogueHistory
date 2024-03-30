@@ -147,6 +147,7 @@ namespace LocalHistory
 	void Manager::SetDialogueMenuOpen(bool a_opened)
 	{
 		dialogueMenuOpen = a_opened;
+
 		if (!dialogueMenuOpen) {
 			if (ShouldHide()) {  // if dialogue menu is temporarily interrupted by inventory, console etc
 				tempClosed = true;
@@ -160,6 +161,7 @@ namespace LocalHistory
 			UpdateDialogue();
 			ImGui::Styles::GetSingleton()->RefreshStyle();
 		}
+
 		ImGui::Renderer::RenderMenus(a_opened);
 	}
 
@@ -274,7 +276,11 @@ namespace LocalHistory
 			case string::const_hash(RE::MainMenu::MENU_NAME):
 			case string::const_hash(RE::LoadingMenu::MENU_NAME):
 			case "CustomMenu"_h:
-				SetDialogueMenuOpen(false);
+				{
+					if (IsDialogueMenuOpen()) {
+						SetDialogueMenuOpen(false);
+					}
+				}
 			default:
 				break;
 			}

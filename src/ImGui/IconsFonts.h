@@ -69,6 +69,9 @@ namespace IconFont
 		Font localHistoryFont;
 		Font globalHistoryFont;
 
+		bool loadFontsOnce{ false };
+		bool loadedFonts{ false };
+
 		IconTexture unknownKey{ L"UnknownKey"sv };
 		IconTexture leftKey{ L"Left"sv };
 		IconTexture rightKey{ L"Right"sv };

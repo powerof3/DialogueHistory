@@ -53,6 +53,8 @@ namespace IconFont
 		globalHistoryFont.LoadSettings(a_ini, "GlobalHistoryFont");
 		headerFont.LoadSettings(a_ini, "TitleFont");
 		buttonFont.LoadSettings(a_ini, "ButtonFont");
+
+		ini::get_value(a_ini, loadFontsOnce, "Settings", "bLoadFontsOnce", nullptr);
 	}
 
 	void Manager::LoadMCMSettings(const CSimpleIniA& a_ini)
@@ -106,6 +108,12 @@ namespace IconFont
 
 	void Manager::ReloadFonts()
 	{
+		if (loadFontsOnce && loadedFonts) {
+			return;
+		}
+
+		logger::info("Reloading fonts...");
+	
 		auto& io = ImGui::GetIO();
 		io.Fonts->Clear();
 
@@ -126,6 +134,8 @@ namespace IconFont
 		ImGui_ImplDX11_CreateDeviceObjects();
 
 		io.FontDefault = globalHistoryFont.font;
+
+		loadedFonts = true;
 	}
 
 	ImFont* Manager::GetButtonFont() const
