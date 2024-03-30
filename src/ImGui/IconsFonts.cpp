@@ -113,7 +113,7 @@ namespace IconFont
 		}
 
 		logger::info("Reloading fonts...");
-	
+
 		auto& io = ImGui::GetIO();
 		io.Fonts->Clear();
 
