@@ -1,12 +1,12 @@
 #include "GlobalHistory.h"
 
-#include "NPCNameProvider.h"
 #include "Hooks.h"
 #include "Hotkeys.h"
 #include "ImGui/IconsFonts.h"
 #include "ImGui/Renderer.h"
 #include "ImGui/Styles.h"
 #include "ImGui/Util.h"
+#include "NPCNameProvider.h"
 
 namespace GlobalHistory
 {

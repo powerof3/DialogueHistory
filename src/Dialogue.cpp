@@ -1,8 +1,8 @@
 #include "Dialogue.h"
 
 #include "GlobalHistory.h"
-#include "NPCNameProvider.h"
 #include "ImGui/Styles.h"
+#include "NPCNameProvider.h"
 
 TimeStamp::TimeStamp(std::uint64_t a_timeStamp, const std::string& a_format) :
 	time(a_timeStamp),
