@@ -5,6 +5,7 @@
 #include "LocalHistory.h"
 #include "Papyrus.h"
 #include "Settings.h"
+#include "NPCNameProvider.h"
 
 void OnInit(SKSE::MessagingInterface::Message* a_msg)
 {
@@ -14,6 +15,12 @@ void OnInit(SKSE::MessagingInterface::Message* a_msg)
 			logger::info("{:*^30}", "POST LOAD");
 			Settings::GetSingleton()->LoadSettings();
 			Hooks::Install();
+		}
+		break;
+	case SKSE::MessagingInterface::kPostPostLoad:
+		{
+			logger::info("{:*^30}", "POST POST LOAD");
+			NPCNameProvider::GetSingleton()->RequestAPI();
 		}
 		break;
 	case SKSE::MessagingInterface::kDataLoaded:
