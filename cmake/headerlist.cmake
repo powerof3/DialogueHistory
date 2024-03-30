@@ -12,6 +12,8 @@ set(headers ${headers}
 	src/ImGui/Util.h
 	src/Input.h
 	src/LocalHistory.h
+	src/NND_API.h
+	src/NPCNameProvider.h
 	src/PCH.h
 	src/Papyrus.h
 	src/Settings.h

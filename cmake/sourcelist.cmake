@@ -12,6 +12,7 @@ set(sources ${sources}
 	src/ImGui/Util.cpp
 	src/Input.cpp
 	src/LocalHistory.cpp
+	src/NPCNameProvider.cpp
 	src/PCH.cpp
 	src/Papyrus.cpp
 	src/Settings.cpp

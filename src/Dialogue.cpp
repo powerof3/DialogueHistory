@@ -1,6 +1,7 @@
 #include "Dialogue.h"
 
 #include "GlobalHistory.h"
+#include "NPCNameProvider.h"
 #include "ImGui/Styles.h"
 
 TimeStamp::TimeStamp(std::uint64_t a_timeStamp, const std::string& a_format) :
@@ -132,7 +133,7 @@ void TimeStamp::SwitchHourFormat(bool a_12HourFormat)
 Dialogue::Line::Line(RE::TESObjectREFR* a_speaker, const std::string& a_line, const std::string& a_voice) :
 	line(a_line),
 	voice(a_voice),
-	name(a_speaker->GetDisplayFullName()),
+	name(NPCNameProvider::GetSingleton()->GetName(a_speaker)),
 	isPlayer(a_speaker->IsPlayerRef()),
 	hovered(false)
 {}
@@ -156,7 +157,7 @@ void Dialogue::Initialize(RE::TESObjectREFR* a_speaker)
 				locName = "$DH_UnknownLocation"_T;
 			}
 		}
-		speakerName = a_speaker->GetDisplayFullName();
+		speakerName = NPCNameProvider::GetSingleton()->GetName(a_speaker);
 	}
 }
 
