@@ -3,9 +3,9 @@
 #include "ImGui/Renderer.h"
 #include "Input.h"
 #include "LocalHistory.h"
+#include "NPCNameProvider.h"
 #include "Papyrus.h"
 #include "Settings.h"
-#include "NPCNameProvider.h"
 
 void OnInit(SKSE::MessagingInterface::Message* a_msg)
 {
