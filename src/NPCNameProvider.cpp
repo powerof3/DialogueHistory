@@ -1,8 +1,6 @@
 #include "NPCNameProvider.h"
 #include "NND_API.h"
 
-namespace logger = SKSE::log;
-
 const char* NPCNameProvider::GetName(RE::TESObjectREFR* ref) const
 {
 	if (NND) {
