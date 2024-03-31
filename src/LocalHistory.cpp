@@ -153,7 +153,9 @@ namespace LocalHistory
 				tempClosed = true;
 				return;
 			}
-			SetLocalHistoryOpen(false);
+			if (IsLocalHistoryOpen()) {
+				SetLocalHistoryOpen(false);
+			}
 			SaveDialogueHistory();
 			localDialogue.Clear();
 			tempClosed = false;
