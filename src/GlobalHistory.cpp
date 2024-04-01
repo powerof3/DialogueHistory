@@ -291,21 +291,38 @@ namespace GlobalHistory
 		}
 	}
 
+	// My Documents/My Games/Skyrim Special Edition/Saves/Dialogue History
 	std::optional<std::filesystem::path> Manager::GetSaveDirectory()
 	{
 		if (!saveDirectory) {
-			// My Documents/My Games/Skyrim Special Edition/Saves/Dialogue History
-			auto directory = logger::log_directory();
-			if (directory) {
-				directory->remove_filename();
-				*directory /= "Saves";
-				*directory /= "DialogueHistory\\"sv;
-
-				if (!std::filesystem::exists(*directory)) {
-					std::filesystem::create_directory(*directory);
+			logger::info("{:*^30}", "LOAD GAME");
+			
+			try {
+				wchar_t*                                               buffer{ nullptr };
+				const auto                                             result = ::SHGetKnownFolderPath(::FOLDERID_Documents, ::KNOWN_FOLDER_FLAG::KF_FLAG_DEFAULT, nullptr, std::addressof(buffer));
+				std::unique_ptr<wchar_t[], decltype(&::CoTaskMemFree)> knownPath(buffer, ::CoTaskMemFree);
+				if (!knownPath || result != S_OK) {
+					logger::error("failed to get known folder path"sv);
+					return std::nullopt;
 				}
+
+				std::filesystem::path path = knownPath.get();
+				path /= "My Games"sv;
+				path /= std::filesystem::exists("steam_api64.dll") ? "Skyrim Special Edition" : "Skyrim Special Edition GOG";
+				path /= "Saves"sv;
+				path /= "DialogueHistory"sv;
+
+				if (!std::filesystem::exists(path)) {
+					std::filesystem::create_directory(path);
+				}
+
+				saveDirectory = path;
+
+				logger::info("Save directory : {}", path.string());
 			}
-			saveDirectory = directory;
+			catch (std::filesystem::filesystem_error& e) {
+				logger::error("error: {}", e.what());
+			}
 		}
 
 		return saveDirectory;
@@ -319,8 +336,10 @@ namespace GlobalHistory
 			return {};
 		}
 
-		*jsonPath += a_save;
+		*jsonPath /= a_save;
 		jsonPath->replace_extension(".json");
+
+		logger::info("Loading save file : {}", jsonPath->string());
 
 		return jsonPath;
 	}
