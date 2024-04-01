@@ -296,7 +296,7 @@ namespace GlobalHistory
 	{
 		if (!saveDirectory) {
 			logger::info("{:*^30}", "LOAD GAME");
-			
+
 			try {
 				wchar_t*                                               buffer{ nullptr };
 				const auto                                             result = ::SHGetKnownFolderPath(::FOLDERID_Documents, ::KNOWN_FOLDER_FLAG::KF_FLAG_DEFAULT, nullptr, std::addressof(buffer));
@@ -319,8 +319,7 @@ namespace GlobalHistory
 				saveDirectory = path;
 
 				logger::info("Save directory : {}", path.string());
-			}
-			catch (std::filesystem::filesystem_error& e) {
+			} catch (std::filesystem::filesystem_error& e) {
 				logger::error("error: {}", e.what());
 			}
 		}
