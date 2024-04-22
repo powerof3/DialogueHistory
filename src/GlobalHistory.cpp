@@ -322,7 +322,7 @@ namespace GlobalHistory
 
 				logger::info("Save directory : {}", path.string());
 			} catch (std::filesystem::filesystem_error& e) {
-				logger::error("error: {}", e.what());
+				logger::error("Unable to access Dialogue History save directory (error: {})", e.what());
 			}
 		}
 
