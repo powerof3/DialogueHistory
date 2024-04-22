@@ -295,8 +295,6 @@ namespace GlobalHistory
 	std::optional<std::filesystem::path> Manager::GetSaveDirectory()
 	{
 		if (!saveDirectory) {
-			logger::info("{:*^30}", "LOAD GAME");
-			
 			try {
 				wchar_t*                                               buffer{ nullptr };
 				const auto                                             result = ::SHGetKnownFolderPath(::FOLDERID_Documents, ::KNOWN_FOLDER_FLAG::KF_FLAG_DEFAULT, nullptr, std::addressof(buffer));
@@ -308,7 +306,11 @@ namespace GlobalHistory
 
 				std::filesystem::path path = knownPath.get();
 				path /= "My Games"sv;
-				path /= std::filesystem::exists("steam_api64.dll") ? "Skyrim Special Edition" : "Skyrim Special Edition GOG";
+				if (::GetModuleHandle(TEXT("Galaxy64"))) {
+					path /= "Skyrim Special Edition GOG"sv;
+				} else {
+					path /= "Skyrim Special Edition"sv;
+				}
 				path /= "Saves"sv;
 				path /= "DialogueHistory"sv;
 
@@ -319,9 +321,8 @@ namespace GlobalHistory
 				saveDirectory = path;
 
 				logger::info("Save directory : {}", path.string());
-			}
-			catch (std::filesystem::filesystem_error& e) {
-				logger::error("error: {}", e.what());
+			} catch (std::filesystem::filesystem_error& e) {
+				logger::error("Unable to access Dialogue History save directory (error: {})", e.what());
 			}
 		}
 
@@ -338,8 +339,6 @@ namespace GlobalHistory
 
 		*jsonPath /= a_save;
 		jsonPath->replace_extension(".json");
-
-		logger::info("Loading save file : {}", jsonPath->string());
 
 		return jsonPath;
 	}
@@ -360,9 +359,13 @@ namespace GlobalHistory
 			return;
 		}
 
-		auto ec = glz::write_file_json(dialogues, jsonPath->string(), std::string());
+		logger::info("Saving file : {}", jsonPath->string());
+
+		std::string buffer;
+		auto        ec = glz::write_file_json(dialogues, jsonPath->string(), buffer);
+
 		if (ec) {
-			logger::info("Failed to save dialogue history");
+			logger::info("\tFailed to save file");
 		}
 	}
 
@@ -375,8 +378,16 @@ namespace GlobalHistory
 
 		Clear();
 
+		logger::info("Loading file : {}", jsonPath->string());
+
 		if (std::filesystem::exists(*jsonPath)) {
-			glz::read_file_json(dialogues, jsonPath->string(), std::string());
+			std::string buffer;
+			auto        ec = glz::read_file_json(dialogues, jsonPath->string(), buffer);
+			if (ec) {
+				logger::info("\tFailed to load file (error: {})", glz::format_error(ec, buffer));
+			}
+		} else {
+			logger::info("\tFailed to load file (error: file doesn't exist)");
 		}
 
 		finishLoading = true;
