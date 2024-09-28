@@ -406,7 +406,7 @@ namespace GlobalHistory
 
 				ImGui::BeginGroup();
 				{
-					auto startPos = childSize.x * 0.25f;                                                        // search box end
+					auto startPos = childSize.x * 0.25f;                                    // search box end
 					auto endPos = (childSize.x * 0.5f) - toggleButtonOffset - itemSpacing;  // "By Date" text start
 
 					ImGui::BeginChild("##Map", { (startPos + endPos) * 0.5f, childSize.y * 0.9125f }, ImGuiChildFlags_None, ImGuiWindowFlags_NoBackground);
@@ -613,7 +613,7 @@ namespace GlobalHistory
 		if (!a_speaker || !a_info) {
 			return;
 		}
-		
+
 		if (a_speaker->IsPlayerRef() || a_speaker->GetDistance(RE::PlayerCharacter::GetSingleton()) > RE::GetINISetting("fTalkingDistance:LOD")->GetFloat() || RE::MenuTopicManager::GetSingleton()->speaker.get() == a_speaker) {
 			return;
 		}

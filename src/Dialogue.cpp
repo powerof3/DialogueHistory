@@ -215,7 +215,7 @@ std::string Dialogue::TimeStampToString(bool a_use12HourFormat) const
 void Dialogue::AddDialogue(RE::TESObjectREFR* a_speaker, const std::string& a_line, const std::string& a_voice)
 {
 	Initialize(a_speaker);
-	
+
 	if (playerName.empty()) {
 		playerName = NPCNameProvider::GetSingleton()->GetName(RE::PlayerCharacter::GetSingleton());
 	}
@@ -232,7 +232,7 @@ void Dialogue::Draw()
 		nameWidth = std::max(ImGui::CalcTextSize(playerName.c_str()).x, ImGui::CalcTextSize(speakerName.c_str()).x);
 		colonWidth = ImGui::CalcTextSize(":").x;
 	}
-	
+
 	bool isGlobalHistoryOpen = MANAGER(GlobalHistory)->IsGlobalHistoryOpen();
 
 	ImGui::Indent();
@@ -260,7 +260,7 @@ void Dialogue::Draw()
 			ImGui::TableSetupColumn("##Line", ImGuiTableColumnFlags_WidthStretch);
 
 			for (auto& line : dialogue) {
-				auto  speakerColor = line.isPlayer ? GetUserStyleColorVec4(USER_STYLE::kPlayerName) : GetUserStyleColorVec4(USER_STYLE::kSpeakerName);
+				auto speakerColor = line.isPlayer ? GetUserStyleColorVec4(USER_STYLE::kPlayerName) : GetUserStyleColorVec4(USER_STYLE::kSpeakerName);
 
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
@@ -300,7 +300,7 @@ void Dialogue::Clear()
 	dialogue.clear();
 	speakerName.clear();
 	playerName.clear();
-	
+
 	RefreshContents();
 }
 
@@ -323,10 +323,10 @@ void Monologues::Draw()
 {
 	if (refreshContents || timeWidth == 0.0f || nameWidth == 0.0f) {
 		refreshContents = false;
-		
+
 		nameWidth = 0.0f;
 		timeWidth = ImGui::CalcTextSize(MANAGER(GlobalHistory)->Use12HourFormat() ? "99:99 AM" : "99:99").x;
-		
+
 		std::set<std::string> names{};
 		for (auto& monologue : monologues) {
 			if (names.insert(monologue.speakerName).second) {

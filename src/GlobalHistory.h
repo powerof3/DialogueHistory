@@ -26,7 +26,7 @@ namespace GlobalHistory
 
 		bool WasMenuOpenJustNow() const;
 		void SetMenuOpenJustNow(bool a_open);
-		
+
 		bool Use12HourFormat() const;
 
 		void SaveDialogueHistory(const std::tm& a_time, const Dialogue& a_dialogue);
@@ -245,13 +245,13 @@ namespace GlobalHistory
 		{
 		public:
 			virtual ~ConversationHistory() override = default;
-			
+
 			void LoadMCMSettings(const CSimpleIniA& a_ini);
-			
+
 			void RefreshTimeStamps();
 			void DrawDateTree() override;
 			void DrawLocationTree() override;
-			
+
 			void ClearCurrentHistory() override;
 			void SetCurrentHistory(const Monologues& a_history) override;
 			void RefreshCurrentHistory();

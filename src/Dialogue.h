@@ -169,7 +169,7 @@ struct Monologue : public Speech
 	// members
 	Speech::Line          line{};
 	RE::BGSNumericIDIndex topic;
-	std::int32_t          dialogueType{ - 1};
+	std::int32_t          dialogueType{ -1 };
 	std::string           hourMinTimeStamp;
 
 	struct glaze
