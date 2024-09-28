@@ -30,14 +30,13 @@ void OnInit(SKSE::MessagingInterface::Message* a_msg)
 			MANAGER(GlobalHistory)->Register();
 
 			PhotoMode::activeGlobal = RE::TESForm::LookupByEditorID<RE::TESGlobal>("PhotoMode_IsActive");
-
 			MANAGER(Translation)->BuildTranslationMap();
 		}
 		break;
 	case SKSE::MessagingInterface::kSaveGame:
 		{
 			std::string savePath{ static_cast<char*>(a_msg->data), a_msg->dataLen };
-			MANAGER(GlobalHistory)->SaveToFile(savePath);
+			MANAGER(GlobalHistory)->SaveFiles(savePath);
 		}
 		break;
 	case SKSE::MessagingInterface::kPreLoadGame:
@@ -45,13 +44,13 @@ void OnInit(SKSE::MessagingInterface::Message* a_msg)
 			std::string savePath{ static_cast<char*>(a_msg->data), a_msg->dataLen };
 			string::replace_last_instance(savePath, ".ess", "");
 
-			MANAGER(GlobalHistory)->LoadFromFile(savePath);
+			MANAGER(GlobalHistory)->LoadFiles(savePath);
 		}
 		break;
 	case SKSE::MessagingInterface::kDeleteGame:
 		{
 			const std::string savePath({ static_cast<char*>(a_msg->data), a_msg->dataLen });
-			MANAGER(GlobalHistory)->DeleteSavedFile(savePath);
+			MANAGER(GlobalHistory)->DeleteSavedFiles(savePath);
 		}
 		break;
 	case SKSE::MessagingInterface::kNewGame:

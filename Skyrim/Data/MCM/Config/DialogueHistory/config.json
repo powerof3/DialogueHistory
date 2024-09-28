@@ -158,6 +158,15 @@
           }
         },
         {
+          "id": "bHideButtonGlobalHistory:Settings",
+          "text": "$DH_HideButton_Text",
+          "type": "toggle",
+          "help": "$DH_HideButton_Help",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
           "type": "empty"
         },
         {
@@ -178,6 +187,68 @@
           "text": "$DH_BlurMenu_Text",
           "type": "toggle",
           "help": "$DH_BlurMenu_Help",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "id": "bHideButtonLocalHistory:Settings",
+          "text": "$DH_HideButton_Text",
+          "type": "toggle",
+          "help": "$DH_HideButton_Help",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "type": "empty"
+        },
+        {
+          "text": "$DH_Title_Conversation",
+          "position": 1,
+          "type": "header"
+        },
+        {
+          "id": "bSceneDialogueConversationHistory:Settings",
+          "text": "$DH_SceneDialogue_Text",
+          "type": "toggle",
+          "help": "$DH_SceneDialogue_Help",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "id": "bCombatDialogueConversationHistory:Settings",
+          "text": "$DH_CombatDialogue_Text",
+          "type": "toggle",
+          "help": "$DH_CombatDialogue_Help",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "id": "bFavorDialogueConversationHistory:Settings",
+          "text": "$DH_FavorDialogue_Text",
+          "type": "toggle",
+          "help": "$DH_FavorDialogue_Help",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "id": "bDetectionDialogueConversationHistory:Settings",
+          "text": "$DH_DetectionDialogue_Text",
+          "type": "toggle",
+          "help": "$DH_DetectionDialogue_Help",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
+          "id": "bMiscDialogueConversationHistory:Settings",
+          "text": "$DH_MiscDialogue_Text",
+          "type": "toggle",
+          "help": "$DH_MiscDialogue_Help",
           "valueOptions": {
             "sourceType": "ModSettingBool"
           }

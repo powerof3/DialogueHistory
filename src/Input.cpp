@@ -395,6 +395,8 @@ namespace Input
 			}
 		}
 
-		MANAGER(Hotkeys)->TryToggleDialogueHistory(a_events);
+		if (!io.WantTextInput) {
+			MANAGER(Hotkeys)->TryToggleDialogueHistory(a_events);
+		}
 	}
 }

@@ -1,5 +1,6 @@
 #include "Util.h"
 
+#include "IconsFonts.h"
 #include "Renderer.h"
 
 namespace ImGui
@@ -17,6 +18,17 @@ namespace ImGui
 
 		const auto newWindowPos = ImVec2{ window->Pos.x - borderSize, window->Pos.y - borderSize };
 		rootWindow->DrawList->AddRect(newWindowPos, newWindowPos + ImVec2(window->Size.x + 2 * borderSize, window->Size.y + 2 * borderSize), GetColorU32(ImGuiCol_WindowBg), 0.0f, 0, borderSize);
+	}
+
+	// https://github.com/ocornut/imgui/discussions/3862
+	void AlignForWidth(float width, float alignment)
+	{
+		float avail = GetContentRegionAvail().x;
+		float off = (avail - width) * alignment;
+
+		if (off > 0.0f) {
+			SetCursorPosX(GetCursorPosX() + off);
+		}
 	}
 
 	void CenteredText(const char* label, bool vertical)

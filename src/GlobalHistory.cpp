@@ -10,9 +10,293 @@
 
 namespace GlobalHistory
 {
+	void Manager::DialogueHistory::RefreshTimeStamps(bool a_use12HourFormat)
+	{
+		if (dateMap.empty()) {
+			return;
+		}
+
+		for (auto& [dayMonth, hourMinMap] : dateMap.map) {
+			for (auto it = hourMinMap.begin(); it != hourMinMap.end(); it++) {
+				it->second.timeAndLoc.clear();
+
+				auto node = hourMinMap.extract(it);
+				node.key().SwitchHourFormat(a_use12HourFormat);
+				hourMinMap.insert(std::move(node));
+			}
+		}
+	}
+
+	void Manager::DialogueHistory::DrawDateTree()
+	{
+		DrawTreeImpl(dateMap);
+	}
+
+	void Manager::DialogueHistory::DrawLocationTree()
+	{
+		DrawTreeImpl(locationMap);
+	}
+
+	void Manager::DialogueHistory::SaveHistory(const std::tm& a_tm, const Dialogue& a_history, bool a_use12HourFormat)
+	{
+		history.push_back(a_history);
+
+		TimeStamp date;
+		date.FromYearMonthDay(a_tm.tm_year, a_tm.tm_mon, a_tm.tm_mday);
+
+		TimeStamp hourMin;
+		hourMin.FromHourMin(a_tm.tm_hour, a_tm.tm_min, a_history.speakerName, a_use12HourFormat);
+
+		dateMap.map[date][hourMin] = a_history;
+
+		TimeStamp speaker(a_history.timeStamp, a_history.speakerName);
+		locationMap.map[a_history.locName][speaker] = a_history;
+	}
+
+	void Manager::DialogueHistory::SaveHistoryToFile(const std::string& a_save)
+	{
+		BaseHistory::SaveHistoryToFileImpl(history, a_save, "DialogueHistory");
+	}
+
+	bool Manager::DialogueHistory::LoadHistoryFromFile(const std::string& a_save)
+	{
+		return BaseHistory::LoadHistoryFromFileImpl(history, a_save, "DialogueHistory");
+	}
+
+	std::optional<std::filesystem::path> Manager::DialogueHistory::GetDirectory()
+	{
+		if (!directory) {
+			directory = GetDirectoryImpl("DialogueHistory"sv);
+		}
+		return directory;
+	}
+
+	void Manager::DialogueHistory::InitHistory()
+	{
+		std::string playerName = RE::PlayerCharacter::GetSingleton()->GetDisplayFullName();
+
+		if (!history.empty()) {
+			std::erase_if(history, [&](auto& dialogue) {
+				auto speakerActor = RE::TESForm::LookupByID<RE::Actor>(dialogue.id.GetNumericID());
+				if (!speakerActor) {
+					return true;
+				}
+
+				if (auto cellOrLoc = RE::TESForm::LookupByID(dialogue.loc.GetNumericID())) {
+					dialogue.locName = cellOrLoc->GetName();
+					if (dialogue.locName.empty()) {
+						dialogue.locName = "$DH_UnknownLocation"_T;
+					}
+				} else {
+					dialogue.locName = "???";
+				}
+
+				dialogue.speakerName = NPCNameProvider::GetSingleton()->GetName(speakerActor);
+				dialogue.playerName = playerName;
+
+				for (auto& line : dialogue.dialogue) {
+					line.isPlayer = line.voice.empty();
+					line.name = !line.isPlayer ? dialogue.speakerName : playerName;
+					if (line.line.empty() || line.line == " ") {
+						line.line = "...";
+					}
+					line.hovered = false;
+				}
+
+				auto time = dialogue.ExtractTimeStamp();
+
+				TimeStamp date;
+				date.FromYearMonthDay(time.tm_year, time.tm_mon, time.tm_mday);
+
+				TimeStamp hourMin;
+				hourMin.FromHourMin(time.tm_hour, time.tm_min, dialogue.speakerName, MANAGER(GlobalHistory)->Use12HourFormat());
+
+				TimeStamp speaker(dialogue.timeStamp, dialogue.speakerName);
+
+				dateMap.map[date][hourMin] = dialogue;
+				locationMap.map[dialogue.locName][speaker] = dialogue;
+
+				return false;
+			});
+		}
+	}
+
+	void Manager::ConversationHistory::RefreshTimeStamps()
+	{
+		if (dateMap.empty()) {
+			return;
+		}
+
+		for (auto& [dayMonth, monologues] : dateMap.map) {
+			for (auto it = monologues.monologues.begin(); it != monologues.monologues.end(); it++) {
+				it->hourMinTimeStamp.clear();
+			}
+		}
+	}
+
+	void Manager::ConversationHistory::DrawDateTree()
+	{
+		DrawTreeImpl(dateMap);
+	}
+
+	void Manager::ConversationHistory::DrawLocationTree()
+	{
+		DrawTreeImpl(locationMap);
+	}
+
+	void Manager::ConversationHistory::ClearCurrentHistory()
+	{
+		BaseHistory::ClearCurrentHistory();
+		currentFixedHistory = std::nullopt;
+	}
+
+	void Manager::ConversationHistory::SetCurrentHistory(const Monologues& a_history)
+	{
+		BaseHistory::SetCurrentHistory(a_history);
+
+		currentFixedHistory = a_history;
+		currentFixedHistory->RefreshContents();
+	}
+
+	void Manager::ConversationHistory::RefreshCurrentHistory()
+	{
+		currentHistory = currentFixedHistory;
+		if (currentHistory) {
+			if (!nameFilter.empty()) {
+				std::erase_if(currentHistory->monologues, [&](const auto& monologue) {
+					return !string::icontains(monologue.speakerName, nameFilter);
+				});
+			}
+			currentHistory->RefreshContents();
+		}
+	}
+
+	void Manager::ConversationHistory::RevertCurrentHistory()
+	{
+		currentHistory = currentFixedHistory;
+		if (currentHistory) {
+			currentHistory->RefreshContents();
+		}
+	}
+
+	void Manager::ConversationHistory::SaveHistory(const std::tm& a_tm, const Monologue& a_history)
+	{
+		history.monologues.push_back(a_history);
+
+		if (MANAGER(GlobalHistory)->IsGlobalHistoryOpen() && CanShowDialogue(a_history.dialogueType)) {
+			TimeStamp date;
+			date.FromYearMonthDay(a_tm.tm_year, a_tm.tm_mon, a_tm.tm_mday);
+
+			dateMap.map[date].monologues.push_back(a_history);
+			locationMap.map[a_history.locName][date].monologues.push_back(a_history);
+			if (currentFixedHistory) {
+				currentFixedHistory->monologues.push_back(a_history);
+				RefreshCurrentHistory();
+			}
+		}
+	}
+
+	void Manager::ConversationHistory::SaveHistoryToFile(const std::string& a_save)
+	{
+		BaseHistory::SaveHistoryToFileImpl(history.monologues, a_save, "ConversationHistory");
+	}
+
+	bool Manager::ConversationHistory::LoadHistoryFromFile(const std::string& a_save)
+	{
+		return BaseHistory::LoadHistoryFromFileImpl(history.monologues, a_save, "ConversationHistory");
+	}
+
+	std::optional<std::filesystem::path> Manager::ConversationHistory::GetDirectory()
+	{
+		if (!directory) {
+			directory = GetDirectoryImpl("ConversationHistory"sv);
+		}
+		return directory;
+	}
+
+	void Manager::ConversationHistory::InitHistory()
+	{
+		if (!history.empty()) {
+			std::erase_if(history.monologues, [&](auto& monologue) {
+				auto speakerActor = RE::TESForm::LookupByID<RE::Actor>(monologue.id.GetNumericID());
+				if (!speakerActor) {
+					return true;
+				}
+
+				if (auto cellOrLoc = RE::TESForm::LookupByID(monologue.loc.GetNumericID())) {
+					monologue.locName = cellOrLoc->GetName();
+					if (monologue.locName.empty()) {
+						monologue.locName = "$DH_UnknownLocation"_T;
+					}
+				} else {
+					monologue.locName = "???";
+				}
+
+				monologue.speakerName = NPCNameProvider::GetSingleton()->GetName(speakerActor);
+
+				if (auto topic = RE::TESForm::LookupByID<RE::TESTopic>(monologue.topic.GetNumericID())) {
+					monologue.dialogueType = topic->data.type.underlying();
+				}
+
+				auto& line = monologue.line;
+				if (line.line.empty() || line.line == " ") {
+					line.line = "...";
+				}
+				line.hovered = false;
+
+				return false;
+			});
+		}
+	}
+
+	void Manager::ConversationHistory::LoadMCMSettings(const CSimpleIniA& a_ini)
+	{
+		showScene = a_ini.GetBoolValue("Settings", "bSceneDialogueConversationHistory", showMisc);
+		showCombat = a_ini.GetBoolValue("Settings", "bCombatDialogueConversationHistory", showCombat);
+		showFavor = a_ini.GetBoolValue("Settings", "bFavorDialogueConversationHistory", showFavor);
+		showDetection = a_ini.GetBoolValue("Settings", "bDetectionDialogueConversationHistory", showDetection);
+		showMisc = a_ini.GetBoolValue("Settings", "bMiscDialogueConversationHistory", showMisc);
+	}
+
+	bool Manager::ConversationHistory::CanShowDialogue(std::int32_t a_dialogueType) const
+	{
+		switch (a_dialogueType) {
+		case RE::DIALOGUE_TYPE::kSceneDialogue:
+			return showScene;
+		case RE::DIALOGUE_TYPE::kCombat:
+			return showCombat;
+		case RE::DIALOGUE_TYPE::kFavors:
+			return showFavor;
+		case RE::DIALOGUE_TYPE::kDetection:
+			return showDetection;
+		case RE::DIALOGUE_TYPE::kMiscellaneous:
+			return showMisc;
+		default:
+			return true;
+		}
+	}
+
+	void Manager::ConversationHistory::RefreshHistoryMaps()
+	{
+		dateMap.clear();
+		locationMap.clear();
+		for (auto& monologue : history.monologues) {
+			auto time = monologue.ExtractTimeStamp();
+
+			TimeStamp date;
+			date.FromYearMonthDay(time.tm_year, time.tm_mon, time.tm_mday);
+
+			if (CanShowDialogue(monologue.dialogueType)) {
+				dateMap.map[date].monologues.push_back(monologue);
+				locationMap.map[monologue.locName][date].monologues.push_back(monologue);
+			}
+		}
+	}
+
 	void Manager::Register()
 	{
-		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink(GetSingleton());
+		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESLoadGameEvent>(GetSingleton());
+		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESTopicInfoEvent>(GetSingleton());
 	}
 
 	void Manager::LoadMCMSettings(const CSimpleIniA& a_ini)
@@ -20,13 +304,15 @@ namespace GlobalHistory
 		use12HourFormat = a_ini.GetBoolValue("Settings", "b12HourFormat", use12HourFormat);
 		unpauseMenu = a_ini.GetBoolValue("Settings", "bUnpauseGlobalHistory", unpauseMenu);
 		blurMenu = a_ini.GetBoolValue("Settings", "bBlurGlobalHistory", blurMenu);
+		hideButton = a_ini.GetBoolValue("Settings", "bHideButtonGlobalHistory", hideButton);
 
-		if (!dialoguesByDate.empty()) {
-			RefreshTimeStamps();
-		}
+		conversationHistory.LoadMCMSettings(a_ini);
+
+		dialogueHistory.RefreshTimeStamps(use12HourFormat);
+		conversationHistory.RefreshTimeStamps();
 	}
 
-	bool Manager::IsValid()
+	bool Manager::IsValid() const
 	{
 		if (IsGlobalHistoryOpen()) {
 			return true;
@@ -70,6 +356,8 @@ namespace GlobalHistory
 		ImGui::Begin("##Main", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBringToFrontOnFocus);
 		{
 			constexpr auto windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar;
+			static float   toggleHeight = ImGui::GetFrameHeight() / 1.5f;
+			float          itemSpacing = ImGui::GetStyle().ItemSpacing.x;
 
 			ImGui::SetNextWindowPos(ImGui::GetNativeViewportCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 
@@ -79,11 +367,32 @@ namespace GlobalHistory
 			{
 				ImGui::ExtendWindowPastBorder();
 
+				ImGui::Spacing(2);
+
 				ImGui::PushFont(MANAGER(IconFont)->GetHeaderFont());
 				{
-					ImGui::Indent();
+					static float width = ImGui::CalcTextSize("$DH_Title"_T).x + (itemSpacing * 2) + (toggleHeight * 0.5f) + ImGui::CalcTextSize("$DH_Title_Conversation"_T).x;
+					ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - width) * 0.5f);
+
+					auto cursorY = ImGui::GetCursorPosY();
+					ImGui::SetCursorPosY(cursorY - (toggleHeight * 0.25f));
+
+					ImGui::BeginDisabled(drawConversation);
 					ImGui::TextUnformatted("$DH_Title"_T);
-					ImGui::Unindent();
+					ImGui::EndDisabled();
+					ImGui::SameLine();
+
+					ImGui::SetCursorPosY(cursorY);
+					if (ImGui::ToggleButton("##DialogueToggle", &drawConversation)) {
+						dialogueHistory.ClearCurrentHistory();
+						conversationHistory.ClearCurrentHistory();
+					}
+
+					ImGui::SameLine();
+					ImGui::SetCursorPosY(cursorY - (toggleHeight * 0.25f));
+					ImGui::BeginDisabled(!drawConversation);
+					ImGui::TextUnformatted("$DH_Title_Conversation"_T);
+					ImGui::EndDisabled();
 				}
 				ImGui::PopFont();
 
@@ -93,20 +402,19 @@ namespace GlobalHistory
 
 				auto childSize = ImGui::GetContentRegionAvail();
 
-				float toggleHeight = ImGui::GetFrameHeight() / 1.5f;
-				float toggleButtonOffset = ImGui::CalcTextSize("$DH_Date_Text"_T).x + ImGui::GetStyle().ItemSpacing.x + toggleHeight * 0.5f;
+				float toggleButtonOffset = ImGui::CalcTextSize("$DH_Date_Text"_T).x + itemSpacing + toggleHeight * 0.5f;
 
 				ImGui::BeginGroup();
 				{
 					auto startPos = childSize.x * 0.25f;                                                        // search box end
-					auto endPos = (childSize.x * 0.5f) - toggleButtonOffset - ImGui::GetStyle().ItemSpacing.x;  // "By Date" text start
+					auto endPos = (childSize.x * 0.5f) - toggleButtonOffset - itemSpacing;  // "By Date" text start
 
 					ImGui::BeginChild("##Map", { (startPos + endPos) * 0.5f, childSize.y * 0.9125f }, ImGuiChildFlags_None, ImGuiWindowFlags_NoBackground);
 					{
-						if (sortByLocation) {
-							DrawDialogueTree(dialoguesByLocation);
+						if (drawConversation) {
+							conversationHistory.DrawTree(sortByLocation);
 						} else {
-							DrawDialogueTree(dialoguesByDate);
+							dialogueHistory.DrawTree(sortByLocation);
 						}
 					}
 					ImGui::EndChild();
@@ -117,10 +425,14 @@ namespace GlobalHistory
 
 					childSize = ImGui::GetContentRegionAvail();
 
-					if (currentDialogue) {
+					if (drawConversation ? conversationHistory.CanDrawHistory() : dialogueHistory.CanDrawHistory()) {
 						ImGui::BeginChild("##History", ImVec2(0, childSize.y * 0.9125f), ImGuiChildFlags_None, windowFlags | ImGuiWindowFlags_NoBackground);
 						{
-							currentDialogue->Draw();
+							if (drawConversation) {
+								conversationHistory.DrawHistory();
+							} else {
+								dialogueHistory.DrawHistory();
+							}
 						}
 						ImGui::EndChild();
 					}
@@ -136,38 +448,50 @@ namespace GlobalHistory
 				{
 					childSize = ImGui::GetContentRegionMax();
 
+					// search box
 					ImGui::SameLine();
 					ImGui::SetCursorPosY(childSize.y * 0.125f);
 					ImGui::SetNextItemWidth(childSize.x * 0.25f);
-					if (ImGui::InputTextWithHint("##Name", "$DH_Name_Text"_T, &nameFilter)) {
-						currentDialogue = std::nullopt;
+					if (drawConversation) {
+						lastNameFilter = nameFilter;
 					}
-
+					if (ImGui::InputTextWithHint("##Name", "$DH_Name_Text"_T, &nameFilter)) {
+						if (drawConversation) {
+							conversationHistory.RefreshCurrentHistory();
+						} else {
+							dialogueHistory.ClearCurrentHistory();
+						}
+					}
+					if (drawConversation) {
+						if (!lastNameFilter.empty() && nameFilter.empty()) {
+							conversationHistory.RevertCurrentHistory();
+						}
+					}
 					ImGui::SetCursorPosX(childSize.x * 0.5f - toggleButtonOffset);
 					ImGui::SetCursorPosY(childSize.y * 0.25f);
 
-					ImGui::BeginGroup();
-					{
-						auto cursorY = ImGui::GetCursorPosY();
+					// location toggle
+					auto cursorY = ImGui::GetCursorPosY();
+					ImGui::SetCursorPosY(cursorY - (toggleHeight * 0.25f));
+					ImGui::BeginDisabled(sortByLocation);
+					ImGui::TextUnformatted("$DH_Date_Text"_T);
+					ImGui::EndDisabled();
+					ImGui::SameLine();
 
-						ImGui::SetCursorPosY(cursorY - (toggleHeight * 0.25f));
-						ImGui::BeginDisabled(sortByLocation);
-						ImGui::TextUnformatted("$DH_Date_Text"_T);
-						ImGui::EndDisabled();
-						ImGui::SameLine();
-
-						ImGui::SetCursorPosY(cursorY);
-						if (ImGui::ToggleButton("##MapToggle", &sortByLocation)) {
-							currentDialogue = std::nullopt;
+					ImGui::SetCursorPosY(cursorY);
+					if (ImGui::ToggleButton("##MapToggle", &sortByLocation)) {
+						if (drawConversation) {
+							conversationHistory.ClearCurrentHistory();
+						} else {
+							dialogueHistory.ClearCurrentHistory();
 						}
-
-						ImGui::SameLine();
-						ImGui::SetCursorPosY(cursorY - (toggleHeight * 0.25f));
-						ImGui::BeginDisabled(!sortByLocation);
-						ImGui::TextUnformatted("$DH_Location_Text"_T);
-						ImGui::EndDisabled();
 					}
-					ImGui::EndGroup();
+
+					ImGui::SameLine();
+					ImGui::SetCursorPosY(cursorY - (toggleHeight * 0.25f));
+					ImGui::BeginDisabled(!sortByLocation);
+					ImGui::TextUnformatted("$DH_Location_Text"_T);
+					ImGui::EndDisabled();
 				}
 				ImGui::EndChild();
 			}
@@ -175,26 +499,28 @@ namespace GlobalHistory
 
 			ImGui::PopFont();
 
-			ImGui::PushFont(MANAGER(IconFont)->GetButtonFont());
-			{
-				const auto icon = MANAGER(Hotkeys)->EscapeIcon();
+			if (!hideButton) {
+				ImGui::PushFont(MANAGER(IconFont)->GetButtonFont());
+				{
+					const auto icon = MANAGER(Hotkeys)->EscapeIcon();
 
-				// exit button position (1784,1015) + offset (32) at 1080p
-				static const auto windowSize = RE::BSGraphics::Renderer::GetScreenSize();
-				static float      posY = 0.93981481481f * windowSize.height;
-				static float      posX = 0.92916666666f * windowSize.width;
+					// exit button position (1784,1015) + offset (32) at 1080p
+					static const auto windowSize = RE::BSGraphics::Renderer::GetScreenSize();
+					static float      posY = 0.93981481481f * windowSize.height;
+					static float      posX = 0.92916666666f * windowSize.width;
 
-				ImGui::SetCursorScreenPos({ posX, posY });
-				ImGui::ButtonIconWithLabel("$DH_Exit_Button"_T, icon);
-				if (ImGui::IsItemClicked()) {
-					SetGlobalHistoryOpen(false);
+					ImGui::SetCursorScreenPos({ posX, posY });
+					ImGui::ButtonIconWithLabel("$DH_Exit_Button"_T, icon);
+					if (ImGui::IsItemClicked()) {
+						SetGlobalHistoryOpen(false);
+					}
 				}
+				ImGui::PopFont();
 			}
-			ImGui::PopFont();
 		}
 		ImGui::End();
 
-		if (ImGui::IsKeyReleased(ImGuiKey_Escape) || ImGui::IsKeyReleased(ImGuiKey_NavGamepadCancel)) {
+		if (ImGui::IsKeyReleased(ImGuiKey_Escape) || ImGui::IsKeyReleased(ImGuiKey_GamepadFaceRight)) {
 			SetGlobalHistoryOpen(false);
 		}
 	}
@@ -220,14 +546,19 @@ namespace GlobalHistory
 			RE::SendHUDMessage::PushHUDMode("WorldMapMode");
 			RE::UIMessageQueue::GetSingleton()->AddMessage(RE::CursorMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kShow, nullptr);
 
+			conversationHistory.RefreshHistoryMaps();
+
 			RE::PlaySound("UIMenuOK");
 
 		} else {
-			currentDialogue = std::nullopt;
+			dialogueHistory.ClearCurrentHistory();
+			conversationHistory.ClearCurrentHistory();
+
+			dialogueHistory.ClearFilters();
+			conversationHistory.ClearFilters();
 
 			nameFilter.clear();
-			dialoguesByDate.clear_filter();
-			dialoguesByLocation.clear_filter();
+			lastNameFilter.clear();
 
 			voiceHandle.Stop();
 
@@ -257,6 +588,16 @@ namespace GlobalHistory
 		SetGlobalHistoryOpen(!IsGlobalHistoryOpen());
 	}
 
+	bool Manager::WasMenuOpenJustNow() const
+	{
+		return menuOpenedJustNow;
+	}
+
+	void Manager::SetMenuOpenJustNow(bool a_open)
+	{
+		menuOpenedJustNow = a_open;
+	}
+
 	bool Manager::Use12HourFormat() const
 	{
 		return use12HourFormat;
@@ -264,206 +605,78 @@ namespace GlobalHistory
 
 	void Manager::SaveDialogueHistory(const std::tm& a_time, const Dialogue& a_dialogue)
 	{
-		dialogues.push_back(a_dialogue);
-
-		TimeStamp date;
-		date.FromYearMonthDay(a_time.tm_year, a_time.tm_mon, a_time.tm_mday);
-
-		TimeStamp hourMin;
-		hourMin.FromHourMin(a_time.tm_hour, a_time.tm_min, a_dialogue.speakerName, use12HourFormat);
-
-		dialoguesByDate.map[date][hourMin] = a_dialogue;
-
-		TimeStamp speaker(a_dialogue.timeStamp, a_dialogue.speakerName);
-		dialoguesByLocation.map[a_dialogue.locName][speaker] = a_dialogue;
+		dialogueHistory.SaveHistory(a_time, a_dialogue, use12HourFormat);
 	}
 
-	void Manager::RefreshTimeStamps()
+	void Manager::AddConversation(const RE::TESObjectREFRPtr& a_speaker, RE::TESTopicInfo* a_info)
 	{
-		for (auto& [dayMonth, hourMinMap] : dialoguesByDate.map) {
-			for (auto it = hourMinMap.begin(); it != hourMinMap.end(); it++) {
-				it->second.timeAndLoc.clear();
+		if (!a_speaker || !a_info) {
+			return;
+		}
+		
+		if (a_speaker->IsPlayerRef() || a_speaker->GetDistance(RE::PlayerCharacter::GetSingleton()) > RE::GetINISetting("fTalkingDistance:LOD")->GetFloat() || RE::MenuTopicManager::GetSingleton()->speaker.get() == a_speaker) {
+			return;
+		}
 
-				auto node = hourMinMap.extract(it);
-				node.key().SwitchHourFormat(use12HourFormat);
-				hourMinMap.insert(std::move(node));
+		auto dialogueItem = a_info->GetDialogueData(a_speaker.get());
+		if (auto currentResponse = dialogueItem.responses.front()) {
+			if (!currentResponse->text.empty() && currentResponse->text != " ") {
+				auto time = RE::Calendar::GetSingleton()->GetTime();
+
+				std::string text = currentResponse->text.c_str();
+				std::string voice = currentResponse->voice.c_str();
+				if (!voice.empty()) {
+					// Strip "Data\"
+					voice.erase(0, 5);
+				}
+
+				Monologue monologue(time, a_speaker.get(), text, voice, dialogueItem.topic);
+				conversationHistory.SaveHistory(time, monologue);
 			}
 		}
-	}
-
-	// My Documents/My Games/Skyrim Special Edition/Saves/Dialogue History
-	std::optional<std::filesystem::path> Manager::GetSaveDirectory()
-	{
-		if (!saveDirectory) {
-			try {
-				wchar_t*                                               buffer{ nullptr };
-				const auto                                             result = ::SHGetKnownFolderPath(::FOLDERID_Documents, ::KNOWN_FOLDER_FLAG::KF_FLAG_DEFAULT, nullptr, std::addressof(buffer));
-				std::unique_ptr<wchar_t[], decltype(&::CoTaskMemFree)> knownPath(buffer, ::CoTaskMemFree);
-				if (!knownPath || result != S_OK) {
-					logger::error("failed to get known folder path"sv);
-					return std::nullopt;
-				}
-
-				std::filesystem::path path = knownPath.get();
-				path /= "My Games"sv;
-				if (::GetModuleHandle(TEXT("Galaxy64"))) {
-					path /= "Skyrim Special Edition GOG"sv;
-				} else {
-					path /= "Skyrim Special Edition"sv;
-				}
-				path /= "Saves"sv;
-				path /= "DialogueHistory"sv;
-
-				if (!std::filesystem::exists(path)) {
-					std::filesystem::create_directory(path);
-				}
-
-				saveDirectory = path;
-
-				logger::info("Save directory : {}", path.string());
-			} catch (std::filesystem::filesystem_error& e) {
-				logger::error("Unable to access Dialogue History save directory (error: {})", e.what());
-			}
-		}
-
-		return saveDirectory;
-	}
-
-	std::optional<std::filesystem::path> Manager::GetDialogueHistoryFile(const std::string& a_save)
-	{
-		auto jsonPath = GetSaveDirectory();
-
-		if (!jsonPath) {
-			return {};
-		}
-
-		*jsonPath /= a_save;
-		jsonPath->replace_extension(".json");
-
-		return jsonPath;
 	}
 
 	EventResult Manager::ProcessEvent(const RE::TESLoadGameEvent* a_evn, RE::BSTEventSource<RE::TESLoadGameEvent>*)
 	{
 		if (a_evn && finishLoading) {
-			FinishLoadFromFile();
+			dialogueHistory.InitHistory();
+			conversationHistory.InitHistory();
 		}
 
 		return EventResult::kContinue;
 	}
 
-	void Manager::SaveToFile(const std::string& a_save)
+	EventResult Manager::ProcessEvent(const RE::TESTopicInfoEvent* a_evn, RE::BSTEventSource<RE::TESTopicInfoEvent>*)
 	{
-		const auto& jsonPath = GetDialogueHistoryFile(a_save);
-		if (!jsonPath) {
-			return;
+		if (a_evn && a_evn->type == RE::TESTopicInfoEvent::TopicInfoEventType::kTopicEnd) {
+			AddConversation(a_evn->speakerRef, RE::TESForm::LookupByID<RE::TESTopicInfo>(a_evn->topicInfoFormID));
 		}
 
-		logger::info("Saving file : {}", jsonPath->string());
-
-		std::string buffer;
-		auto        ec = glz::write_file_json(dialogues, jsonPath->string(), buffer);
-
-		if (ec) {
-			logger::info("\tFailed to save file");
-		}
+		return EventResult::kContinue;
 	}
 
-	void Manager::LoadFromFile(const std::string& a_save)
+	void Manager::SaveFiles(const std::string& a_save)
 	{
-		const auto& jsonPath = GetDialogueHistoryFile(a_save);
-		if (!jsonPath) {
-			return;
-		}
-
-		Clear();
-
-		logger::info("Loading file : {}", jsonPath->string());
-
-		if (std::filesystem::exists(*jsonPath)) {
-			std::string buffer;
-			auto        ec = glz::read_file_json(dialogues, jsonPath->string(), buffer);
-			if (ec) {
-				logger::info("\tFailed to load file (error: {})", glz::format_error(ec, buffer));
-			}
-		} else {
-			logger::info("\tFailed to load file (error: file doesn't exist)");
-		}
-
-		finishLoading = true;
+		dialogueHistory.SaveHistoryToFile(a_save);
+		conversationHistory.SaveHistoryToFile(a_save);
 	}
 
-	void Manager::FinishLoadFromFile()
+	void Manager::LoadFiles(const std::string& a_save)
 	{
-		if (!finishLoading) {
-			return;
-		}
-
-		std::string playerName = RE::PlayerCharacter::GetSingleton()->GetDisplayFullName();
-
-		if (!dialogues.empty()) {
-			std::erase_if(dialogues, [&](auto& dialogue) {
-				auto speakerActor = RE::TESForm::LookupByID<RE::Actor>(dialogue.id.GetNumericID());
-				if (!speakerActor) {
-					return true;
-				}
-
-				if (auto cellOrLoc = RE::TESForm::LookupByID(dialogue.loc.GetNumericID())) {
-					dialogue.locName = cellOrLoc->GetName();
-					if (dialogue.locName.empty()) {
-						dialogue.locName = "$DH_UnknownLocation"_T;
-					}
-				} else {
-					dialogue.locName = "???";
-				}
-
-				dialogue.speakerName = NPCNameProvider::GetSingleton()->GetName(speakerActor);
-
-				for (auto& [line, voice, name, isPlayer, hovered] : dialogue.dialogue) {
-					isPlayer = voice.empty();
-					name = !isPlayer ? dialogue.speakerName : playerName;
-					if (line.empty() || line == " ") {
-						line = "...";
-					}
-					hovered = false;
-				}
-
-				std::uint32_t year, month, day, hour, min;
-				dialogue.ExtractTimeStamp(year, month, day, hour, min);
-
-				TimeStamp date;
-				date.FromYearMonthDay(year, month, day);
-
-				TimeStamp hourMin;
-				hourMin.FromHourMin(hour, min, dialogue.speakerName, use12HourFormat);
-
-				TimeStamp speaker(dialogue.timeStamp, dialogue.speakerName);
-
-				dialoguesByDate.map[date][hourMin] = dialogue;
-				dialoguesByLocation.map[dialogue.locName][speaker] = dialogue;
-
-				return false;
-			});
-		}
-
-		finishLoading = true;
+		finishLoading |= dialogueHistory.LoadHistoryFromFile(a_save);
+		finishLoading |= conversationHistory.LoadHistoryFromFile(a_save);
 	}
 
-	void Manager::DeleteSavedFile(const std::string& a_save)
+	void Manager::DeleteSavedFiles(const std::string& a_save)
 	{
-		auto jsonPath = GetDialogueHistoryFile(a_save);
-		if (!jsonPath) {
-			return;
-		}
-
-		std::filesystem::remove(*jsonPath);
+		dialogueHistory.DeleteSavedFile(a_save);
+		conversationHistory.DeleteSavedFile(a_save);
 	}
 
 	void Manager::Clear()
 	{
-		dialogues.clear();
-		dialoguesByDate.clear();
-		dialoguesByLocation.clear();
+		dialogueHistory.Clear();
+		conversationHistory.Clear();
 	}
 
 	void Manager::PlayVoiceline(const std::string& a_voiceline)

@@ -47,5 +47,6 @@ namespace LocalHistory
 
 		bool unpauseMenu{ false };
 		bool blurMenu{ true };
+		bool hideButton{ false };
 	};
 }

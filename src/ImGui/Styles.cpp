@@ -97,6 +97,9 @@ namespace ImGui
 		colors[ImGuiCol_ChildBg] = user.background;
 		colors[ImGuiCol_ScrollbarBg] = ImVec4();
 		colors[ImGuiCol_FrameBg] = user.frameBG;
+		colors[ImGuiCol_TableHeaderBg] = ImVec4();
+		colors[ImGuiCol_TableRowBg] = ImVec4();
+		colors[ImGuiCol_TableRowBgAlt] = ImVec4();
 
 		colors[ImGuiCol_Border] = user.border;
 		colors[ImGuiCol_Separator] = user.separator;

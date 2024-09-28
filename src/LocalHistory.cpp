@@ -16,6 +16,7 @@ namespace LocalHistory
 	{
 		unpauseMenu = a_ini.GetBoolValue("Settings", "bUnpauseLocalHistory", unpauseMenu);
 		blurMenu = a_ini.GetBoolValue("Settings", "bBlurLocalHistory", blurMenu);
+		hideButton = a_ini.GetBoolValue("Settings", "bHideButtonLocalHistory", hideButton);
 	}
 
 	void Manager::Draw()
@@ -58,42 +59,44 @@ namespace LocalHistory
 
 			ImGui::PopFont();
 
-			ImGui::PushFont(MANAGER(IconFont)->GetButtonFont());
-			{
-				const auto& icons = MANAGER(Hotkeys)->LocalHistoryIcons();
+			if (!hideButton) {
+				ImGui::PushFont(MANAGER(IconFont)->GetButtonFont());
+				{
+					const auto& icons = MANAGER(Hotkeys)->LocalHistoryIcons();
 
-				// exit button position (1784,1015) + offset (32) at 1080p
-				static const auto windowSize = RE::BSGraphics::Renderer::GetScreenSize();
-				static float      posY = 0.93981481481f * windowSize.height;
-				float             posX;
-				if (!localHistoryOpen) {
-					// calculate position backwards
-					static float exitButtonPos = 0.9125f * windowSize.width;
-					static float textSize = ImGui::CalcTextSize("$DH_Title"_T).x;
-					static float innerSpacing = ImGui::GetStyle().ItemInnerSpacing.x * 0.40f;
+					// exit button position (1784,1015) + offset (32) at 1080p
+					static const auto windowSize = RE::BSGraphics::Renderer::GetScreenSize();
+					static float      posY = 0.93981481481f * windowSize.height;
+					float             posX;
+					if (!localHistoryOpen) {
+						// calculate position backwards
+						static float exitButtonPos = 0.9125f * windowSize.width;
+						static float textSize = ImGui::CalcTextSize("$DH_Title"_T).x;
+						static float innerSpacing = ImGui::GetStyle().ItemInnerSpacing.x * 0.40f;
 
-					posX = exitButtonPos;
-					posX -= textSize;
-					posX -= innerSpacing;
-					for (auto& icon : icons) {
-						posX -= icon->size.x;
+						posX = exitButtonPos;
+						posX -= textSize;
+						posX -= innerSpacing;
+						for (auto& icon : icons) {
+							posX -= icon->size.x;
+						}
+
+					} else {
+						posX = 0.92916666666f * windowSize.width;
+						if (icons.size() > 1) {
+							posX -= (*icons.begin())->size.x;
+						}
 					}
 
-				} else {
-					posX = 0.92916666666f * windowSize.width;
-					if (icons.size() > 1) {
-						posX -= (*icons.begin())->size.x;
+					ImGui::SetCursorScreenPos({ posX, posY });
+					ImGui::ButtonIconWithLabel(localHistoryOpen ? "$DH_Exit_Button"_T : "$DH_Title"_T, icons);
+					// no dialogue menu click because the real menu registers as a click too
+					if (ImGui::IsItemClicked() && localHistoryOpen) {
+						SetLocalHistoryOpen(false);
 					}
 				}
-
-				ImGui::SetCursorScreenPos({ posX, posY });
-				ImGui::ButtonIconWithLabel(localHistoryOpen ? "$DH_Exit_Button"_T : "$DH_Title"_T, icons);
-				// no dialogue menu click because the real menu registers as a click too
-				if (ImGui::IsItemClicked() && localHistoryOpen) {
-					SetLocalHistoryOpen(false);
-				}
+				ImGui::PopFont();
 			}
-			ImGui::PopFont();
 		}
 		ImGui::End();
 	}
@@ -259,6 +262,8 @@ namespace LocalHistory
 
 		gameTime = calendar->GetTime();
 		localDialogue.Initialize(gameTime);
+
+		localDialogue.RefreshContents();
 	}
 
 	RE::BSEventNotifyControl Manager::ProcessEvent(const RE::MenuOpenCloseEvent* a_evn, RE::BSTEventSource<RE::MenuOpenCloseEvent>*)
@@ -283,6 +288,7 @@ namespace LocalHistory
 						SetDialogueMenuOpen(false);
 					}
 				}
+				break;
 			default:
 				break;
 			}
