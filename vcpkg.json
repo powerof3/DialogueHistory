@@ -1,6 +1,6 @@
 {
   "name": "dialogue-history",
-  "version-string": "2.0.0",
+  "version-string": "2.0.1",
   "description": "",
   "homepage": "",
   "license": "MIT",
@@ -19,5 +19,5 @@
     "unordered-dense",
     "xbyak"
   ],
-  "builtin-baseline": "76d153790caf0592fce8fc4484aa6db18c7d00d4"
+  "builtin-baseline": "52fc0d8c1e2cbd12c9907284566f5c17e5ef0d12"
 }

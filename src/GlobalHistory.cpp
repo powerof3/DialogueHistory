@@ -619,7 +619,7 @@ namespace GlobalHistory
 		}
 
 		auto dialogueItem = a_info->GetDialogueData(a_speaker.get());
-		if (auto currentResponse = dialogueItem.responses.front()) {
+		if (auto currentResponse = !dialogueItem.responses.empty() ? dialogueItem.responses.front() : nullptr) {
 			if (!currentResponse->text.empty() && currentResponse->text != " ") {
 				auto time = RE::Calendar::GetSingleton()->GetTime();
 
