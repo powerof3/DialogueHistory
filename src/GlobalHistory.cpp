@@ -328,18 +328,15 @@ namespace GlobalHistory
 
 		if (const auto UI = RE::UI::GetSingleton();
 			!UI || !UI->IsShowingMenus() || std::ranges::any_of(badMenus, [&](const auto& menuName) { return UI->IsMenuOpen(menuName); })) {
-			logger::info("menus hidden or bad menu open");
 			return false;
 		}
 
 		if (const auto* controlMap = RE::ControlMap::GetSingleton();
 			!controlMap || controlMap->contextPriorityStack.back() != RE::UserEvents::INPUT_CONTEXT_ID::kGameplay || controlMap->textEntryCount) {
-			logger::info("control map is not gameplay or text input active");
 			return false;
 		}
 
 		if (PhotoMode::IsPhotoModeActive()) {
-			logger::info("photomode active");
 			return false;
 		}
 
