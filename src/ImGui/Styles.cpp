@@ -105,6 +105,7 @@ namespace ImGui
 		colors[ImGuiCol_Separator] = user.separator;
 
 		colors[ImGuiCol_Text] = user.text;
+		colors[ImGuiCol_InputTextCursor] = user.text;
 
 		colors[ImGuiCol_Header] = user.header;
 		colors[ImGuiCol_HeaderActive] = colors[ImGuiCol_Header];
