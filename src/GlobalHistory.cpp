@@ -355,7 +355,7 @@ namespace GlobalHistory
 		ImGui::SetNextWindowPos(ImGui::GetNativeViewportPos());
 		ImGui::SetNextWindowSize(ImGui::GetNativeViewportSize());
 
-		ImGui::Begin("##Main", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBringToFrontOnFocus);
+		ImGui::Begin("##Main", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus);
 		{
 			constexpr auto windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar;
 			static float   toggleHeight = ImGui::GetFrameHeight() / 1.5f;

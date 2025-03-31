@@ -106,6 +106,9 @@ namespace ImGui::Renderer
 				}
 				ImGui::NewFrame();
 				{
+					// disable windowing
+					GImGui->NavWindowingTarget = nullptr;
+
 					MANAGER(LocalHistory)->Draw();
 					MANAGER(GlobalHistory)->Draw();
 				}
