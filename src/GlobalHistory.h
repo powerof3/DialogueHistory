@@ -139,8 +139,8 @@ namespace GlobalHistory
 		{
 			virtual ~BaseHistory() = default;
 
-			virtual void DrawDateTree() {};
-			virtual void DrawLocationTree() {};
+			virtual void DrawDateTree(){};
+			virtual void DrawLocationTree(){};
 			void         DrawTree(bool a_sortByLocation)
 			{
 				if (a_sortByLocation) {
