@@ -367,19 +367,12 @@ namespace Input
 					break;
 				case RE::INPUT_DEVICE::kGamepad:
 					{
-						switch (RE::ControlMap::GetSingleton()->GetGamePadType()) {
-						case RE::PC_GAMEPAD_TYPE::kOrbis:
-							{
-								inputDevice = DEVICE::kGamepadOrbis;
-								io.AddKeyEvent(ToImGuiKey(static_cast<GAMEPAD_ORBIS>(key)), buttonEvent->IsPressed());
-							}
-							break;
-						default:
-							{
-								inputDevice = DEVICE::kGamepadDirectX;
-								io.AddKeyEvent(ToImGuiKey(static_cast<GAMEPAD_DIRECTX>(key)), buttonEvent->IsPressed());
-							}
-							break;
+						if (RE::ControlMap::GetSingleton()->GetGamePadType() == RE::PC_GAMEPAD_TYPE::kOrbis) {
+							inputDevice = DEVICE::kGamepadOrbis;
+							io.AddKeyEvent(ToImGuiKey(static_cast<GAMEPAD_ORBIS>(key)), buttonEvent->IsPressed());
+						} else {
+							inputDevice = DEVICE::kGamepadDirectX;
+							io.AddKeyEvent(ToImGuiKey(static_cast<GAMEPAD_DIRECTX>(key)), buttonEvent->IsPressed());
 						}
 					}
 					break;

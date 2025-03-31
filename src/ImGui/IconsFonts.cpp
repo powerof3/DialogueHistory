@@ -42,7 +42,7 @@ namespace IconFont
 		const auto& io = ImGui::GetIO();
 
 		ImFontConfig font_config;
-		font_config.GlyphExtraSpacing.x = spacing;
+		font_config.GlyphExtraAdvanceX = spacing;
 
 		font = io.Fonts->AddFontFromFileTTF(name.c_str(), size, &font_config, a_ranges.Data);
 	}
@@ -230,7 +230,7 @@ namespace ImGui
 
 	ImVec2 ButtonIcon(const IconTexture* a_IconData)
 	{
-		ImGui::Image(a_IconData->srView.Get(), a_IconData->size);
+		ImGui::Image((std::uint64_t)a_IconData->srView.Get(), a_IconData->size);
 		return a_IconData->size;
 	}
 
@@ -254,7 +254,7 @@ namespace ImGui
 		ImGui::BeginGroup();
 		{
 			auto size = ButtonIcon(a_IconData);
-			ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x * 0.40);
+			ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x * 0.40f);
 
 			auto posY = ImGui::GetCursorPosY();
 			auto textSize = ImGui::CalcTextSize(a_text);
@@ -271,7 +271,7 @@ namespace ImGui
 		ImGui::BeginGroup();
 		{
 			auto size = ImGui::ButtonIcon(a_textures);
-			ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x * 0.40);
+			ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x * 0.40f);
 
 			auto posY = ImGui::GetCursorPosY();
 			auto textSize = ImGui::CalcTextSize(a_text);

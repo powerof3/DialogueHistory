@@ -11,7 +11,7 @@ namespace Input
 	};
 
 	class Manager :
-		public ISingleton<Manager>
+		public REX::Singleton<Manager>
 	{
 	public:
 		static void Register();

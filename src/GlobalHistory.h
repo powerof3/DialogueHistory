@@ -8,7 +8,7 @@ namespace GlobalHistory
 	inline std::string lastNameFilter{};
 
 	class Manager :
-		public ISingleton<Manager>,
+		public REX::Singleton<Manager>,
 		public RE::BSTEventSink<RE::TESLoadGameEvent>,
 		public RE::BSTEventSink<RE::TESTopicInfoEvent>
 	{

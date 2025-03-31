@@ -13,7 +13,7 @@ namespace ImGui
 		kSeparatorThickness,
 	};
 
-	class Styles : public ISingleton<Styles>
+	class Styles : public REX::Singleton<Styles>
 	{
 	public:
 		ImVec4 GetColorVec4(USER_STYLE a_style) const;

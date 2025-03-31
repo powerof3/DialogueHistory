@@ -11,8 +11,8 @@ float DisplayTweaks::GetResolutionScale()
 
 void DisplayTweaks::LoadSettings(const CSimpleIniA& a_ini)
 {
-	resolutionScale = a_ini.GetDoubleValue("Render", "ResolutionScale", resolutionScale);
-	borderlessUpscale = a_ini.GetBoolValue("Render", "BorderlessUpscale", borderlessUpscale);
+	resolutionScale = static_cast<float>(a_ini.GetDoubleValue("Render", "ResolutionScale", resolutionScale));
+	borderlessUpscale = static_cast<float>(a_ini.GetBoolValue("Render", "BorderlessUpscale", borderlessUpscale));
 }
 
 bool PhotoMode::IsPhotoModeActive()

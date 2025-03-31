@@ -35,7 +35,7 @@ namespace IconFont
 		ImFont* font{ nullptr };
 	};
 
-	class Manager final : public ISingleton<Manager>
+	class Manager final : public REX::Singleton<Manager>
 	{
 	public:
 		void LoadSettings(CSimpleIniA& a_ini);

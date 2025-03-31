@@ -95,7 +95,7 @@ std::tm TimeStamp::ExtractTimeStamp(std::uint64_t a_timeStamp)
 	a_timeStamp /= 100;
 	time.tm_mon = a_timeStamp % 100;
 	a_timeStamp /= 100;
-	time.tm_year = a_timeStamp;
+	time.tm_year = static_cast<int>(a_timeStamp);
 
 	return time;
 }
@@ -142,7 +142,7 @@ void TimeStamp::FromHourMin(std::uint32_t a_hour, std::uint32_t a_minute, const 
 
 void TimeStamp::SwitchHourFormat(bool a_12HourFormat)
 {
-	std::uint32_t hour = time / 100;
+	std::uint32_t hour = static_cast<std::uint32_t>(time / 100);
 	std::uint32_t minute = time % 100;
 
 	auto hourMin = GetFormattedHourMin(hour, minute, a_12HourFormat);
