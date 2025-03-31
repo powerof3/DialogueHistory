@@ -297,6 +297,9 @@ namespace GlobalHistory
 	{
 		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESLoadGameEvent>(GetSingleton());
 		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESTopicInfoEvent>(GetSingleton());
+		if (GetModuleHandle(L"TweenMenuOverhaul") != nullptr) {
+			SKSE::GetModCallbackEventSource()->AddEventSink(GetSingleton());
+		}
 	}
 
 	void Manager::LoadMCMSettings(const CSimpleIniA& a_ini)
@@ -314,10 +317,6 @@ namespace GlobalHistory
 
 	bool Manager::IsValid() const
 	{
-		if (IsGlobalHistoryOpen()) {
-			return true;
-		}
-
 		static constexpr std::array badMenus{
 			RE::MainMenu::MENU_NAME,
 			RE::MistMenu::MENU_NAME,
@@ -329,15 +328,18 @@ namespace GlobalHistory
 
 		if (const auto UI = RE::UI::GetSingleton();
 			!UI || !UI->IsShowingMenus() || std::ranges::any_of(badMenus, [&](const auto& menuName) { return UI->IsMenuOpen(menuName); })) {
+			logger::info("menus hidden or bad menu open");
 			return false;
 		}
 
 		if (const auto* controlMap = RE::ControlMap::GetSingleton();
-			!controlMap || controlMap->contextPriorityStack.back() != RE::UserEvents::INPUT_CONTEXT_ID::kGameplay) {
+			!controlMap || controlMap->contextPriorityStack.back() != RE::UserEvents::INPUT_CONTEXT_ID::kGameplay || controlMap->textEntryCount) {
+			logger::info("control map is not gameplay or text input active");
 			return false;
 		}
 
 		if (PhotoMode::IsPhotoModeActive()) {
+			logger::info("photomode active");
 			return false;
 		}
 
@@ -581,11 +583,19 @@ namespace GlobalHistory
 
 	void Manager::ToggleActive()
 	{
-		if (!IsValid()) {
+		if (!IsGlobalHistoryOpen() && !IsValid()) {
 			return;
 		}
 
 		SetGlobalHistoryOpen(!IsGlobalHistoryOpen());
+	}
+
+	void Manager::TryOpenFromTweenMenu()
+	{
+		if (openFromTweenMenu) {
+			openFromTweenMenu = false;
+			SetGlobalHistoryOpen(true);
+		}
 	}
 
 	bool Manager::WasMenuOpenJustNow() const
@@ -650,6 +660,15 @@ namespace GlobalHistory
 	{
 		if (a_evn && a_evn->type == RE::TESTopicInfoEvent::TopicInfoEventType::kTopicEnd) {
 			AddConversation(a_evn->speakerRef, RE::TESForm::LookupByID<RE::TESTopicInfo>(a_evn->topicInfoFormID));
+		}
+
+		return EventResult::kContinue;
+	}
+
+	EventResult Manager::ProcessEvent(const SKSE::ModCallbackEvent* a_evn, RE::BSTEventSource<SKSE::ModCallbackEvent>*)
+	{
+		if (a_evn && a_evn->eventName == "OpenTween_DialogueHistory" && !IsGlobalHistoryOpen()) {
+			openFromTweenMenu = true;
 		}
 
 		return EventResult::kContinue;

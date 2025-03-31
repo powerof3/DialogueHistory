@@ -10,7 +10,8 @@ namespace GlobalHistory
 	class Manager :
 		public REX::Singleton<Manager>,
 		public RE::BSTEventSink<RE::TESLoadGameEvent>,
-		public RE::BSTEventSink<RE::TESTopicInfoEvent>
+		public RE::BSTEventSink<RE::TESTopicInfoEvent>,
+		public RE::BSTEventSink<SKSE::ModCallbackEvent>
 	{
 	public:
 		static void Register();
@@ -23,6 +24,7 @@ namespace GlobalHistory
 		bool IsGlobalHistoryOpen() const;
 		void SetGlobalHistoryOpen(bool a_open);
 		void ToggleActive();
+		void TryOpenFromTweenMenu();
 
 		bool WasMenuOpenJustNow() const;
 		void SetMenuOpenJustNow(bool a_open);
@@ -137,8 +139,8 @@ namespace GlobalHistory
 		{
 			virtual ~BaseHistory() = default;
 
-			virtual void DrawDateTree(){};
-			virtual void DrawLocationTree(){};
+			virtual void DrawDateTree() {};
+			virtual void DrawLocationTree() {};
 			void         DrawTree(bool a_sortByLocation)
 			{
 				if (a_sortByLocation) {
@@ -287,10 +289,12 @@ namespace GlobalHistory
 
 		EventResult ProcessEvent(const RE::TESLoadGameEvent* a_evn, RE::BSTEventSource<RE::TESLoadGameEvent>*) override;
 		EventResult ProcessEvent(const RE::TESTopicInfoEvent* a_evn, RE::BSTEventSource<RE::TESTopicInfoEvent>*) override;
+		EventResult ProcessEvent(const SKSE::ModCallbackEvent* a_evn, RE::BSTEventSource<SKSE::ModCallbackEvent>*) override;
 
 		// members
 		bool                globalHistoryOpen{ false };
 		bool                menuOpenedJustNow{ false };
+		bool                openFromTweenMenu{ false };
 		DialogueHistory     dialogueHistory;
 		ConversationHistory conversationHistory;
 		bool                drawConversation{ false };

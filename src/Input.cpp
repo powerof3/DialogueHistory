@@ -313,76 +313,82 @@ namespace Input
 
 	void Manager::ProcessInputEvents(RE::InputEvent* const* a_events)
 	{
-		bool drawGlobalHistory = MANAGER(GlobalHistory)->IsGlobalHistoryOpen();
-
+		bool  drawGlobalHistory = MANAGER(GlobalHistory)->IsGlobalHistoryOpen();
 		auto& io = ImGui::GetIO();
-		auto  cursorMenu = RE::UI::GetSingleton()->GetMenu<RE::CursorMenu>();
 
-		for (auto event = *a_events; event; event = event->next) {
-			if (auto mouseEvent = event->AsMouseMoveEvent()) {
-				// pass in mouse pos to cursor menu, since we're blocking the main input queue
-				if (drawGlobalHistory && cursorMenu) {
-					cursorMenu->ProcessMouseMove(mouseEvent);
-				}
-			} else if (const auto thumbstickEvent = event->AsThumbstickEvent()) {
-				// pass in thumbstick pos to cursor menu, since we're blocking the main input queue
-				if (drawGlobalHistory && cursorMenu) {
-					cursorMenu->ProcessThumbstick(thumbstickEvent);
-				}
-			} else if (const auto charEvent = event->AsCharEvent()) {
-				if (drawGlobalHistory) {
-					io.AddInputCharacter(charEvent->keycode);
-				}
-			} else if (const auto buttonEvent = event->AsButtonEvent()) {
-				const auto device = event->GetDevice();
-				const auto key = buttonEvent->GetIDCode();
+		if (drawGlobalHistory || MANAGER(LocalHistory)->IsLocalHistoryOpen()) {
+			auto cursorMenu = RE::UI::GetSingleton()->GetMenu<RE::CursorMenu>();
 
-				switch (device) {
-				case RE::INPUT_DEVICE::kKeyboard:
-					{
-						inputDevice = DEVICE::kKeyboard;
-						auto imKey = ToImGuiKey(static_cast<KEY>(key));
-						// esc is still released if you close journal menu and then open global history
-						if (imKey == ImGuiKey_Escape && !drawGlobalHistory) {
-							continue;
-						}
-						io.AddKeyEvent(imKey, buttonEvent->IsPressed());
+			for (auto event = *a_events; event; event = event->next) {
+				if (auto mouseEvent = event->AsMouseMoveEvent()) {
+					// pass in mouse pos to cursor menu, since we're blocking the main input queue
+					if (drawGlobalHistory && cursorMenu) {
+						cursorMenu->ProcessMouseMove(mouseEvent);
 					}
-					break;
-				case RE::INPUT_DEVICE::kMouse:
-					{
-						inputDevice = DEVICE::kMouse;
-						switch (auto mouseKey = static_cast<MOUSE>(key)) {
-						case MOUSE::kWheelUp:
-							io.AddMouseWheelEvent(0, buttonEvent->Value());
-							break;
-						case MOUSE::kWheelDown:
-							io.AddMouseWheelEvent(0, buttonEvent->Value() * -1);
-							break;
-						default:
-							io.AddMouseButtonEvent(key, buttonEvent->IsPressed());
-							break;
-						}
+				} else if (const auto thumbstickEvent = event->AsThumbstickEvent()) {
+					// pass in thumbstick pos to cursor menu, since we're blocking the main input queue
+					if (drawGlobalHistory && cursorMenu) {
+						cursorMenu->ProcessThumbstick(thumbstickEvent);
 					}
-					break;
-				case RE::INPUT_DEVICE::kGamepad:
-					{
-						if (RE::ControlMap::GetSingleton()->GetGamePadType() == RE::PC_GAMEPAD_TYPE::kOrbis) {
-							inputDevice = DEVICE::kGamepadOrbis;
-							io.AddKeyEvent(ToImGuiKey(static_cast<GAMEPAD_ORBIS>(key)), buttonEvent->IsPressed());
-						} else {
-							inputDevice = DEVICE::kGamepadDirectX;
-							io.AddKeyEvent(ToImGuiKey(static_cast<GAMEPAD_DIRECTX>(key)), buttonEvent->IsPressed());
-						}
-					}
-					break;
-				default:
-					break;
-				}
-
-				if (buttonEvent->QUserEvent() == RE::UserEvents::GetSingleton()->screenshot && buttonEvent->IsDown()) {
+				} else if (const auto charEvent = event->AsCharEvent()) {
 					if (drawGlobalHistory) {
-						RE::MenuControls::GetSingleton()->QueueScreenshot();
+						io.AddInputCharacter(charEvent->keycode);
+					}
+				} else if (const auto buttonEvent = event->AsButtonEvent()) {
+					const auto device = event->GetDevice();
+					const auto key = buttonEvent->GetIDCode();
+
+					switch (device) {
+					case RE::INPUT_DEVICE::kKeyboard:
+						{
+							inputDevice = DEVICE::kKeyboard;
+							auto imKey = ToImGuiKey(static_cast<KEY>(key));
+							// esc is still released if you close journal menu and then open global history
+							if (imKey == ImGuiKey_Escape && !drawGlobalHistory) {
+								continue;
+							}
+							if (imKey == ImGuiKey_Tab) {
+								io.AddKeyEvent(imKey, buttonEvent->IsDown());
+							} else {
+								io.AddKeyEvent(imKey, buttonEvent->IsPressed());
+							}
+						}
+						break;
+					case RE::INPUT_DEVICE::kMouse:
+						{
+							inputDevice = DEVICE::kMouse;
+							switch (auto mouseKey = static_cast<MOUSE>(key)) {
+							case MOUSE::kWheelUp:
+								io.AddMouseWheelEvent(0, buttonEvent->Value());
+								break;
+							case MOUSE::kWheelDown:
+								io.AddMouseWheelEvent(0, buttonEvent->Value() * -1);
+								break;
+							default:
+								io.AddMouseButtonEvent(key, buttonEvent->IsPressed());
+								break;
+							}
+						}
+						break;
+					case RE::INPUT_DEVICE::kGamepad:
+						{
+							if (RE::ControlMap::GetSingleton()->GetGamePadType() == RE::PC_GAMEPAD_TYPE::kOrbis) {
+								inputDevice = DEVICE::kGamepadOrbis;
+								io.AddKeyEvent(ToImGuiKey(static_cast<GAMEPAD_ORBIS>(key)), buttonEvent->IsPressed());
+							} else {
+								inputDevice = DEVICE::kGamepadDirectX;
+								io.AddKeyEvent(ToImGuiKey(static_cast<GAMEPAD_DIRECTX>(key)), buttonEvent->IsPressed());
+							}
+						}
+						break;
+					default:
+						break;
+					}
+
+					if (buttonEvent->QUserEvent() == RE::UserEvents::GetSingleton()->screenshot && buttonEvent->IsDown()) {
+						if (drawGlobalHistory) {
+							RE::MenuControls::GetSingleton()->QueueScreenshot();
+						}
 					}
 				}
 			}
