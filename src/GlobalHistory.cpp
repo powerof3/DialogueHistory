@@ -295,10 +295,11 @@ namespace GlobalHistory
 
 	void Manager::Register()
 	{
-		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESLoadGameEvent>(GetSingleton());
-		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESTopicInfoEvent>(GetSingleton());
+		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESLoadGameEvent>(this);
+		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESTopicInfoEvent>(this);
 		if (GetModuleHandle(L"TweenMenuOverhaul") != nullptr) {
-			SKSE::GetModCallbackEventSource()->AddEventSink(GetSingleton());
+			SKSE::GetModCallbackEventSource()->AddEventSink(this);
+			skyrimSoulsInstalled = GetModuleHandle(L"SkyrimSoulsRE.dll") != nullptr;
 		}
 	}
 
@@ -529,7 +530,7 @@ namespace GlobalHistory
 		return globalHistoryOpen;
 	}
 
-	void Manager::SetGlobalHistoryOpen(bool a_open)
+	void Manager::SetGlobalHistoryOpen(bool a_open, bool a_showCursor)
 	{
 		globalHistoryOpen = a_open;
 		menuOpenedJustNow = a_open;
@@ -543,7 +544,9 @@ namespace GlobalHistory
 
 			// hides compass but not notifications
 			RE::SendHUDMessage::PushHUDMode("WorldMapMode");
-			RE::UIMessageQueue::GetSingleton()->AddMessage(RE::CursorMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kShow, nullptr);
+			if (a_showCursor) {
+				RE::UIMessageQueue::GetSingleton()->AddMessage(RE::CursorMenu::MENU_NAME, RE::UI_MESSAGE_TYPE::kShow, nullptr);
+			}
 
 			conversationHistory.RefreshHistoryMaps();
 
@@ -587,12 +590,15 @@ namespace GlobalHistory
 		SetGlobalHistoryOpen(!IsGlobalHistoryOpen());
 	}
 
-	void Manager::TryOpenFromTweenMenu()
+	bool Manager::TryOpenFromTweenMenu(bool a_showCursor)
 	{
 		if (openFromTweenMenu) {
 			openFromTweenMenu = false;
-			SetGlobalHistoryOpen(true);
+			SetGlobalHistoryOpen(true, a_showCursor);
+			return true;
 		}
+
+		return false;
 	}
 
 	bool Manager::WasMenuOpenJustNow() const

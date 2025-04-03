@@ -14,7 +14,7 @@ namespace GlobalHistory
 		public RE::BSTEventSink<SKSE::ModCallbackEvent>
 	{
 	public:
-		static void Register();
+		void Register();
 
 		void LoadMCMSettings(const CSimpleIniA& a_ini);
 
@@ -22,9 +22,9 @@ namespace GlobalHistory
 		void Draw();
 
 		bool IsGlobalHistoryOpen() const;
-		void SetGlobalHistoryOpen(bool a_open);
+		void SetGlobalHistoryOpen(bool a_open, bool a_showCursor = true);
 		void ToggleActive();
-		void TryOpenFromTweenMenu();
+		bool TryOpenFromTweenMenu(bool a_showCursor = true);
 
 		bool WasMenuOpenJustNow() const;
 		void SetMenuOpenJustNow(bool a_open);
@@ -295,6 +295,7 @@ namespace GlobalHistory
 		bool                globalHistoryOpen{ false };
 		bool                menuOpenedJustNow{ false };
 		bool                openFromTweenMenu{ false };
+		bool                skyrimSoulsInstalled{ false };
 		DialogueHistory     dialogueHistory;
 		ConversationHistory conversationHistory;
 		bool                drawConversation{ false };
