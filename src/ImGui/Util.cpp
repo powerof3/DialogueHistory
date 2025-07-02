@@ -57,7 +57,7 @@ namespace ImGui
 	void TextShadows(const ImVec2& a_pos, const char* text)
 	{
 		constexpr ImVec2 shadowOffset{ 3.0f, 3.0f };
-		
+
 		auto drawList = ImGui::GetForegroundDrawList();
 		drawList->AddText(a_pos + shadowOffset, IM_COL32_BLACK, text);
 		drawList->AddText(a_pos, GetColorU32(ImGuiCol_Text), text);

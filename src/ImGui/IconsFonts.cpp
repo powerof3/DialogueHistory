@@ -272,7 +272,7 @@ namespace ImGui
 
 	void AlignedButtonLabel(const char* a_text, const ImVec2& a_size)
 	{
-		PushStyleColor(ImGuiCol_Text, ImGui::GetUserStyleColorVec4(ImGui::USER_STYLE::kButtonColor));		
+		PushStyleColor(ImGuiCol_Text, ImGui::GetUserStyleColorVec4(ImGui::USER_STYLE::kButtonColor));
 		{
 			ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x * 0.40f);
 
