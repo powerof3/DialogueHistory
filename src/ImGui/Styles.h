@@ -4,7 +4,8 @@ namespace ImGui
 {
 	enum class USER_STYLE
 	{
-		kButtons,
+		kButtonScale,
+		kButtonColor,
 		kSpeakerName,
 		kSpeakerLine,
 		kPlayerName,
@@ -47,6 +48,7 @@ namespace ImGui
 			float  borderSize{ 3.0f };
 
 			ImVec4 text{ 1.0f, 1.0f, 1.0f, 1.0f };
+			ImVec4 textButton{ 0.9843f, 0.9843f, 0.9843f, 1.0f };
 			float  textDisabledAlpha{ 0.62f };
 
 			ImVec4 header{ 1.0f, 1.0f, 1.0f, 0.15f };
@@ -117,9 +119,9 @@ namespace ImGui
 	{
 		if constexpr (std::is_same_v<ImVec4, T>) {
 			if (a_hex) {
-				return std::format("#{:02X}{:02X}{:02X}{:02X}", std::uint8_t(255.0f * a_style.x), std::uint8_t(255.0f * a_style.y), std::uint8_t(255.0f * a_style.z), std::uint8_t(255.0f * a_style.w));
+				return std::format("#{:02X}{:02X}{:02X}{:02X}", static_cast<std::uint8_t>(255.0f * a_style.x), static_cast<std::uint8_t>(255.0f * a_style.y), static_cast<std::uint8_t>(255.0f * a_style.z), static_cast<std::uint8_t>(255.0f * a_style.w));
 			}
-			return std::format("{},{},{},{}", std::uint8_t(255.0f * a_style.x), std::uint8_t(255.0f * a_style.y), std::uint8_t(255.0f * a_style.z), std::uint8_t(255.0f * a_style.w));
+			return std::format("{},{},{},{}", static_cast<std::uint8_t>(255.0f * a_style.x), static_cast<std::uint8_t>(255.0f * a_style.y), static_cast<std::uint8_t>(255.0f * a_style.z), static_cast<std::uint8_t>(255.0f * a_style.w));
 		} else {
 			return std::format("{:.3f}", a_style);
 		}

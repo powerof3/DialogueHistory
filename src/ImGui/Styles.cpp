@@ -9,6 +9,8 @@ namespace ImGui
 	ImVec4 Styles::GetColorVec4(USER_STYLE a_style) const
 	{
 		switch (a_style) {
+		case USER_STYLE::kButtonColor:
+			return user.textButton;
 		case USER_STYLE::kSpeakerName:
 			return user.speakerName;
 		case USER_STYLE::kSpeakerLine:
@@ -25,7 +27,7 @@ namespace ImGui
 	float Styles::GetVar(USER_STYLE a_style) const
 	{
 		switch (a_style) {
-		case USER_STYLE::kButtons:
+		case USER_STYLE::kButtonScale:
 			return user.buttonScale;
 		case USER_STYLE::kDisabledTextAlpha:
 			return user.textDisabledAlpha;
@@ -55,6 +57,7 @@ namespace ImGui
 		GET_VALUE(borderSize, "Window", "fBorderSize");
 
 		GET_VALUE(text, "Text", "rColor");
+		GET_VALUE(textButton, "Text", "rButtonTextColor");
 		GET_VALUE(playerName, "Text", "rPlayerNameColor");
 		GET_VALUE(playerLine, "Text", "rPlayerLineColor");
 		GET_VALUE(speakerName, "Text", "rSpeakerNameColor");

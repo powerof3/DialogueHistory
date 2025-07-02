@@ -2,6 +2,7 @@
 
 #include "ImGui/Styles.h"
 #include "Input.h"
+#include "Util.h"
 
 namespace IconFont
 {
@@ -85,7 +86,7 @@ namespace IconFont
 
 	void Manager::ResizeIcons()
 	{
-		float buttonScale = ImGui::GetUserStyleVar(ImGui::USER_STYLE::kButtons);
+		float buttonScale = ImGui::GetUserStyleVar(ImGui::USER_STYLE::kButtonScale);
 
 		unknownKey.Resize(buttonScale);
 		upKey.Resize(buttonScale);
@@ -254,14 +255,7 @@ namespace ImGui
 		ImGui::BeginGroup();
 		{
 			auto size = ButtonIcon(a_IconData);
-			ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x * 0.40f);
-
-			auto posY = ImGui::GetCursorPosY();
-			auto textSize = ImGui::CalcTextSize(a_text);
-
-			ImGui::SetCursorPosY(posY + (size.y - textSize.y) / 2);
-			ImGui::TextUnformatted(a_text);
-			ImGui::SetCursorPosY(posY);
+			AlignedButtonLabel(a_text, size);
 		}
 		ImGui::EndGroup();
 	}
@@ -271,15 +265,22 @@ namespace ImGui
 		ImGui::BeginGroup();
 		{
 			auto size = ImGui::ButtonIcon(a_textures);
+			AlignedButtonLabel(a_text, size);
+		}
+		ImGui::EndGroup();
+	}
+
+	void AlignedButtonLabel(const char* a_text, const ImVec2& a_size)
+	{
+		PushStyleColor(ImGuiCol_Text, ImGui::GetUserStyleColorVec4(ImGui::USER_STYLE::kButtonColor));		
+		{
 			ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x * 0.40f);
 
 			auto posY = ImGui::GetCursorPosY();
 			auto textSize = ImGui::CalcTextSize(a_text);
 
-			ImGui::SetCursorPosY(posY + (size.y - textSize.y) / 2);
-			ImGui::TextUnformatted(a_text);
-			ImGui::SetCursorPosY(posY);
+			ImGui::TextShadows(ImVec2(ImGui::GetCursorPosX(), posY + (a_size.y - textSize.y) / 2), a_text);
 		}
-		ImGui::EndGroup();
+		PopStyleColor();
 	}
 }

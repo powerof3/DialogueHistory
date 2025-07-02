@@ -220,4 +220,6 @@ namespace ImGui
 
 	void ButtonIconWithLabel(const char* a_text, const IconTexture* a_texture);
 	void ButtonIconWithLabel(const char* a_text, const std::set<const IconTexture*>& a_textures);
+
+	void AlignedButtonLabel(const char* a_text, const ImVec2& a_size);
 }
