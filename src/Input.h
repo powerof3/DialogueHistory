@@ -21,7 +21,7 @@ namespace Input
 		bool   IsInputKBM() const;
 		bool   IsInputGamepad() const;
 
-		void   ProcessInputEvents(RE::InputEvent* const* a_events);
+		void ProcessInputEvents(RE::InputEvent* const* a_events);
 
 	private:
 		static ImGuiKey ToImGuiKey(KEY a_key);

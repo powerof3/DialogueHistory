@@ -105,8 +105,8 @@ namespace GlobalHistory
 	{
 		virtual ~BaseHistory() = default;
 
-		virtual void DrawDateTree() {};
-		virtual void DrawLocationTree() {};
+		virtual void DrawDateTree(){};
+		virtual void DrawLocationTree(){};
 		void         DrawTree(bool a_sortByLocation)
 		{
 			if (a_sortByLocation) {
@@ -325,7 +325,7 @@ namespace GlobalHistory
 		logger::error("Unable to access {} directory", a_folder);
 		return std::nullopt;
 	}
-	
+
 	template <class HistoryData, class DateMap, class LocationMap>
 	template <class T>
 	inline bool BaseHistory<HistoryData, DateMap, LocationMap>::LoadHistoryFromFileImpl(T&& a_history, const std::string& a_save, std::string_view a_folder)
@@ -352,7 +352,7 @@ namespace GlobalHistory
 
 		return true;
 	}
-	
+
 	template <class HistoryData, class DateMap, class LocationMap>
 	template <class T>
 	inline void BaseHistory<HistoryData, DateMap, LocationMap>::SaveHistoryToFileImpl(T&& a_history, const std::string& a_save, std::string_view a_folder)
