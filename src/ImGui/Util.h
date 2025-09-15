@@ -8,7 +8,6 @@ namespace ImGui
 
 	void CenteredText(const char* label, bool vertical);
 	void TextColoredWrapped(const ImVec4& col, const char* fmt, ...);
-	void TextShadows(const ImVec2& a_pos, const char* text);
 
 	bool ToggleButton(const char* label, bool* v);
 

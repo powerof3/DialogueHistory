@@ -279,7 +279,9 @@ namespace ImGui
 			auto posY = ImGui::GetCursorPosY();
 			auto textSize = ImGui::CalcTextSize(a_text);
 
-			ImGui::TextShadows(ImVec2(ImGui::GetCursorPosX(), posY + (a_size.y - textSize.y) / 2), a_text);
+			ImGui::SetCursorPosY(posY + (a_size.y - textSize.y) / 2);
+			ImGui::TextUnformatted(a_text);
+			ImGui::SetCursorPosY(posY);
 		}
 		PopStyleColor();
 	}

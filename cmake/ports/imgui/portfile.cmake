@@ -2,10 +2,10 @@ vcpkg_check_linkage(ONLY_STATIC_LIBRARY)
 
 vcpkg_from_github(
 OUT_SOURCE_PATH SOURCE_PATH
-REPO ocornut/imgui
-REF fd75bdccb033e74afeba44f500edc8fcef7eb023
-SHA512 aca915570f3904d7329cbc723510462645a9578768602cd0fce9b34ee690588deff4d20db4739baeb25e1dc0cfbaadf55518222e39f61969a398c3ce43f9f6c5
-HEAD_REF master
+REPO powerof3/imgui
+REF d7a726087347347f927418dd5eefac41a85d35af
+SHA512 7acd64e08fac37afc06704a62cbd911fad79a2045474d4bcf41512ff35701eecb7b6d1fb2ec792b54ea128ac7e1171bc3e62b8857af50ce3f9b2d32887dc8a1f
+HEAD_REF features/textshadows
 )
 
 file(COPY "${CMAKE_CURRENT_LIST_DIR}/imgui-config.cmake.in" DESTINATION "${SOURCE_PATH}")
