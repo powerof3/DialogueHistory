@@ -38,13 +38,6 @@ namespace ImGui
 		}
 	}
 
-	void Styles::LoadStyles()
-	{
-		Settings::GetSingleton()->SerializeStyles([this](auto& ini) {
-			LoadStyles(ini);
-		});
-	}
-
 	void Styles::LoadStyles(CSimpleIniA& a_ini)
 	{
 #define GET_VALUE(a_value, a_section, a_key)                                                                                                        \
@@ -86,7 +79,9 @@ namespace ImGui
 			return;
 		}
 
-		LoadStyles();
+		Settings::GetSingleton()->Load(FileType::kStyles, [this](auto& ini) {
+			LoadStyles(ini);
+		});
 
 		ImGuiStyle style;
 		auto&      colors = style.Colors;
@@ -127,8 +122,9 @@ namespace ImGui
 		GetStyle() = style;
 
 		// reload fonts/icons
-
-		Settings::GetSingleton()->SerializeFonts([&](auto& ini) { MANAGER(IconFont)->LoadSettings(ini); });
+		Settings::GetSingleton()->Load(FileType::kFonts, [this](auto& ini) {
+			MANAGER(IconFont)->LoadSettings(ini);
+		});
 
 		MANAGER(IconFont)->ReloadFonts();
 		MANAGER(IconFont)->ResizeIcons();

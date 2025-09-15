@@ -13,7 +13,7 @@ void OnInit(SKSE::MessagingInterface::Message* a_msg)
 	case SKSE::MessagingInterface::kPostLoad:
 		{
 			logger::info("{:*^30}", "POST LOAD");
-			Settings::GetSingleton()->LoadSettings();
+			Settings::GetSingleton()->LoadMCMSettings();
 			Hooks::Install();
 		}
 		break;
@@ -123,6 +123,10 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	logger::info("Game version : {}", a_skse->RuntimeVersion().string());
 
 	SKSE::Init(a_skse, false);
+
+	Settings::GetSingleton()->Load(FileType::kDisplayTweaks, [](auto& ini) {
+		DisplayTweaks::LoadSettings(ini);  // display tweaks scaling
+	});
 
 	ImGui::Renderer::Install();
 
