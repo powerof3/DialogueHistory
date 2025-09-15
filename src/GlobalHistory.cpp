@@ -10,7 +10,7 @@
 
 namespace GlobalHistory
 {
-	void Manager::DialogueHistory::RefreshTimeStamps(bool a_use12HourFormat)
+	void DialogueHistory::RefreshTimeStamps(bool a_use12HourFormat)
 	{
 		if (dateMap.empty()) {
 			return;
@@ -27,17 +27,17 @@ namespace GlobalHistory
 		}
 	}
 
-	void Manager::DialogueHistory::DrawDateTree()
+	void DialogueHistory::DrawDateTree()
 	{
 		DrawTreeImpl(dateMap);
 	}
 
-	void Manager::DialogueHistory::DrawLocationTree()
+	void DialogueHistory::DrawLocationTree()
 	{
 		DrawTreeImpl(locationMap);
 	}
 
-	void Manager::DialogueHistory::SaveHistory(const std::tm& a_tm, const Dialogue& a_history, bool a_use12HourFormat)
+	void DialogueHistory::SaveHistory(const std::tm& a_tm, const Dialogue& a_history, bool a_use12HourFormat)
 	{
 		history.push_back(a_history);
 
@@ -53,17 +53,17 @@ namespace GlobalHistory
 		locationMap.map[a_history.locName][speaker] = a_history;
 	}
 
-	void Manager::DialogueHistory::SaveHistoryToFile(const std::string& a_save)
+	void DialogueHistory::SaveHistoryToFile(const std::string& a_save)
 	{
 		BaseHistory::SaveHistoryToFileImpl(history, a_save, "DialogueHistory");
 	}
 
-	bool Manager::DialogueHistory::LoadHistoryFromFile(const std::string& a_save)
+	bool DialogueHistory::LoadHistoryFromFile(const std::string& a_save)
 	{
 		return BaseHistory::LoadHistoryFromFileImpl(history, a_save, "DialogueHistory");
 	}
 
-	std::optional<std::filesystem::path> Manager::DialogueHistory::GetDirectory()
+	std::optional<std::filesystem::path> DialogueHistory::GetDirectory()
 	{
 		if (!directory) {
 			directory = GetDirectoryImpl("DialogueHistory"sv);
@@ -71,7 +71,7 @@ namespace GlobalHistory
 		return directory;
 	}
 
-	void Manager::DialogueHistory::InitHistory()
+	void DialogueHistory::InitHistory()
 	{
 		std::string playerName = RE::PlayerCharacter::GetSingleton()->GetDisplayFullName();
 
@@ -121,7 +121,7 @@ namespace GlobalHistory
 		}
 	}
 
-	void Manager::ConversationHistory::RefreshTimeStamps()
+	void ConversationHistory::RefreshTimeStamps()
 	{
 		if (dateMap.empty()) {
 			return;
@@ -134,23 +134,23 @@ namespace GlobalHistory
 		}
 	}
 
-	void Manager::ConversationHistory::DrawDateTree()
+	void ConversationHistory::DrawDateTree()
 	{
 		DrawTreeImpl(dateMap);
 	}
 
-	void Manager::ConversationHistory::DrawLocationTree()
+	void ConversationHistory::DrawLocationTree()
 	{
 		DrawTreeImpl(locationMap);
 	}
 
-	void Manager::ConversationHistory::ClearCurrentHistory()
+	void ConversationHistory::ClearCurrentHistory()
 	{
 		BaseHistory::ClearCurrentHistory();
 		currentFixedHistory = std::nullopt;
 	}
 
-	void Manager::ConversationHistory::SetCurrentHistory(const Monologues& a_history)
+	void ConversationHistory::SetCurrentHistory(const Monologues& a_history)
 	{
 		BaseHistory::SetCurrentHistory(a_history);
 
@@ -158,7 +158,7 @@ namespace GlobalHistory
 		currentFixedHistory->RefreshContents();
 	}
 
-	void Manager::ConversationHistory::RefreshCurrentHistory()
+	void ConversationHistory::RefreshCurrentHistory()
 	{
 		currentHistory = currentFixedHistory;
 		if (currentHistory) {
@@ -171,7 +171,7 @@ namespace GlobalHistory
 		}
 	}
 
-	void Manager::ConversationHistory::RevertCurrentHistory()
+	void ConversationHistory::RevertCurrentHistory()
 	{
 		currentHistory = currentFixedHistory;
 		if (currentHistory) {
@@ -179,7 +179,7 @@ namespace GlobalHistory
 		}
 	}
 
-	void Manager::ConversationHistory::SaveHistory(const std::tm& a_tm, const Monologue& a_history)
+	void ConversationHistory::SaveHistory(const std::tm& a_tm, const Monologue& a_history)
 	{
 		history.monologues.push_back(a_history);
 
@@ -196,17 +196,17 @@ namespace GlobalHistory
 		}
 	}
 
-	void Manager::ConversationHistory::SaveHistoryToFile(const std::string& a_save)
+	void ConversationHistory::SaveHistoryToFile(const std::string& a_save)
 	{
 		BaseHistory::SaveHistoryToFileImpl(history.monologues, a_save, "ConversationHistory");
 	}
 
-	bool Manager::ConversationHistory::LoadHistoryFromFile(const std::string& a_save)
+	bool ConversationHistory::LoadHistoryFromFile(const std::string& a_save)
 	{
 		return BaseHistory::LoadHistoryFromFileImpl(history.monologues, a_save, "ConversationHistory");
 	}
 
-	std::optional<std::filesystem::path> Manager::ConversationHistory::GetDirectory()
+	std::optional<std::filesystem::path> ConversationHistory::GetDirectory()
 	{
 		if (!directory) {
 			directory = GetDirectoryImpl("ConversationHistory"sv);
@@ -214,7 +214,7 @@ namespace GlobalHistory
 		return directory;
 	}
 
-	void Manager::ConversationHistory::InitHistory()
+	void ConversationHistory::InitHistory()
 	{
 		if (!history.empty()) {
 			std::erase_if(history.monologues, [&](auto& monologue) {
@@ -249,7 +249,7 @@ namespace GlobalHistory
 		}
 	}
 
-	void Manager::ConversationHistory::LoadMCMSettings(const CSimpleIniA& a_ini)
+	void ConversationHistory::LoadMCMSettings(const CSimpleIniA& a_ini)
 	{
 		showScene = a_ini.GetBoolValue("Settings", "bSceneDialogueConversationHistory", showMisc);
 		showCombat = a_ini.GetBoolValue("Settings", "bCombatDialogueConversationHistory", showCombat);
@@ -258,7 +258,7 @@ namespace GlobalHistory
 		showMisc = a_ini.GetBoolValue("Settings", "bMiscDialogueConversationHistory", showMisc);
 	}
 
-	bool Manager::ConversationHistory::CanShowDialogue(std::int32_t a_dialogueType) const
+	bool ConversationHistory::CanShowDialogue(std::int32_t a_dialogueType) const
 	{
 		switch (a_dialogueType) {
 		case RE::DIALOGUE_TYPE::kSceneDialogue:
@@ -276,7 +276,7 @@ namespace GlobalHistory
 		}
 	}
 
-	void Manager::ConversationHistory::RefreshHistoryMaps()
+	void ConversationHistory::RefreshHistoryMaps()
 	{
 		dateMap.clear();
 		locationMap.clear();
@@ -511,7 +511,7 @@ namespace GlobalHistory
 
 					ImGui::SetCursorScreenPos({ posX, posY });
 					ImGui::ButtonIconWithLabel("$DH_Exit_Button"_T, icon);
-					if (ImGui::IsItemClicked()) {
+					if (ImGui::IsItemSelected()) {
 						SetGlobalHistoryOpen(false);
 					}
 				}

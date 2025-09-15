@@ -4,6 +4,7 @@ namespace Input
 {
 	enum class DEVICE
 	{
+		kNone,
 		kKeyboard,
 		kMouse,
 		kGamepadDirectX,  // xbox
@@ -17,6 +18,9 @@ namespace Input
 		static void Register();
 
 		DEVICE GetInputDevice() const;
+		bool   IsInputKBM() const;
+		bool   IsInputGamepad() const;
+
 		void   ProcessInputEvents(RE::InputEvent* const* a_events);
 
 	private:
@@ -25,6 +29,7 @@ namespace Input
 		static ImGuiKey ToImGuiKey(GAMEPAD_ORBIS a_key);
 
 		// members
-		DEVICE inputDevice{ DEVICE::kKeyboard };
+		DEVICE inputDevice{ DEVICE::kNone };
+		DEVICE lastInputDevice{ DEVICE::kNone };
 	};
 }

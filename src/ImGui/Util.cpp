@@ -68,7 +68,7 @@ namespace ImGui
 		float radius = height * 0.50f;
 
 		ImGui::InvisibleButton(str_id, ImVec2(width, height));
-		if (ImGui::IsItemClicked()) {
+		if (IsItemClicked() || (IsItemHovered() && IsKeyPressed(ImGuiKey_GamepadFaceDown, false))) {
 			*v = !*v;
 			pressed = true;
 		}
@@ -88,6 +88,15 @@ namespace ImGui
 		draw_list->AddCircleFilled(ImVec2(p.x + radius + t * (width - radius * 2.0f), p.y + radius), radius - 1.5f, GetColorU32(colors[ImGuiCol_Button]));
 
 		return pressed;
+	}
+
+	bool IsItemSelected()
+	{
+		if ((IsItemHovered() || IsItemFocused())) {
+			return IsMouseClicked(ImGuiMouseButton_Left) || IsKeyPressed(ImGuiKey_GamepadFaceDown) || IsKeyPressed(ImGuiKey_Enter) || IsKeyPressed(ImGuiKey_Space);
+		}
+
+		return false;
 	}
 
 	void Spacing(std::uint32_t a_numSpaces)

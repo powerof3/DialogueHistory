@@ -91,7 +91,7 @@ namespace LocalHistory
 					ImGui::SetCursorScreenPos({ posX, posY });
 					ImGui::ButtonIconWithLabel(localHistoryOpen ? "$DH_Exit_Button"_T : "$DH_Title"_T, icons);
 					// no dialogue menu click because the real menu registers as a click too
-					if (ImGui::IsItemClicked() && localHistoryOpen) {
+					if (ImGui::IsItemSelected() && localHistoryOpen) {
 						SetLocalHistoryOpen(false);
 					}
 				}

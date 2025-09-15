@@ -11,6 +11,8 @@ namespace ImGui
 
 	bool ToggleButton(const char* label, bool* v);
 
+	bool IsItemSelected();
+
 	void Spacing(std::uint32_t a_numSpaces);
 
 	ImVec2 GetNativeViewportSize();

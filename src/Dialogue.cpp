@@ -280,7 +280,7 @@ void Dialogue::Draw()
 
 					line.hovered = ImGui::IsItemHovered();
 
-					if (ImGui::IsItemClicked() && isGlobalHistoryOpen) {
+					if (ImGui::IsItemSelected() && isGlobalHistoryOpen) {
 						MANAGER(GlobalHistory)->PlayVoiceline(line.voice);
 					}
 				}
@@ -325,7 +325,7 @@ void Monologues::Draw()
 		refreshContents = false;
 
 		nameWidth = 0.0f;
-		timeWidth = ImGui::CalcTextSize(MANAGER(GlobalHistory)->Use12HourFormat() ? "99:99 AM" : "99:99").x;
+		timeWidth = ImGui::CalcTextSize(MANAGER(GlobalHistory)->Use12HourFormat() ? "88:88 AM" : "88:88").x;
 
 		std::set<std::string> names{};
 		for (auto& monologue : monologues) {
@@ -374,7 +374,7 @@ void Monologues::Draw()
 				lineColor.w = hovered ? 1.0f : GetUserStyleVar(ImGui::USER_STYLE::kDisabledTextAlpha);
 				ImGui::TextColoredWrapped(lineColor, response.c_str());
 				hovered = ImGui::IsItemHovered();
-				if (ImGui::IsItemClicked()) {
+				if (ImGui::IsItemSelected()) {
 					MANAGER(GlobalHistory)->PlayVoiceline(voice);
 				}
 			}
