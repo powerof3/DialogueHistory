@@ -113,6 +113,8 @@ namespace IconFont
 			return;
 		}
 
+		loadedFonts = true;
+
 		logger::info("Reloading fonts...");
 
 		auto& io = ImGui::GetIO();
@@ -135,8 +137,6 @@ namespace IconFont
 		ImGui_ImplDX11_CreateDeviceObjects();
 
 		io.FontDefault = globalHistoryFont.font;
-
-		loadedFonts = true;
 	}
 
 	ImFont* Manager::GetButtonFont() const

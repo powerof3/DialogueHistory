@@ -79,6 +79,8 @@ namespace ImGui
 			return;
 		}
 
+		refreshStyle = false;
+
 		Settings::GetSingleton()->Load(FileType::kStyles, [this](auto& ini) {
 			LoadStyles(ini);
 		});
@@ -126,8 +128,6 @@ namespace ImGui
 
 		MANAGER(IconFont)->ReloadFonts();
 		MANAGER(IconFont)->ResizeIcons();
-
-		refreshStyle = false;
 	}
 
 	void Styles::RefreshStyle()
