@@ -195,12 +195,11 @@ namespace GlobalHistory
 
 	protected:
 		template <class T>
-		bool LoadHistoryFromFileImpl(T&& a_history, const std::string& a_save, std::string_view a_folder);
-
+		bool LoadHistoryFromFileImpl(T&& a_history, const std::string& a_save);
 		template <class T>
-		void SaveHistoryToFileImpl(T&& a_history, const std::string& a_save, std::string_view a_folder);
+		void SaveHistoryToFileImpl(T&& a_history, const std::string& a_save);
 
-		std::optional<std::filesystem::path> GetDirectoryImpl(std::string_view a_folder);
+		std::optional<std::filesystem::path> GetDirectoryImpl();
 	};
 
 	// Dialogue between player and NPC
@@ -333,25 +332,25 @@ namespace GlobalHistory
 	};
 
 	template <class HistoryData, class DateMap, class LocationMap>
-	inline std::optional<std::filesystem::path> BaseHistory<HistoryData, DateMap, LocationMap>::GetDirectoryImpl(std::string_view a_folder)
+	inline std::optional<std::filesystem::path> BaseHistory<HistoryData, DateMap, LocationMap>::GetDirectoryImpl()
 	{
 		if (auto dir = logger::log_directory()) {
 			dir->remove_filename();
 			*dir /= "Saves";
-			*dir /= a_folder;
+			*dir /= GetType();
 			std::error_code ec;
 			if (!std::filesystem::exists(*dir, ec)) {
-				std::filesystem::create_directory(*dir);
+				std::filesystem::create_directory(*dir, ec);
 			}
 			return dir;
 		}
-		logger::error("Unable to access {} directory", a_folder);
+		logger::error("Unable to access {} directory", GetType());
 		return std::nullopt;
 	}
 
 	template <class HistoryData, class DateMap, class LocationMap>
 	template <class T>
-	inline bool BaseHistory<HistoryData, DateMap, LocationMap>::LoadHistoryFromFileImpl(T&& a_history, const std::string& a_save, std::string_view a_folder)
+	inline bool BaseHistory<HistoryData, DateMap, LocationMap>::LoadHistoryFromFileImpl(T&& a_history, const std::string& a_save)
 	{
 		const auto& jsonPath = GetFile(a_save);
 		if (!jsonPath) {
@@ -360,17 +359,17 @@ namespace GlobalHistory
 
 		Clear();
 
-		logger::info("Loading {} file : {}", a_folder, jsonPath->string());
+		logger::info("Loading {} file : {}", GetType(), jsonPath->string());
 
 		std::error_code err;
 		if (std::filesystem::exists(*jsonPath, err)) {
 			std::string buffer;
 			auto        ec = glz::read_file_json(a_history, jsonPath->string(), buffer);
 			if (ec) {
-				logger::info("\tFailed to load {} file (error: {})", a_folder, glz::format_error(ec, buffer));
+				logger::info("\tFailed to read {} file (error: {})", GetType(), glz::format_error(ec, buffer));
 			}
 		} else {
-			logger::info("\tFailed to load {} file (error: {})", a_folder, err.value());
+			logger::info("\tFailed to load {} file (error: {})", GetType(), err.message());
 		}
 
 		return true;
@@ -378,20 +377,20 @@ namespace GlobalHistory
 
 	template <class HistoryData, class DateMap, class LocationMap>
 	template <class T>
-	inline void BaseHistory<HistoryData, DateMap, LocationMap>::SaveHistoryToFileImpl(T&& a_history, const std::string& a_save, std::string_view a_folder)
+	inline void BaseHistory<HistoryData, DateMap, LocationMap>::SaveHistoryToFileImpl(T&& a_history, const std::string& a_save)
 	{
 		const auto& jsonPath = GetFile(a_save);
 		if (!jsonPath) {
 			return;
 		}
 
-		logger::info("Saving {} file : {}", a_folder, jsonPath->string());
+		logger::info("Saving {} file : {}", GetType(), jsonPath->string());
 
 		std::string buffer;
 		auto        ec = glz::write_file_json(a_history, jsonPath->string(), buffer);
 
 		if (ec) {
-			logger::info("\tFailed to save {} file: (error: {})", a_folder, glz::format_error(ec, buffer));
+			logger::info("\tFailed to save {} file: (error: {})", GetType(), glz::format_error(ec, buffer));
 		}
 	}
 

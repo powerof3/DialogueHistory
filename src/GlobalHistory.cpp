@@ -55,18 +55,18 @@ namespace GlobalHistory
 
 	void DialogueHistory::SaveHistoryToFile(const std::string& a_save)
 	{
-		BaseHistory::SaveHistoryToFileImpl(history, a_save, "DialogueHistory");
+		BaseHistory::SaveHistoryToFileImpl(history, a_save);
 	}
 
 	bool DialogueHistory::LoadHistoryFromFile(const std::string& a_save)
 	{
-		return BaseHistory::LoadHistoryFromFileImpl(history, a_save, "DialogueHistory");
+		return BaseHistory::LoadHistoryFromFileImpl(history, a_save);
 	}
 
 	std::optional<std::filesystem::path> DialogueHistory::GetDirectory()
 	{
 		if (!directory) {
-			directory = GetDirectoryImpl("DialogueHistory"sv);
+			directory = GetDirectoryImpl();
 		}
 		return directory;
 	}
@@ -198,18 +198,18 @@ namespace GlobalHistory
 
 	void ConversationHistory::SaveHistoryToFile(const std::string& a_save)
 	{
-		BaseHistory::SaveHistoryToFileImpl(history.monologues, a_save, "ConversationHistory");
+		BaseHistory::SaveHistoryToFileImpl(history.monologues, a_save);
 	}
 
 	bool ConversationHistory::LoadHistoryFromFile(const std::string& a_save)
 	{
-		return BaseHistory::LoadHistoryFromFileImpl(history.monologues, a_save, "ConversationHistory");
+		return BaseHistory::LoadHistoryFromFileImpl(history.monologues, a_save);
 	}
 
 	std::optional<std::filesystem::path> ConversationHistory::GetDirectory()
 	{
 		if (!directory) {
-			directory = GetDirectoryImpl("ConversationHistory"sv);
+			directory = GetDirectoryImpl();
 		}
 		return directory;
 	}
@@ -361,7 +361,8 @@ namespace GlobalHistory
 
 			ImGui::SetNextWindowPos(ImGui::GetNativeViewportCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 
-			ImGui::PushFont(MANAGER(IconFont)->GetGlobalHistoryFont());
+			auto globalFont = MANAGER(IconFont)->GetGlobalHistoryFont();
+			ImGui::PushFont(globalFont, globalFont->LegacySize);
 
 			ImGui::BeginChild("##GlobalHistory", ImGui::GetNativeViewportSize() * 0.8f, ImGuiChildFlags_Border, windowFlags);
 			{
@@ -369,7 +370,8 @@ namespace GlobalHistory
 
 				ImGui::Spacing(2);
 
-				ImGui::PushFont(MANAGER(IconFont)->GetHeaderFont());
+				auto headerFont = MANAGER(IconFont)->GetHeaderFont();
+				ImGui::PushFont(headerFont, headerFont->LegacySize);
 				{
 					static float width = ImGui::CalcTextSize("$DH_Title"_T).x + (itemSpacing * 2) + (toggleHeight * 0.5f) + ImGui::CalcTextSize("$DH_Title_Conversation"_T).x;
 					ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - width) * 0.5f);
@@ -500,7 +502,8 @@ namespace GlobalHistory
 			ImGui::PopFont();
 
 			if (!hideButton) {
-				ImGui::PushFont(MANAGER(IconFont)->GetButtonFont());
+				auto buttonFont = MANAGER(IconFont)->GetButtonFont();
+				ImGui::PushFont(buttonFont, buttonFont->LegacySize);
 				{
 					const auto icon = MANAGER(Hotkeys)->EscapeIcon();
 

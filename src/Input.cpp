@@ -306,6 +306,42 @@ namespace Input
 		}
 	}
 
+	void Manager::UpdateInputDevice(RE::INPUT_DEVICE a_device)
+	{
+		lastInputDevice = inputDevice;
+
+		switch (a_device) {
+		case RE::INPUT_DEVICE::kKeyboard:
+			inputDevice = DEVICE::kKeyboard;
+			break;
+		case RE::INPUT_DEVICE::kMouse:
+			inputDevice = DEVICE::kMouse;
+			break;
+		case RE::INPUT_DEVICE::kGamepad:
+			{
+				if (RE::ControlMap::GetSingleton()->GetGamePadType() == RE::PC_GAMEPAD_TYPE::kOrbis) {
+					inputDevice = DEVICE::kGamepadOrbis;
+				} else {
+					inputDevice = DEVICE::kGamepadDirectX;
+				}
+			}
+			break;
+		default:
+			break;
+		}
+
+		if (lastInputDevice == DEVICE::kNone || inputDevice == DEVICE::kNone || lastInputDevice != inputDevice) {
+			auto& io = ImGui::GetIO();
+			if (IsInputGamepad()) {
+				io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+				io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;
+			} else {
+				io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+				io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableGamepad;
+			}
+		}
+	}
+
 	DEVICE Manager::GetInputDevice() const
 	{
 		return inputDevice;
@@ -323,45 +359,22 @@ namespace Input
 
 	void Manager::ProcessInputEvents(RE::InputEvent* const* a_events)
 	{
-		bool  drawGlobalHistory = MANAGER(GlobalHistory)->IsGlobalHistoryOpen();
 		auto& io = ImGui::GetIO();
 
-		if (drawGlobalHistory || MANAGER(LocalHistory)->IsLocalHistoryOpen()) {
+		const bool drawGlobalHistory = MANAGER(GlobalHistory)->IsGlobalHistoryOpen();
+		const bool drawLocalHistory = MANAGER(LocalHistory)->IsLocalHistoryOpen();
+		const bool dialogueMenuOpen = MANAGER(LocalHistory)->IsDialogueMenuOpen();
+
+		const bool anyHistoryMenuOpen = drawGlobalHistory || drawLocalHistory;
+
+		if (anyHistoryMenuOpen || dialogueMenuOpen) {
 			auto cursorMenu = RE::UI::GetSingleton()->GetMenu<RE::CursorMenu>();
 
 			for (auto event = *a_events; event; event = event->next) {
-				const auto device = event->GetDevice();
+				UpdateInputDevice(event->GetDevice());
 
-				lastInputDevice = inputDevice;
-
-				switch (device) {
-				case RE::INPUT_DEVICE::kKeyboard:
-					inputDevice = DEVICE::kKeyboard;
-					break;
-				case RE::INPUT_DEVICE::kMouse:
-					inputDevice = DEVICE::kMouse;
-					break;
-				case RE::INPUT_DEVICE::kGamepad:
-					{
-						if (RE::ControlMap::GetSingleton()->GetGamePadType() == RE::PC_GAMEPAD_TYPE::kOrbis) {
-							inputDevice = DEVICE::kGamepadOrbis;
-						} else {
-							inputDevice = DEVICE::kGamepadDirectX;
-						}
-					}
-					break;
-				default:
-					break;
-				}
-
-				if (lastInputDevice == DEVICE::kNone || inputDevice == DEVICE::kNone || lastInputDevice != inputDevice) {
-					if (IsInputGamepad()) {
-						io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-						io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;
-					} else {
-						io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-						io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableGamepad;
-					}
+				if (!anyHistoryMenuOpen) {
+					continue;
 				}
 
 				if (auto mouseEvent = event->AsMouseMoveEvent()) {
@@ -421,9 +434,7 @@ namespace Input
 						break;
 					}
 
-					auto& userEvent = buttonEvent->QUserEvent();
-
-					if (userEvent == RE::UserEvents::GetSingleton()->screenshot) {
+					if (buttonEvent->QUserEvent() == RE::UserEvents::GetSingleton()->screenshot) {
 						if (buttonEvent->IsDown() && drawGlobalHistory) {
 							RE::MenuControls::GetSingleton()->QueueScreenshot();
 						}

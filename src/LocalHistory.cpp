@@ -32,7 +32,8 @@ namespace LocalHistory
 
 		ImGui::Begin("##Main", nullptr, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBringToFrontOnFocus);
 		{
-			ImGui::PushFont(MANAGER(IconFont)->GetLocalHistoryFont());
+			auto localHistoryFont = MANAGER(IconFont)->GetLocalHistoryFont();
+			ImGui::PushFont(localHistoryFont, localHistoryFont->LegacySize);
 
 			if (localHistoryOpen) {
 				ImGui::SetNextWindowPos(ImGui::GetNativeViewportCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
@@ -42,7 +43,8 @@ namespace LocalHistory
 				{
 					ImGui::ExtendWindowPastBorder();
 
-					ImGui::PushFont(MANAGER(IconFont)->GetHeaderFont());
+					auto headerFont = MANAGER(IconFont)->GetHeaderFont();
+					ImGui::PushFont(headerFont, headerFont->LegacySize);
 					{
 						ImGui::CenteredText(gameTimeString.c_str(), false);
 					}
@@ -60,7 +62,8 @@ namespace LocalHistory
 			ImGui::PopFont();
 
 			if (!hideButton) {
-				ImGui::PushFont(MANAGER(IconFont)->GetButtonFont());
+				auto buttonFont = MANAGER(IconFont)->GetButtonFont();
+				ImGui::PushFont(buttonFont, buttonFont->LegacySize);
 				{
 					const auto& icons = MANAGER(Hotkeys)->LocalHistoryIcons();
 

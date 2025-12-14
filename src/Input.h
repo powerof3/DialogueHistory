@@ -28,6 +28,8 @@ namespace Input
 		static ImGuiKey ToImGuiKey(GAMEPAD_DIRECTX a_key);
 		static ImGuiKey ToImGuiKey(GAMEPAD_ORBIS a_key);
 
+		void UpdateInputDevice(RE::INPUT_DEVICE a_device);
+
 		// members
 		DEVICE inputDevice{ DEVICE::kNone };
 		DEVICE lastInputDevice{ DEVICE::kNone };

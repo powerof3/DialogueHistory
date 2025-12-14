@@ -176,17 +176,17 @@ namespace IconFont
 			return &rightKey;
 		default:
 			{
-				if (auto device = MANAGER(Input)->GetInputDevice(); device == Input::DEVICE::kKeyboard || device == Input::DEVICE::kMouse) {
+				if (auto device = MANAGER(Input)->GetInputDevice(); device == Input::DEVICE::kGamepadDirectX || device == Input::DEVICE::kGamepadOrbis) {
+					if (const auto it = gamePad.find(key); it != gamePad.end()) {
+						return GetGamePadIcon(it->second);
+					}
+				} else {
 					if (key >= SKSE::InputMap::kMacro_MouseButtonOffset) {
 						if (const auto it = mouse.find(key); it != mouse.end()) {
 							return &it->second;
 						}
 					} else if (const auto it = keyboard.find(static_cast<KEY>(key)); it != keyboard.end()) {
 						return &it->second;
-					}
-				} else {
-					if (const auto it = gamePad.find(key); it != gamePad.end()) {
-						return GetGamePadIcon(it->second);
 					}
 				}
 				return &unknownKey;
