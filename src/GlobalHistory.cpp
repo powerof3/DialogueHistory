@@ -710,7 +710,7 @@ namespace GlobalHistory
 		if (!saveDir) {
 			return;
 		}
-		
+
 		dialogueHistory.CleanupSavedFiles(*saveDir);
 		conversationHistory.CleanupSavedFiles(*saveDir);
 	}

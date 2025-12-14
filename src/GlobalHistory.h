@@ -157,10 +157,10 @@ namespace GlobalHistory
 		void CleanupSavedFiles(const std::filesystem::path& a_saveDir)
 		{
 			std::uint32_t count = 0;
-			
+
 			if (auto dir = GetDirectory()) {
 				std::error_code ec;
-				
+
 				for (const auto& entry : std::filesystem::directory_iterator(*dir)) {
 					if (entry.exists() && entry.path().extension() == ".json"sv) {
 						auto saveFileName = entry.path().stem().string();

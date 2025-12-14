@@ -31,7 +31,7 @@ void OnInit(SKSE::MessagingInterface::Message* a_msg)
 
 			PhotoMode::activeGlobal = RE::TESForm::LookupByEditorID<RE::TESGlobal>("PhotoMode_IsActive");
 			MANAGER(Translation)->BuildTranslationMap();
-			
+
 			logger::info("{:*^50}", "FILE CLEANUP");
 			MANAGER(GlobalHistory)->CleanupSavedFiles();
 		}
