@@ -130,7 +130,7 @@ namespace GlobalHistory
 			currentHistory = a_history;
 			currentHistory->RefreshContents();
 		};
-
+		virtual const char*                          GetType() { return nullptr; }
 		virtual std::optional<std::filesystem::path> GetDirectory() { return std::nullopt; };
 		std::optional<std::filesystem::path>         GetFile(const std::string& a_save)
 		{
@@ -151,8 +151,29 @@ namespace GlobalHistory
 			if (!jsonPath) {
 				return;
 			}
+			std::error_code ec;
+			std::filesystem::remove(*jsonPath, ec);
+		}
+		void CleanupSavedFiles(const std::filesystem::path& a_saveDir)
+		{
+			std::uint32_t count = 0;
+			
+			if (auto dir = GetDirectory()) {
+				std::error_code ec;
+				
+				for (const auto& entry : std::filesystem::directory_iterator(*dir)) {
+					if (entry.exists() && entry.path().extension() == ".json"sv) {
+						auto saveFileName = entry.path().stem().string();
+						auto savePath = std::format("{}{}.ess", a_saveDir.string(), saveFileName);
+						if (!std::filesystem::exists(savePath, ec)) {
+							std::filesystem::remove(entry.path(), ec);
+							count++;
+						}
+					}
+				}
+			}
 
-			std::filesystem::remove(*jsonPath);
+			logger::info("{} : Cleaned up {} unused history files.", GetType(), count);
 		}
 
 		void Clear()
@@ -188,13 +209,13 @@ namespace GlobalHistory
 	public:
 		virtual ~DialogueHistory() override = default;
 
-		void RefreshTimeStamps(bool a_use12HourFormat);
-		void DrawDateTree() override;
-		void DrawLocationTree() override;
-
-		void SaveHistory(const std::tm& a_tm, const Dialogue& a_history, bool a_use12HourFormat);
-		void SaveHistoryToFile(const std::string& a_save);
-		bool LoadHistoryFromFile(const std::string& a_save);
+		void        RefreshTimeStamps(bool a_use12HourFormat);
+		void        DrawDateTree() override;
+		void        DrawLocationTree() override;
+		const char* GetType() override { return "DialogueHistory"; }
+		void        SaveHistory(const std::tm& a_tm, const Dialogue& a_history, bool a_use12HourFormat);
+		void        SaveHistoryToFile(const std::string& a_save);
+		bool        LoadHistoryFromFile(const std::string& a_save);
 
 		std::optional<std::filesystem::path> GetDirectory() override;
 
@@ -224,6 +245,8 @@ namespace GlobalHistory
 		void SetCurrentHistory(const Monologues& a_history) override;
 		void RefreshCurrentHistory();
 		void RevertCurrentHistory();
+
+		const char* GetType() override { return "ConversationHistory"; }
 
 		void SaveHistory(const std::tm& a_tm, const Monologue& a_history);
 		void SaveHistoryToFile(const std::string& a_save);
@@ -280,6 +303,7 @@ namespace GlobalHistory
 		void SaveFiles(const std::string& a_save);
 		void LoadFiles(const std::string& a_save);
 		void DeleteSavedFiles(const std::string& a_save);
+		void CleanupSavedFiles();
 		void Clear();
 
 		void PlayVoiceline(const std::string& a_voiceline);
@@ -319,13 +343,12 @@ namespace GlobalHistory
 			if (!std::filesystem::exists(*dir, ec)) {
 				std::filesystem::create_directory(*dir);
 			}
-			logger::info("{} directory : {}", a_folder, dir->string());
 			return dir;
 		}
 		logger::error("Unable to access {} directory", a_folder);
 		return std::nullopt;
 	}
-	
+
 	template <class HistoryData, class DateMap, class LocationMap>
 	template <class T>
 	inline bool BaseHistory<HistoryData, DateMap, LocationMap>::LoadHistoryFromFileImpl(T&& a_history, const std::string& a_save, std::string_view a_folder)
@@ -352,7 +375,7 @@ namespace GlobalHistory
 
 		return true;
 	}
-	
+
 	template <class HistoryData, class DateMap, class LocationMap>
 	template <class T>
 	inline void BaseHistory<HistoryData, DateMap, LocationMap>::SaveHistoryToFileImpl(T&& a_history, const std::string& a_save, std::string_view a_folder)

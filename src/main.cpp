@@ -12,25 +12,28 @@ void OnInit(SKSE::MessagingInterface::Message* a_msg)
 	switch (a_msg->type) {
 	case SKSE::MessagingInterface::kPostLoad:
 		{
-			logger::info("{:*^30}", "POST LOAD");
+			logger::info("{:*^50}", "POST LOAD");
 			Settings::GetSingleton()->LoadMCMSettings();
 			Hooks::Install();
 		}
 		break;
 	case SKSE::MessagingInterface::kPostPostLoad:
 		{
-			logger::info("{:*^30}", "POST POST LOAD");
+			logger::info("{:*^50}", "POST POST LOAD");
 			NPCNameProvider::GetSingleton()->RequestAPI();
 		}
 		break;
 	case SKSE::MessagingInterface::kDataLoaded:
 		{
-			logger::info("{:*^30}", "DATA LOADED");
+			logger::info("{:*^50}", "DATA LOADED");
 			MANAGER(LocalHistory)->Register();
 			MANAGER(GlobalHistory)->Register();
 
 			PhotoMode::activeGlobal = RE::TESForm::LookupByEditorID<RE::TESGlobal>("PhotoMode_IsActive");
 			MANAGER(Translation)->BuildTranslationMap();
+			
+			logger::info("{:*^50}", "FILE CLEANUP");
+			MANAGER(GlobalHistory)->CleanupSavedFiles();
 		}
 		break;
 	case SKSE::MessagingInterface::kSaveGame:
@@ -44,6 +47,7 @@ void OnInit(SKSE::MessagingInterface::Message* a_msg)
 			std::string savePath{ static_cast<char*>(a_msg->data), a_msg->dataLen };
 			string::replace_last_instance(savePath, ".ess", "");
 
+			logger::info("{:*^50}", "LOAD GAME");
 			MANAGER(GlobalHistory)->LoadFiles(savePath);
 		}
 		break;
@@ -69,7 +73,7 @@ extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() {
 	v.AuthorName("powerofthree");
 	v.UsesAddressLibrary();
 	v.UsesUpdatedStructs();
-	v.CompatibleVersions({ SKSE::RUNTIME_LATEST });
+	v.CompatibleVersions({ SKSE::RUNTIME_SSE_LATEST });
 
 	return v;
 }();
@@ -86,7 +90,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a
 	}
 
 	const auto ver = a_skse->RuntimeVersion();
-	if (ver < SKSE::RUNTIME_1_5_39) {
+	if (ver < SKSE::RUNTIME_SSE_1_5_39) {
 		logger::critical(FMT_STRING("Unsupported runtime version {}"), ver.string());
 		return false;
 	}
@@ -127,6 +131,8 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	Settings::GetSingleton()->Load(FileType::kDisplayTweaks, [](auto& ini) {
 		DisplayTweaks::LoadSettings(ini);  // display tweaks scaling
 	});
+
+	SKSE::AllocTrampoline(14 * 9);
 
 	ImGui::Renderer::Install();
 

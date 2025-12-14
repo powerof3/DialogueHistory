@@ -376,7 +376,7 @@ namespace Input
 					}
 				} else if (const auto charEvent = event->AsCharEvent()) {
 					if (drawGlobalHistory) {
-						io.AddInputCharacter(charEvent->keycode);
+						io.AddInputCharacter(charEvent->keyCode);
 					}
 				} else if (const auto buttonEvent = event->AsButtonEvent()) {
 					const auto key = buttonEvent->GetIDCode();

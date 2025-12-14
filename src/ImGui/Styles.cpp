@@ -83,8 +83,8 @@ namespace ImGui
 			LoadStyles(ini);
 		});
 
-		ImGuiStyle style;
-		auto&      colors = style.Colors;
+		auto& style = GetStyle();
+		auto& colors = style.Colors;
 
 		style.WindowBorderSize = user.borderSize;
 		style.ChildBorderSize = user.borderSize;
@@ -115,11 +115,9 @@ namespace ImGui
 		colors[ImGuiCol_ScrollbarGrabHovered] = user.scrollbarGrabHovered;
 		colors[ImGuiCol_ScrollbarGrabActive] = user.scrollbarGrabActive;
 
-		colors[ImGuiCol_NavHighlight] = ImVec4();
+		colors[ImGuiCol_NavCursor] = ImVec4();
 
 		style.ScaleAllSizes(DisplayTweaks::GetResolutionScale());
-
-		GetStyle() = style;
 
 		// reload fonts/icons
 		Settings::GetSingleton()->Load(FileType::kFonts, [this](auto& ini) {

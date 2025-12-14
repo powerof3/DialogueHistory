@@ -695,6 +695,26 @@ namespace GlobalHistory
 		conversationHistory.DeleteSavedFile(a_save);
 	}
 
+	void Manager::CleanupSavedFiles()
+	{
+		constexpr auto get_save_directory = []() -> std::optional<std::filesystem::path> {
+			if (auto path = logger::log_directory()) {
+				path->remove_filename();  // remove "/SKSE"
+				path->append("sLocalSavePath:General"_ini.value());
+				return path;
+			}
+			return std::nullopt;
+		};
+
+		auto saveDir = get_save_directory();
+		if (!saveDir) {
+			return;
+		}
+		
+		dialogueHistory.CleanupSavedFiles(*saveDir);
+		conversationHistory.CleanupSavedFiles(*saveDir);
+	}
+
 	void Manager::Clear()
 	{
 		dialogueHistory.Clear();
