@@ -630,7 +630,7 @@ namespace GlobalHistory
 			return;
 		}
 
-		if (a_speaker->IsPlayerRef() || a_speaker->GetDistance(RE::PlayerCharacter::GetSingleton()) > RE::GetINISetting("fTalkingDistance:LOD")->GetFloat() || RE::MenuTopicManager::GetSingleton()->speaker.get() == a_speaker) {
+		if (a_speaker->IsPlayerRef() || a_speaker->GetDistance(RE::PlayerCharacter::GetSingleton()) > "fTalkingDistance:LOD"_ini.value() || RE::MenuTopicManager::GetSingleton()->speaker.get() == a_speaker) {
 			return;
 		}
 
