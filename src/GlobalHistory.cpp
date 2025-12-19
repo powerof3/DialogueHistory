@@ -361,7 +361,7 @@ namespace GlobalHistory
 
 			ImGui::SetNextWindowPos(ImGui::GetNativeViewportCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 
-			auto [globalFont, globalFontSize]	= MANAGER(IconFont)->GetGlobalHistoryFont();
+			auto [globalFont, globalFontSize] = MANAGER(IconFont)->GetGlobalHistoryFont();
 			ImGui::PushFont(globalFont, globalFontSize);
 
 			ImGui::BeginChild("##GlobalHistory", ImGui::GetNativeViewportSize() * 0.8f, ImGuiChildFlags_Border, windowFlags);

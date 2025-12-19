@@ -86,7 +86,7 @@ namespace ImGui
 		});
 
 		ImGuiStyle style{};
-		auto& colors = style.Colors;
+		auto&      colors = style.Colors;
 
 		style.WindowBorderSize = user.borderSize;
 		style.ChildBorderSize = user.borderSize;
