@@ -45,10 +45,10 @@ namespace IconFont
 		void ReloadFonts();
 		void ResizeIcons();
 
-		ImFont* GetButtonFont() const;
-		ImFont* GetHeaderFont() const;
-		ImFont* GetLocalHistoryFont() const;
-		ImFont* GetGlobalHistoryFont() const;
+		std::pair<ImFont*, float> GetButtonFont() const;
+		std::pair<ImFont*, float> GetHeaderFont() const;
+		std::pair<ImFont*, float> GetLocalHistoryFont() const;
+		std::pair<ImFont*, float> GetGlobalHistoryFont() const;
 
 		const IconTexture*           GetIcon(std::uint32_t key);
 		std::set<const IconTexture*> GetIcons(const std::set<std::uint32_t>& keys);

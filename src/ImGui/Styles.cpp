@@ -85,7 +85,7 @@ namespace ImGui
 			LoadStyles(ini);
 		});
 
-		auto& style = GetStyle();
+		ImGuiStyle style{};
 		auto& colors = style.Colors;
 
 		style.WindowBorderSize = user.borderSize;
@@ -120,6 +120,8 @@ namespace ImGui
 		colors[ImGuiCol_NavCursor] = ImVec4();
 
 		style.ScaleAllSizes(DisplayTweaks::GetResolutionScale());
+
+		ImGui::GetStyle() = style;
 
 		// reload fonts/icons
 		Settings::GetSingleton()->Load(FileType::kFonts, [this](auto& ini) {

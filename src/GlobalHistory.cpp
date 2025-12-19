@@ -361,8 +361,8 @@ namespace GlobalHistory
 
 			ImGui::SetNextWindowPos(ImGui::GetNativeViewportCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 
-			auto globalFont = MANAGER(IconFont)->GetGlobalHistoryFont();
-			ImGui::PushFont(globalFont, globalFont->LegacySize);
+			auto [globalFont, globalFontSize]	= MANAGER(IconFont)->GetGlobalHistoryFont();
+			ImGui::PushFont(globalFont, globalFontSize);
 
 			ImGui::BeginChild("##GlobalHistory", ImGui::GetNativeViewportSize() * 0.8f, ImGuiChildFlags_Border, windowFlags);
 			{
@@ -370,8 +370,8 @@ namespace GlobalHistory
 
 				ImGui::Spacing(2);
 
-				auto headerFont = MANAGER(IconFont)->GetHeaderFont();
-				ImGui::PushFont(headerFont, headerFont->LegacySize);
+				auto [headerFont, headerFontSize] = MANAGER(IconFont)->GetHeaderFont();
+				ImGui::PushFont(headerFont, headerFontSize);
 				{
 					static float width = ImGui::CalcTextSize("$DH_Title"_T).x + (itemSpacing * 2) + (toggleHeight * 0.5f) + ImGui::CalcTextSize("$DH_Title_Conversation"_T).x;
 					ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - width) * 0.5f);
@@ -502,8 +502,8 @@ namespace GlobalHistory
 			ImGui::PopFont();
 
 			if (!hideButton) {
-				auto buttonFont = MANAGER(IconFont)->GetButtonFont();
-				ImGui::PushFont(buttonFont, buttonFont->LegacySize);
+				auto [buttonFont, buttonFontSize] = MANAGER(IconFont)->GetButtonFont();
+				ImGui::PushFont(buttonFont, buttonFontSize);
 				{
 					const auto icon = MANAGER(Hotkeys)->EscapeIcon();
 

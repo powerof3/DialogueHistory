@@ -139,24 +139,24 @@ namespace IconFont
 		io.FontDefault = globalHistoryFont.font;
 	}
 
-	ImFont* Manager::GetButtonFont() const
+	std::pair<ImFont*, float> Manager::GetButtonFont() const
 	{
-		return buttonFont.font;
+		return { buttonFont.font, buttonFont.size };
 	}
 
-	ImFont* Manager::GetHeaderFont() const
+	std::pair<ImFont*, float> Manager::GetHeaderFont() const
 	{
-		return headerFont.font;
+		return { headerFont.font, headerFont.size };
 	}
 
-	ImFont* Manager::GetLocalHistoryFont() const
+	std::pair<ImFont*, float> Manager::GetLocalHistoryFont() const
 	{
-		return localHistoryFont.font;
+		return { localHistoryFont.font, localHistoryFont.size };
 	}
 
-	ImFont* Manager::GetGlobalHistoryFont() const
+	std::pair<ImFont*, float> Manager::GetGlobalHistoryFont() const
 	{
-		return globalHistoryFont.font;
+		return { globalHistoryFont.font, globalHistoryFont.size };
 	}
 
 	const IconTexture* Manager::GetIcon(std::uint32_t key)

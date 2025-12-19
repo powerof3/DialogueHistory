@@ -238,7 +238,8 @@ void Dialogue::Draw()
 	ImGui::Indent();
 	{
 		if (isGlobalHistoryOpen) {
-			ImGui::PushFont(MANAGER(IconFont)->GetHeaderFont());
+			auto [headerFont, headerFontSize] = MANAGER(IconFont)->GetHeaderFont();	
+			ImGui::PushFont(headerFont, headerFontSize);
 			{
 				ImGui::CenteredText(speakerName.c_str(), false);
 			}
