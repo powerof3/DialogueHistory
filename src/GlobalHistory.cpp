@@ -675,6 +675,13 @@ namespace GlobalHistory
 	{
 		if (a_evn && a_evn->eventName == "OpenTween_DialogueHistory" && !IsGlobalHistoryOpen()) {
 			openFromTweenMenu = true;
+			// Tween Menu Overhaul closes the Tween menu then fires this event
+			// immediately. Opening on the next UI tick avoids depending on
+			// TweenMenuCameraState::Update (StopTweenCamera), which TMO often
+			// never reaches — so the flag alone would never open the history.
+			SKSE::GetTaskInterface()->AddUITask([]() {
+				MANAGER(GlobalHistory)->TryOpenFromTweenMenu(true);
+			});
 		}
 
 		return EventResult::kContinue;
