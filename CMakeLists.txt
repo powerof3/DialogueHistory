@@ -159,8 +159,6 @@ find_package(glaze CONFIG REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 
-find_path(CLIB_UTIL_INCLUDE_DIRS "ClibUtil/utils.hpp")
-
 # ---- Add source files ----
 
 include(cmake/headerlist.cmake)
@@ -211,7 +209,6 @@ target_include_directories(
 	PRIVATE
 		${CMAKE_CURRENT_BINARY_DIR}/include
 		${CMAKE_CURRENT_SOURCE_DIR}/src
-		${CLIB_UTIL_INCLUDE_DIRS}
 )
 
 target_link_libraries(

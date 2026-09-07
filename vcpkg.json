@@ -6,7 +6,6 @@
   "dependencies": [
     "boost-regex",
     "boost-unordered",
-    "clib-util",
     {
       "name": "commonlib-shared",
       "features": [

@@ -15,7 +15,13 @@ void DisplayTweaks::LoadSettings(const CSimpleIniA& a_ini)
 	borderlessUpscale = static_cast<float>(a_ini.GetBoolValue("Render", "BorderlessUpscale", borderlessUpscale));
 }
 
+void PhotoMode::InitGlobals()
+{
+	activeGlobal = RE::TESForm::LookupByEditorID<RE::TESGlobal>("PhotoMode_IsActive");
+	activeGalleryGlobal = RE::TESForm::LookupByEditorID<RE::TESGlobal>("PhotoGallery_IsActive");
+}
+
 bool PhotoMode::IsPhotoModeActive()
 {
-	return activeGlobal && activeGlobal->value == 1;
+	return (activeGlobal && activeGlobal->value == 1) || (activeGalleryGlobal && activeGalleryGlobal->value == 1);
 }

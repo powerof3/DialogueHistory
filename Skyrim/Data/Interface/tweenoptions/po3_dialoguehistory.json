@@ -2,6 +2,6 @@
 	"papyrus_event": "OpenTween_DialogueHistory",
 	"menuName": "DIALOGUE HISTORY",
 	"icon": "scroll",
-	"priority": 11,
+	"priority": 70,
 	"category": "bottom"
 }
