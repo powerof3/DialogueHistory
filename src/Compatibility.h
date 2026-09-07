@@ -13,7 +13,7 @@ namespace DisplayTweaks
 namespace PhotoMode
 {
 	void InitGlobals();
-	
+
 	bool IsPhotoModeActive();
 
 	// members
