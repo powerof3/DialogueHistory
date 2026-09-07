@@ -123,9 +123,7 @@ namespace ImGui
 		});
 
 		MANAGER(IconFont)->LoadFonts();
-
 		MANAGER(IconFont)->LoadIcons();
-		MANAGER(IconFont)->ResizeIcons();
 	}
 
 	ImVec4 GetUserStyleColorVec4(USER_STYLE a_style)

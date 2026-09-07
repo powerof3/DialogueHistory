@@ -4,17 +4,14 @@
 
 namespace IconFont
 {
-	struct IconTexture : ImGui::Texture
+	struct IconTexture final : ImGui::Texture
 	{
 		IconTexture() = delete;
 		IconTexture(std::wstring_view a_iconName);
-		~IconTexture() = default;
 
-		bool Load();
-		void Resize(float a_scale);
+		~IconTexture() override = default;
 
-		// members
-		ImVec2 imageSize{};
+		bool Load(float a_scale);
 	};
 
 	struct GamepadIcon
@@ -43,7 +40,6 @@ namespace IconFont
 
 		void LoadIcons();
 		void LoadFonts();
-		void ResizeIcons();
 
 		std::pair<ImFont*, float> GetButtonFont() const;
 		std::pair<ImFont*, float> GetHeaderFont() const;

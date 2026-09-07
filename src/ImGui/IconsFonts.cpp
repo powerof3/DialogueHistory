@@ -10,21 +10,10 @@ namespace IconFont
 		ImGui::Texture(LR"(Data/Interface/ImGuiIcons/Icons/)", a_iconName)
 	{}
 
-	bool IconTexture::Load()
+	bool IconTexture::Load(float a_scale)
 	{
-		const bool result = ImGui::Texture::Load();
-
-		if (result) {
-			imageSize = size;
-		}
-
-		return result;
-	}
-
-	void IconTexture::Resize(float a_scale)
-	{
-		auto scale = a_scale / 1080;  // standard window height
-		size = imageSize * (scale * RE::BSGraphics::Renderer::GetScreenSize().height);
+		auto scale = (a_scale / 1080) * RE::BSGraphics::Renderer::GetScreenSize().height;
+		return ImGui::Texture::LoadImpl(scale);
 	}
 
 	void Font::LoadSettings(const CSimpleIniA& a_ini, const char* a_section)
@@ -63,45 +52,34 @@ namespace IconFont
 
 	void Manager::LoadIcons()
 	{
-		unknownKey.Load();
-		upKey.Load();
-		downKey.Load();
-		leftKey.Load();
-		rightKey.Load();
-
-		std::for_each(keyboard.begin(), keyboard.end(), [](auto& Icon) {
-			Icon.second.Load();
-		});
-		std::for_each(gamePad.begin(), gamePad.end(), [](auto& Icon) {
-			auto& [xbox, ps4] = Icon.second;
-			xbox.Load();
-			ps4.Load();
-		});
-		std::for_each(mouse.begin(), mouse.end(), [](auto& Icon) {
-			Icon.second.Load();
-		});
-	}
-
-	void Manager::ResizeIcons()
-	{
 		float buttonScale = ImGui::GetUserStyleVar(ImGui::USER_STYLE::kButtonScale);
 
-		unknownKey.Resize(buttonScale);
-		upKey.Resize(buttonScale);
-		downKey.Resize(buttonScale);
-		leftKey.Resize(buttonScale);
-		rightKey.Resize(buttonScale);
+		std::vector<std::pair<IconTexture*, float>> queue;
+		queue.reserve(keyboard.size() + (gamePad.size() * 2) + mouse.size() + 5);
 
-		std::for_each(keyboard.begin(), keyboard.end(), [&](auto& Icon) {
-			Icon.second.Resize(buttonScale);
-		});
-		std::for_each(gamePad.begin(), gamePad.end(), [&](auto& Icon) {
-			auto& [xbox, ps4] = Icon.second;
-			xbox.Resize(buttonScale);
-			ps4.Resize(buttonScale);
-		});
-		std::for_each(mouse.begin(), mouse.end(), [&](auto& Icon) {
-			Icon.second.Resize(buttonScale);
+		const auto queue_into = [&](IconTexture& a_texture, float a_scale) {
+			queue.emplace_back(&a_texture, a_scale);
+		};
+
+		queue_into(unknownKey, buttonScale);
+		queue_into(upKey, buttonScale);
+		queue_into(downKey, buttonScale);
+		queue_into(leftKey, buttonScale);
+		queue_into(rightKey, buttonScale);
+		for (auto& [key, texture] : keyboard) {
+			queue_into(texture, buttonScale);
+		}
+		for (auto& [key, textures] : gamePad) {
+			auto& [xbox, ps4] = textures;
+			queue_into(xbox, buttonScale);
+			queue_into(ps4, buttonScale);
+		}
+		for (auto& [key, texture] : mouse) {
+			queue_into(texture, buttonScale);
+		}
+
+		std::for_each(std::execution::par, queue.begin(), queue.end(), [](auto& a_entry) {
+			a_entry.first->Load(a_entry.second);
 		});
 	}
 
