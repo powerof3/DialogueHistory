@@ -1,7 +1,6 @@
 #include "Hooks.h"
 #include "GlobalHistory.h"
 #include "Input.h"
-#include "LocalHistory.h"
 
 namespace Hooks
 {
@@ -36,88 +35,6 @@ namespace Hooks
 			}
 		}
 		static inline REL::Relocation<decltype(thunk)> func;
-	};
-
-	struct ShowSubtitle
-	{
-		static void thunk(RE::SubtitleManager* a_this, RE::TESObjectREFR* a_speaker, const char* a_subtitle, bool a_alwaysDisplay)
-		{
-			func(a_this, a_speaker, a_subtitle, a_alwaysDisplay);
-
-			if (a_speaker && !a_speaker->IsPlayerRef()) {
-				std::string subtitle = a_subtitle;
-				std::string voice;
-				if (auto topic = RE::MenuTopicManager::GetSingleton()->lastSelectedDialogue) {
-					if (auto response = topic->currentResponse; response && response->item) {
-						if (voice = response->item->voice; !voice.empty()) {
-							// Strip "Data\"
-							voice.erase(0, 5);
-						}
-					}
-				}
-				MANAGER(LocalHistory)->AddDialogue(a_speaker, (subtitle.empty() || subtitle == " ") ? "..." : a_subtitle, voice);
-			}
-		}
-		static inline REL::Relocation<decltype(thunk)> func;
-
-		static void Install()
-		{
-			std::array targets{
-				std::make_pair(RELOCATION_ID(19119, 19521), 0x2B2),
-				std::make_pair(RELOCATION_ID(36543, 37544), OFFSET(0x8EC, 0x8C2)),
-			};
-			for (auto& [id, offset] : targets) {
-				REL::Relocation<std::uintptr_t> target(id, offset);
-				stl::write_thunk_call<ShowSubtitle>(target.address());
-			}
-		}
-	};
-
-	struct PushHUDMode
-	{
-		static void thunk(const char* a_mode)
-		{
-			func(a_mode);
-
-			MANAGER(LocalHistory)->SetDialogueMenuOpen(true);
-		}
-		static inline REL::Relocation<decltype(thunk)> func;
-
-		static void Install()
-		{
-			std::array targets{
-				std::make_pair(RELOCATION_ID(50610, 51504), 0xA2),
-				std::make_pair(RELOCATION_ID(50612, 51506), OFFSET(0x2AF, 0x3AE)),
-			};
-			for (auto& [id, offset] : targets) {
-				REL::Relocation<std::uintptr_t> target(id, offset);
-				stl::write_thunk_call<PushHUDMode>(target.address());
-			}
-		}
-	};
-
-	struct PopHUDMode
-	{
-		static void thunk(const char* a_mode)
-		{
-			func(a_mode);
-
-			MANAGER(LocalHistory)->SetDialogueMenuOpen(false);
-		}
-		static inline REL::Relocation<decltype(thunk)> func;
-
-		static void Install()
-		{
-			std::array targets{
-				std::make_pair(RELOCATION_ID(50617, 51511), 0xA5),
-				std::make_pair(RELOCATION_ID(50612, 51506), OFFSET(0x2A8, 0x3A7)),
-				std::make_pair(RELOCATION_ID(50612, 51506), OFFSET(0xDE, 0xE1)),
-			};
-			for (auto& [id, offset] : targets) {
-				REL::Relocation<std::uintptr_t> target(id, offset);
-				stl::write_thunk_call<PopHUDMode>(target.address());
-			}
-		}
 	};
 
 	struct ProcessMessage
@@ -200,9 +117,22 @@ namespace Hooks
 		REL::Relocation<std::uintptr_t> topicClicked(RELOCATION_ID(50615, 51509), 0x5A);
 		stl::write_thunk_call<UpdateSelectedResponse>(topicClicked.address());
 
-		ShowSubtitle::Install();
-		PushHUDMode::Install();
-		PopHUDMode::Install();
+		REL::Relocation<std::uintptr_t> showSub_0(RELOCATION_ID(19119, 19521), 0x2B2);
+		stl::write_thunk_call<ShowSubtitle<0>>(showSub_0.address());
+		REL::Relocation<std::uintptr_t> showSub_1(RELOCATION_ID(36543, 37544), OFFSET(0x8EC, 0x8C2));
+		stl::write_thunk_call<ShowSubtitle<1>>(showSub_1.address());
+
+		REL::Relocation<std::uintptr_t> pushhud_0(RELOCATION_ID(50610, 51504), 0xA2);
+		stl::write_thunk_call<PushHUDMode<0>>(pushhud_0.address());
+		REL::Relocation<std::uintptr_t> pushhud_1(RELOCATION_ID(50612, 51506), OFFSET(0x2AF, 0x3AE));
+		stl::write_thunk_call<PushHUDMode<1>>(pushhud_1.address());
+	
+		REL::Relocation<std::uintptr_t> pophud_0(RELOCATION_ID(50617, 51511), 0xA5);
+		stl::write_thunk_call<PopHUDMode<0>>(pophud_0.address());
+		
+		REL::Relocation<std::uintptr_t> pophud_1(RELOCATION_ID(50612, 51506));
+		stl::write_thunk_call<PopHUDMode<1>>(pophud_1.address() + OFFSET(0x2A8, 0x3A7));
+		stl::write_thunk_call<PopHUDMode<2>>(pophud_1.address() + OFFSET(0xDE, 0xE1));
 
 		stl::write_vfunc<RE::DialogueMenu, ProcessMessage>();
 
