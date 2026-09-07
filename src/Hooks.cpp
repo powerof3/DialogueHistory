@@ -126,10 +126,10 @@ namespace Hooks
 		stl::write_thunk_call<PushHUDMode<0>>(pushhud_0.address());
 		REL::Relocation<std::uintptr_t> pushhud_1(RELOCATION_ID(50612, 51506), OFFSET(0x2AF, 0x3AE));
 		stl::write_thunk_call<PushHUDMode<1>>(pushhud_1.address());
-	
+
 		REL::Relocation<std::uintptr_t> pophud_0(RELOCATION_ID(50617, 51511), 0xA5);
 		stl::write_thunk_call<PopHUDMode<0>>(pophud_0.address());
-		
+
 		REL::Relocation<std::uintptr_t> pophud_1(RELOCATION_ID(50612, 51506));
 		stl::write_thunk_call<PopHUDMode<1>>(pophud_1.address() + OFFSET(0x2A8, 0x3A7));
 		stl::write_thunk_call<PopHUDMode<2>>(pophud_1.address() + OFFSET(0xDE, 0xE1));

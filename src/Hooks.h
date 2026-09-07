@@ -51,6 +51,6 @@ namespace Hooks
 		}
 		static inline REL::Relocation<decltype(thunk)> func;
 	};
-	
+
 	void Install();
 }
