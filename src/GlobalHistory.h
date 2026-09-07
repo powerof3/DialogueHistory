@@ -24,8 +24,8 @@ namespace GlobalHistory
 	template <class D>
 	using TimeStampMap = std::map<TimeStamp, D, comparator>;
 
-	using DialogueDate = TimeStampMap<TimeStampMap<Dialogue>>;
-	using DialogueLocation = std::map<std::string, TimeStampMap<Dialogue>, comparator>;
+	using DialogueDate = TimeStampMap<TimeStampMap<Dialogue*>>;
+	using DialogueLocation = std::map<std::string, TimeStampMap<Dialogue*>, comparator>;
 
 	using MonologueDate = TimeStampMap<Monologues>;
 	using MonologueLocation = std::map<std::string, TimeStampMap<Monologues>, comparator>;
@@ -40,43 +40,54 @@ namespace GlobalHistory
 			if (nameFilter.empty()) {
 				return map;
 			}
-
 			if (cachedFilter == nameFilter) {
 				return filteredMap;
 			}
 
 			cachedFilter = nameFilter;
-			filteredMap = map;
+			filteredMap.clear();
+
+			constexpr auto pass_filter = [](const auto& speech) {
+				return REX::STR::ICONTAINS(speech->speakerName, nameFilter);
+			};
 
 			if constexpr (std::is_same_v<T, MonologueDate>) {
-				std::erase_if(filteredMap, [](auto& item) {
-					auto& [root, monologueVec] = item;
-					std::erase_if(monologueVec.monologues, [&](const auto& monologue) {
-						return !REX::STR::ICONTAINS(monologue.speakerName, nameFilter);
-					});
-					return monologueVec.empty();
-				});
+				// date -> Monologues
+				for (const auto& [date, monologues] : map) {
+					Monologues* out = nullptr;
+					for (auto* monologue : monologues.monologues) {
+						if (pass_filter(monologue)) {
+							if (!out) {
+								out = &filteredMap[date];
+							}
+							out->monologues.push_back(monologue);
+						}
+					}
+				}
 			} else if constexpr (std::is_same_v<T, MonologueLocation>) {
-				std::erase_if(filteredMap, [](auto& item) {
-					auto& [root, monologueMap] = item;
-					std::erase_if(monologueMap, [&](auto& item) {
-						auto& [timeStamp, monologueVec] = item;
-						std::erase_if(monologueVec.monologues, [&](const auto& monologue) {
-							return !REX::STR::ICONTAINS(monologue.speakerName, nameFilter);
-						});
-						return monologueVec.empty();
-					});
-					return monologueMap.empty();
-				});
+				// location -> date -> Monologues
+				for (const auto& [loc, dateMap] : map) {
+					for (const auto& [date, monologues] : dateMap) {
+						Monologues* out = nullptr;
+						for (auto* monologue : monologues.monologues) {
+							if (pass_filter(monologue)) {
+								if (!out) {
+									out = &filteredMap[loc][date];
+								}
+								out->monologues.push_back(monologue);
+							}
+						}
+					}
+				}
 			} else {
-				std::erase_if(filteredMap, [](auto& item) {
-					auto& [root, dialogueMap] = item;
-					std::erase_if(dialogueMap, [&](auto& item) {
-						const auto& [timeStamp, dialogue] = item;
-						return !REX::STR::ICONTAINS(dialogue.speakerName, nameFilter);
-					});
-					return dialogueMap.empty();
-				});
+				// root -> leaf -> Dialogue*
+				for (const auto& [root, leafMap] : map) {
+					for (const auto& [leaf, dialogue] : leafMap) {
+						if (pass_filter(dialogue)) {
+							filteredMap[root][leaf] = dialogue;
+						}
+					}
+				}
 			}
 
 			return filteredMap;
@@ -105,8 +116,8 @@ namespace GlobalHistory
 	{
 		virtual ~BaseHistory() = default;
 
-		virtual void DrawDateTree(){};
-		virtual void DrawLocationTree(){};
+		virtual void DrawDateTree() {};
+		virtual void DrawLocationTree() {};
 		void         DrawTree(bool a_sortByLocation)
 		{
 			if (a_sortByLocation) {
@@ -116,16 +127,25 @@ namespace GlobalHistory
 			}
 		}
 
-		virtual void ClearCurrentHistory() { currentHistory = std::nullopt; };
-		bool         CanDrawHistory() { return currentHistory.has_value(); }
-		void         DrawHistory()
+		virtual void ClearCurrentHistory() { currentHistory = nullptr; }
+
+		void ClearMaps()
+		{
+			dateMap.clear();
+			locationMap.clear();
+			ClearCurrentHistory();
+		}
+		virtual void Clear() { ClearMaps(); }
+
+		bool CanDrawHistory() const { return currentHistory != nullptr; }
+		void DrawHistory()
 		{
 			if (currentHistory) {
 				currentHistory->Draw();
 			}
 		}
 
-		virtual void SetCurrentHistory(const HistoryData& a_history)
+		virtual void SetCurrentHistory(HistoryData a_history)
 		{
 			currentHistory = a_history;
 			currentHistory->RefreshContents();
@@ -176,11 +196,6 @@ namespace GlobalHistory
 			REX::INFO("{} : Cleaned up {} unused history files.", GetType(), count);
 		}
 
-		void Clear()
-		{
-			dateMap.clear();
-			locationMap.clear();
-		}
 		void ClearFilters()
 		{
 			dateMap.clear_filter();
@@ -190,7 +205,7 @@ namespace GlobalHistory
 		// members
 		DialogueMap<DateMap>                 dateMap{};      // 8th of Last Seed, 4E 201 -> 13:53, Lydia
 		DialogueMap<LocationMap>             locationMap{};  // Dragonsreach -> Lydia
-		std::optional<HistoryData>           currentHistory{ std::nullopt };
+		HistoryData                          currentHistory{ nullptr };
 		std::optional<std::filesystem::path> directory;
 
 	protected:
@@ -203,7 +218,7 @@ namespace GlobalHistory
 	};
 
 	// Dialogue between player and NPC
-	struct DialogueHistory : public BaseHistory<Dialogue, DialogueDate, DialogueLocation>
+	struct DialogueHistory : public BaseHistory<Dialogue*, DialogueDate, DialogueLocation>
 	{
 	public:
 		virtual ~DialogueHistory() override = default;
@@ -211,8 +226,9 @@ namespace GlobalHistory
 		void        RefreshTimeStamps(bool a_use12HourFormat);
 		void        DrawDateTree() override;
 		void        DrawLocationTree() override;
+		void        Clear() override;
 		const char* GetType() override { return "DialogueHistory"; }
-		void        SaveHistory(const std::tm& a_tm, const Dialogue& a_history, bool a_use12HourFormat);
+		void        SaveHistory(const std::tm& a_tm, Dialogue a_history, bool a_use12HourFormat);
 		void        SaveHistoryToFile(const std::string& a_save);
 		bool        LoadHistoryFromFile(const std::string& a_save);
 
@@ -221,7 +237,7 @@ namespace GlobalHistory
 		void InitHistory();
 
 		//members
-		std::vector<Dialogue> history{};
+		std::deque<Dialogue> history{};
 
 	private:
 		template <class T>
@@ -229,7 +245,7 @@ namespace GlobalHistory
 	};
 
 	// Standalone NPC dialogue
-	struct ConversationHistory : public BaseHistory<Monologues, MonologueDate, MonologueLocation>
+	struct ConversationHistory : public BaseHistory<Monologues*, MonologueDate, MonologueLocation>
 	{
 	public:
 		virtual ~ConversationHistory() override = default;
@@ -241,13 +257,14 @@ namespace GlobalHistory
 		void DrawLocationTree() override;
 
 		void ClearCurrentHistory() override;
-		void SetCurrentHistory(const Monologues& a_history) override;
+		void Clear() override;
+		void SetCurrentHistory(Monologues* a_history) override;
 		void RefreshCurrentHistory();
 		void RevertCurrentHistory();
 
 		const char* GetType() override { return "ConversationHistory"; }
 
-		void SaveHistory(const std::tm& a_tm, const Monologue& a_history);
+		void SaveHistory(const std::tm& a_tm, Monologue a_history);
 		void SaveHistoryToFile(const std::string& a_save);
 		bool LoadHistoryFromFile(const std::string& a_save);
 
@@ -259,8 +276,9 @@ namespace GlobalHistory
 		void RefreshHistoryMaps();
 
 		// members
-		Monologues                history{};
-		std::optional<Monologues> currentFixedHistory{ std::nullopt };  // for search filter
+		std::deque<Monologue> history{};
+		Monologues*           currentFixedHistory{ nullptr };
+		Monologues            currentFiltered{};
 
 		bool showScene{ true };
 		bool showCombat{ true };
@@ -297,7 +315,7 @@ namespace GlobalHistory
 
 		bool Use12HourFormat() const;
 
-		void SaveDialogueHistory(const std::tm& a_time, const Dialogue& a_dialogue);
+		void SaveDialogueHistory(const std::tm& a_time, Dialogue a_dialogue);
 
 		void SaveFiles(const std::string& a_save);
 		void LoadFiles(const std::string& a_save);
@@ -307,6 +325,12 @@ namespace GlobalHistory
 
 		void PlayVoiceline(const std::string& a_voiceline);
 
+		const std::string& GetPlayerName() const;
+		void               RefreshPlayerName();
+
+		bool IsLineHovered(const void* a_line) const;
+		void SetLineHovered(const void* a_line, bool a_hovered);
+
 	private:
 		void AddConversation(const RE::TESObjectREFRPtr& a_speaker, RE::TESTopicInfo* a_info);
 
@@ -315,20 +339,21 @@ namespace GlobalHistory
 		EventResult ProcessEvent(const SKSE::ModCallbackEvent* a_evn, RE::BSTEventSource<SKSE::ModCallbackEvent>*) override;
 
 		// members
-		bool                globalHistoryOpen{ false };
-		bool                menuOpenedJustNow{ false };
-		bool                openFromTweenMenu{ false };
-		bool                skyrimSoulsInstalled{ false };
 		DialogueHistory     dialogueHistory;
 		ConversationHistory conversationHistory;
-		bool                drawConversation{ false };
+		std::string         playerName;
 		RE::BSSoundHandle   voiceHandle{};
+		const void*         hoveredLine{ nullptr };
+		bool                drawConversation{ false };
 		bool                finishLoading{ false };
 		bool                sortByLocation{ false };
 		bool                use12HourFormat{ false };
 		bool                unpauseMenu{ false };
 		bool                blurMenu{ true };
 		bool                hideButton{ false };
+		bool                globalHistoryOpen{ false };
+		bool                menuOpenedJustNow{ false };
+		bool                openFromTweenMenu{ false };
 	};
 
 	template <class HistoryData, class DateMap, class LocationMap>
@@ -468,7 +493,7 @@ namespace GlobalHistory
 				if (rootOpen) {
 					for (auto& [leaf, monologue] : leafMap) {
 						auto leafFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanFullWidth;
-						auto is_selected = currentHistory && currentHistory == monologue;
+						auto is_selected = currentHistory && *currentHistory == monologue;
 						if (is_selected) {
 							leafFlags |= ImGuiTreeNodeFlags_Selected;
 							ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImGui::GetStyleColorVec4(ImGuiCol_Header));
@@ -477,8 +502,8 @@ namespace GlobalHistory
 							ImGui::TreePop();
 						}
 						if (ImGui::IsItemSelected() && !ImGui::IsItemToggledOpen()) {
-							if (monologue != currentHistory) {
-								SetCurrentHistory(monologue);
+							if (!is_selected) {
+								SetCurrentHistory(&a_map.map.at(root).at(leaf));
 								RE::PlaySound("UIMenuFocus");
 							}
 						}
@@ -499,7 +524,7 @@ namespace GlobalHistory
 			}
 			for (auto& [leaf, monologue] : map) {
 				auto leafFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanFullWidth;
-				auto is_selected = currentHistory && currentHistory == monologue;
+				auto is_selected = currentHistory && *currentHistory == monologue;
 				if (is_selected) {
 					leafFlags |= ImGuiTreeNodeFlags_Selected;
 					ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImGui::GetStyleColorVec4(ImGuiCol_Header));
@@ -508,8 +533,8 @@ namespace GlobalHistory
 					ImGui::TreePop();
 				}
 				if (ImGui::IsItemSelected() && !ImGui::IsItemToggledOpen()) {
-					if (monologue != currentHistory) {
-						SetCurrentHistory(monologue);
+					if (!is_selected) {
+						SetCurrentHistory(&a_map.map.at(leaf));
 						RE::PlaySound("UIMenuFocus");
 					}
 				}

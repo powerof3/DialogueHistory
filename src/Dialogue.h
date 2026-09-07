@@ -16,21 +16,17 @@ struct TimeStamp
 	TimeStamp() = default;
 	TimeStamp(std::uint64_t a_timeStamp, const std::string& a_format);
 
-	bool operator<(const TimeStamp& a_rhs) const
-	{
-		return time < a_rhs.time;
-	}
-	bool operator>(const TimeStamp& a_rhs) const
-	{
-		return time > a_rhs.time;
-	}
 	bool operator==(const TimeStamp& a_rhs) const
 	{
 		return time == a_rhs.time;
 	}
+	auto operator<=>(const TimeStamp& a_rhs) const
+	{
+		return time <=> a_rhs.time;
+	}
 
-	static std::string GetMonthName(std::uint32_t a_month);
-	static std::string GetOrdinalSuffix(std::uint32_t a_day);
+	static const char* GetMonthName(std::uint32_t a_month);
+	static const char* GetOrdinalSuffix(std::uint32_t a_day);
 
 	static std::uint64_t GenerateTimeStamp(std::tm a_time);
 	static std::tm       ExtractTimeStamp(std::uint64_t a_timeStamp);
@@ -53,21 +49,18 @@ struct Speech
 	struct Line
 	{
 		Line() = default;
-		Line(const std::string& a_line, const std::string& a_voice);
+		Line(std::string a_line, std::string a_voice);
 
 		// members
 		std::string line;
 		std::string voice;
-		// skip write
-		bool hovered{};
 
 		struct glaze
 		{
 			using T = Line;
 			static constexpr auto value = glz::object(
 				"line", &T::line,
-				"wav", &T::voice,
-				"hovered", glz::hide(&T::hovered));
+				"wav", &T::voice);
 		};
 	};
 
@@ -78,18 +71,16 @@ struct Speech
 	{
 		return timeStamp == a_rhs.timeStamp;
 	}
-	bool operator<(const Speech& a_rhs) const
+	auto operator<=>(const Speech& a_rhs) const
 	{
-		return timeStamp < a_rhs.timeStamp;
-	}
-	bool operator>(const Speech& a_rhs) const
-	{
-		return timeStamp > a_rhs.timeStamp;
+		return timeStamp <=> a_rhs.timeStamp;
 	}
 
 	void    Initialize(RE::TESObjectREFR* a_speaker);
 	void    Initialize(const std::tm& a_time);
 	std::tm ExtractTimeStamp() const;
+
+	void Clear();
 
 	// members
 	std::uint64_t         timeStamp;
@@ -105,11 +96,10 @@ struct Dialogue : public Speech
 	struct Line : public Speech::Line
 	{
 		Line() = default;
-		Line(RE::TESObjectREFR* a_speaker, const std::string& a_line, const std::string& a_voice);
+		Line(RE::TESObjectREFR* a_speaker, std::string a_line, std::string a_voice);
 
 		// members
-		std::string name{};
-		bool        isPlayer{};  // skip write
+		bool isPlayer{};  // skip write
 
 		struct glaze
 		{
@@ -117,8 +107,6 @@ struct Dialogue : public Speech
 			static constexpr auto value = glz::object(
 				"line", &T::line,
 				"wav", &T::voice,
-				"name", glz::hide(&T::name),
-				"hovered", glz::hide(&T::hovered),
 				"pc", glz::hide(&T::isPlayer));
 		};
 	};
@@ -131,7 +119,7 @@ struct Dialogue : public Speech
 		return dialogue.empty();
 	}
 
-	void        AddDialogue(RE::TESObjectREFR* a_speaker, const std::string& a_line, const std::string& a_voice);
+	void        AddDialogue(RE::TESObjectREFR* a_speaker, std::string a_line, std::string a_voice);
 	std::string TimeStampToString(bool a_use12HourFormat) const;
 
 	void Draw();
@@ -139,12 +127,11 @@ struct Dialogue : public Speech
 	void RefreshContents();
 
 	// members
-	std::string                 playerName{};
 	std::vector<Dialogue::Line> dialogue{};
 	std::string                 timeAndLoc{};
-	bool                        refreshContents{ true };
 	float                       nameWidth{ 0.0f };
 	float                       colonWidth{ 0.0f };
+	bool                        refreshContents{ true };
 
 	struct glaze
 	{
@@ -164,7 +151,7 @@ struct Dialogue : public Speech
 struct Monologue : public Speech
 {
 	Monologue() = default;
-	Monologue(std::tm& a_time, RE::TESObjectREFR* a_speaker, const std::string& a_line, const std::string& a_voice, RE::TESTopic* a_topic);
+	Monologue(std::tm& a_time, RE::TESObjectREFR* a_speaker, std::string a_line, std::string a_voice, RE::TESTopic* a_topic);
 
 	// members
 	Speech::Line          line{};
@@ -200,9 +187,9 @@ struct Monologues
 	void RefreshContents();
 
 	// members
-	std::vector<Monologue> monologues{};
-	bool                   refreshContents{ true };
-	float                  timeWidth{ 0.0f };
-	float                  nameWidth{ 0.0f };
-	float                  colonWidth{ 0.0f };
+	std::vector<Monologue*> monologues{};
+	bool                    refreshContents{ true };
+	float                   timeWidth{ 0.0f };
+	float                   nameWidth{ 0.0f };
+	float                   colonWidth{ 0.0f };
 };

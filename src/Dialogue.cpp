@@ -14,72 +14,53 @@ std::uint64_t TimeStamp::GenerateTimeStamp(std::tm a_time)
 	return REX::STR::TO_NUM<std::uint64_t>(std::format("{:03}{:02}{:02}{:02}{:02}", a_time.tm_year, a_time.tm_mon, a_time.tm_mday, a_time.tm_hour, a_time.tm_min));
 }
 
-std::string TimeStamp::GetMonthName(std::uint32_t a_month)
+const char* TimeStamp::GetMonthName(std::uint32_t a_month)
 {
-	auto gmst = RE::GameSettingCollection::GetSingleton();
-
-	RE::Setting* setting = nullptr;
 	switch (a_month) {
 	case RE::Calendar::Month::kMorningStar:
-		setting = gmst->GetSetting("sMonthJanuary");
-		break;
+		return *"sMonthJanuary"_gs;
 	case RE::Calendar::Month::kSunsDawn:
-		setting = gmst->GetSetting("sMonthFebruary");
-		break;
+		return *"sMonthFebruary"_gs;
 	case RE::Calendar::Month::kFirstSeed:
-		setting = gmst->GetSetting("sMonthMarch");
-		break;
+		return *"sMonthMarch"_gs;
 	case RE::Calendar::Month::kRainsHand:
-		setting = gmst->GetSetting("sMonthApril");
-		break;
+		return *"sMonthApril"_gs;
 	case RE::Calendar::Month::kSecondSeed:
-		setting = gmst->GetSetting("sMonthMay");
-		break;
+		return *"sMonthMay"_gs;
 	case RE::Calendar::Month::kMidyear:
-		setting = gmst->GetSetting("sMonthJune");
-		break;
+		return *"sMonthJune"_gs;
 	case RE::Calendar::Month::kSunsHeight:
-		setting = gmst->GetSetting("sMonthJuly");
-		break;
+		return *"sMonthJuly"_gs;
 	case RE::Calendar::Month::kLastSeed:
-		setting = gmst->GetSetting("sMonthAugust");
-		break;
+		return *"sMonthAugust"_gs;
 	case RE::Calendar::Month::kHearthfire:
-		setting = gmst->GetSetting("sMonthSeptember");
-		break;
+		return *"sMonthSeptember"_gs;
 	case RE::Calendar::Month::kFrostfall:
-		setting = gmst->GetSetting("sMonthOctober");
-		break;
+		return *"sMonthOctober"_gs;
 	case RE::Calendar::Month::kSunsDusk:
-		setting = gmst->GetSetting("sMonthNovember");
-		break;
+		return *"sMonthNovember"_gs;
 	case RE::Calendar::Month::kEveningStar:
-		setting = gmst->GetSetting("sMonthDecember");
-		break;
+		return *"sMonthDecember"_gs;
 	default:
-		setting = nullptr;
-		break;
+		return "Bad Month";
 	}
-	return setting ? setting->GetString() : "Bad Month";
 }
 
-std::string TimeStamp::GetOrdinalSuffix(std::uint32_t a_day)
+const char* TimeStamp::GetOrdinalSuffix(std::uint32_t a_day)
 {
-	auto gmst = RE::GameSettingCollection::GetSingleton();
-
 	switch (a_day) {
 	case 1:
 	case 21:
 	case 31:
-		return gmst->GetSetting("sFirstOrdSuffix")->GetString();
+		return *"sFirstOrdSuffix"_gs;
 	case 2:
 	case 22:
-		return gmst->GetSetting("sSecondOrdSuffix")->GetString();
+		return *"sSecondOrdSuffix"_gs;
 	case 3:
 	case 23:
-		return gmst->GetSetting("sThirdOrdSuffix")->GetString();
+		return *"sThirdOrdSuffix"_gs;
 	default:
-		return gmst->GetSetting("sDefaultOrdSuffix")->GetString();
+		return *"sDefaultOrdSuffix"_gs;
 	}
 }
 
@@ -102,25 +83,23 @@ std::tm TimeStamp::ExtractTimeStamp(std::uint64_t a_timeStamp)
 
 std::string TimeStamp::GetFormattedYearMonthDay(std::uint32_t a_year, std::uint32_t a_month, std::uint32_t a_day)
 {
-	return std::format("{}{}{}{}, 4E {}", a_day, GetOrdinalSuffix(a_day), RE::GameSettingCollection::GetSingleton()->GetSetting("sOf")->GetString(), GetMonthName(a_month), a_year);
+	return std::format("{}{}{}{}, 4E {}", a_day, GetOrdinalSuffix(a_day), *"sOf"_gs, GetMonthName(a_month), a_year);
 }
 
 std::string TimeStamp::GetFormattedHourMin(std::uint32_t a_hour, std::uint32_t a_minute, bool a_12HourFormat)
 {
-	auto gmst = RE::GameSettingCollection::GetSingleton();
-
 	if (a_12HourFormat) {
-		std::string AMPM;
+		const char* AMPM;
 		if (a_hour < 12) {
 			if (a_hour == 0) {
 				a_hour = 12;
 			}
-			AMPM = gmst->GetSetting("sTimeAM")->GetString();
+			AMPM = *"sTimeAM"_gs;
 		} else {
 			if (a_hour > 12) {
 				a_hour -= 12;
 			}
-			AMPM = gmst->GetSetting("sTimePM")->GetString();
+			AMPM = *"sTimePM"_gs;
 		}
 		return std::format("{:02}:{:02} {}", a_hour, a_minute, AMPM);
 	} else {
@@ -155,10 +134,9 @@ Speech::Speech(const std::tm& a_time, RE::TESObjectREFR* a_speaker)
 	Initialize(a_time);
 }
 
-Speech::Line::Line(const std::string& a_line, const std::string& a_voice) :
-	line(a_line),
-	voice(a_voice),
-	hovered(false)
+Speech::Line::Line(std::string a_line, std::string a_voice) :
+	line(std::move(a_line)),
+	voice(std::move(a_voice))
 {}
 
 void Speech::Initialize(RE::TESObjectREFR* a_speaker)
@@ -194,13 +172,21 @@ std::tm Speech::ExtractTimeStamp() const
 	return TimeStamp::ExtractTimeStamp(timeStamp);
 }
 
+void Speech::Clear()
+{
+	timeStamp = 0;
+	id = {};
+	loc = {};
+	locName.clear();
+	speakerName.clear();
+}
+
 Dialogue::Dialogue(const std::tm& a_time, RE::TESObjectREFR* a_speaker) :
 	Speech::Speech(a_time, a_speaker)
 {}
 
-Dialogue::Line::Line(RE::TESObjectREFR* a_speaker, const std::string& a_line, const std::string& a_voice) :
-	Speech::Line::Line(a_line, a_voice),
-	name(NPCNameProvider::GetSingleton()->GetName(a_speaker)),
+Dialogue::Line::Line(RE::TESObjectREFR* a_speaker, std::string a_line, std::string a_voice) :
+	Speech::Line::Line(std::move(a_line), std::move(a_voice)),
 	isPlayer(a_speaker->IsPlayerRef())
 {}
 
@@ -212,20 +198,19 @@ std::string Dialogue::TimeStampToString(bool a_use12HourFormat) const
 		TimeStamp::GetFormattedHourMin(time.tm_hour, time.tm_min, a_use12HourFormat));
 }
 
-void Dialogue::AddDialogue(RE::TESObjectREFR* a_speaker, const std::string& a_line, const std::string& a_voice)
+void Dialogue::AddDialogue(RE::TESObjectREFR* a_speaker, std::string a_line, std::string a_voice)
 {
 	Initialize(a_speaker);
-
-	if (playerName.empty()) {
-		playerName = NPCNameProvider::GetSingleton()->GetName(RE::PlayerCharacter::GetSingleton());
-	}
-
-	dialogue.emplace_back(a_speaker, a_line, a_voice);
+	dialogue.emplace_back(a_speaker, std::move(a_line), std::move(a_voice));
 }
 
 void Dialogue::Draw()
 {
 	using namespace ImGui;
+
+	auto mgr = MANAGER(GlobalHistory);
+
+	const auto& playerName = mgr->GetPlayerName();
 
 	if (refreshContents || nameWidth == 0.0f) {
 		refreshContents = false;
@@ -233,7 +218,7 @@ void Dialogue::Draw()
 		colonWidth = ImGui::CalcTextSize(":").x;
 	}
 
-	bool isGlobalHistoryOpen = MANAGER(GlobalHistory)->IsGlobalHistoryOpen();
+	bool isGlobalHistoryOpen = mgr->IsGlobalHistoryOpen();
 
 	ImGui::Indent();
 	{
@@ -245,7 +230,7 @@ void Dialogue::Draw()
 			}
 			ImGui::PopFont();
 			if (timeAndLoc.empty()) {
-				timeAndLoc = std::format("{} - {}", TimeStampToString(MANAGER(GlobalHistory)->Use12HourFormat()), locName);
+				timeAndLoc = std::format("{} - {}", TimeStampToString(mgr->Use12HourFormat()), locName);
 			}
 			ImGui::CenteredText(timeAndLoc.c_str(), false);
 			ImGui::Spacing(4);
@@ -261,12 +246,14 @@ void Dialogue::Draw()
 			ImGui::TableSetupColumn("##Line", ImGuiTableColumnFlags_WidthStretch);
 
 			for (auto& line : dialogue) {
-				auto speakerColor = line.isPlayer ? GetUserStyleColorVec4(USER_STYLE::kPlayerName) : GetUserStyleColorVec4(USER_STYLE::kSpeakerName);
+				bool        hovered = mgr->IsLineHovered(&line);
+				const auto& name = line.isPlayer ? playerName : speakerName;
+				auto        speakerColor = line.isPlayer ? GetUserStyleColorVec4(USER_STYLE::kPlayerName) : GetUserStyleColorVec4(USER_STYLE::kSpeakerName);
 
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex(0);
 				{
-					ImGui::TextColored(speakerColor, line.name.c_str());
+					ImGui::TextColored(speakerColor, name.c_str());
 				}
 				ImGui::TableSetColumnIndex(1);
 				{
@@ -275,14 +262,14 @@ void Dialogue::Draw()
 				ImGui::TableSetColumnIndex(2);
 				{
 					auto lineColor = line.isPlayer ? GetUserStyleColorVec4(USER_STYLE::kPlayerLine) : GetUserStyleColorVec4(USER_STYLE::kSpeakerLine);
-					lineColor.w = (!isGlobalHistoryOpen || line.isPlayer || line.hovered) ? 1.0f : GetUserStyleVar(USER_STYLE::kDisabledTextAlpha);
+					lineColor.w = (!isGlobalHistoryOpen || line.isPlayer || hovered) ? 1.0f : GetUserStyleVar(USER_STYLE::kDisabledTextAlpha);
 
 					ImGui::TextColoredWrapped(lineColor, line.line.c_str());
 
-					line.hovered = ImGui::IsItemHovered();
+					mgr->SetLineHovered(&line, ImGui::IsItemHovered());
 
 					if (ImGui::IsItemSelected() && isGlobalHistoryOpen) {
-						MANAGER(GlobalHistory)->PlayVoiceline(line.voice);
+						mgr->PlayVoiceline(line.voice);
 					}
 				}
 				ImGui::Spacing(3);
@@ -297,10 +284,12 @@ void Dialogue::Draw()
 
 void Dialogue::Clear()
 {
-	timeStamp = 0;
+	Speech::Clear();
+
 	dialogue.clear();
-	speakerName.clear();
-	playerName.clear();
+	timeAndLoc.clear();
+	nameWidth = 0.0f;
+	colonWidth = 0.0f;
 
 	RefreshContents();
 }
@@ -310,9 +299,9 @@ void Dialogue::RefreshContents()
 	refreshContents = true;
 }
 
-Monologue::Monologue(std::tm& a_time, RE::TESObjectREFR* a_speaker, const std::string& a_line, const std::string& a_voice, RE::TESTopic* a_topic) :
+Monologue::Monologue(std::tm& a_time, RE::TESObjectREFR* a_speaker, std::string a_line, std::string a_voice, RE::TESTopic* a_topic) :
 	Speech::Speech(a_time, a_speaker),
-	line(a_line, a_voice)
+	line(std::move(a_line), std::move(a_voice))
 {
 	topic.SetNumericID(a_topic ? a_topic->GetFormID() : 0);
 	if (a_topic) {
@@ -322,16 +311,19 @@ Monologue::Monologue(std::tm& a_time, RE::TESObjectREFR* a_speaker, const std::s
 
 void Monologues::Draw()
 {
+	auto mgr = MANAGER(GlobalHistory);
+	bool use12HourFormat = mgr->Use12HourFormat();
+
 	if (refreshContents || timeWidth == 0.0f || nameWidth == 0.0f) {
 		refreshContents = false;
 
 		nameWidth = 0.0f;
-		timeWidth = ImGui::CalcTextSize(MANAGER(GlobalHistory)->Use12HourFormat() ? "88:88 AM" : "88:88").x;
+		timeWidth = ImGui::CalcTextSize(use12HourFormat ? "88:88 AM" : "88:88").x;
 
-		std::set<std::string> names{};
+		std::unordered_set<std::string_view> names{};
 		for (auto& monologue : monologues) {
-			if (names.insert(monologue.speakerName).second) {
-				if (auto width = ImGui::CalcTextSize(monologue.speakerName.c_str()).x; width > nameWidth) {
+			if (names.insert(monologue->speakerName).second) {
+				if (auto width = ImGui::CalcTextSize(monologue->speakerName.c_str()).x; width > nameWidth) {
 					nameWidth = width;
 				}
 			}
@@ -350,17 +342,20 @@ void Monologues::Draw()
 
 		auto speakerColor = ImGui::GetUserStyleColorVec4(ImGui::USER_STYLE::kSpeakerName);
 
-		for (auto& monologue : monologues | std::views::reverse) {
+		for (auto& monologuePtr : monologues | std::views::reverse) {
+			auto& monologue = *monologuePtr;
+			bool  hovered = mgr->IsLineHovered(&monologue.line);
+
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
 			{
 				if (monologue.hourMinTimeStamp.empty()) {
 					auto tm = monologue.ExtractTimeStamp();
-					monologue.hourMinTimeStamp = TimeStamp::GetFormattedHourMin(tm.tm_hour, tm.tm_min, MANAGER(GlobalHistory)->Use12HourFormat());
+					monologue.hourMinTimeStamp = TimeStamp::GetFormattedHourMin(tm.tm_hour, tm.tm_min, use12HourFormat);
 				}
 				ImGui::Text(monologue.hourMinTimeStamp.c_str());
 			}
-			auto& [response, voice, hovered] = monologue.line;
+			auto& [response, voice] = monologue.line;
 			ImGui::TableSetColumnIndex(1);
 			{
 				ImGui::TextColored(speakerColor, monologue.speakerName.c_str());
@@ -374,9 +369,9 @@ void Monologues::Draw()
 				auto lineColor = GetUserStyleColorVec4(ImGui::USER_STYLE::kSpeakerLine);
 				lineColor.w = hovered ? 1.0f : GetUserStyleVar(ImGui::USER_STYLE::kDisabledTextAlpha);
 				ImGui::TextColoredWrapped(lineColor, response.c_str());
-				hovered = ImGui::IsItemHovered();
+				mgr->SetLineHovered(&monologue.line, ImGui::IsItemHovered());
 				if (ImGui::IsItemSelected()) {
-					MANAGER(GlobalHistory)->PlayVoiceline(voice);
+					mgr->PlayVoiceline(voice);
 				}
 			}
 			ImGui::Spacing(3);

@@ -24,7 +24,7 @@ namespace LocalHistory
 		void SetDialogueMenuOpen(bool a_opened);
 		void SetLocalHistoryOpen(bool a_opened);
 
-		void AddDialogue(RE::TESObjectREFR* a_speaker, const std::string& a_response, const std::string& a_voice);
+		void AddDialogue(RE::TESObjectREFR* a_speaker, std::string a_response, std::string a_voice);
 		void SaveDialogueHistory();
 
 	private:

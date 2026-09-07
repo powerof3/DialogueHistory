@@ -74,7 +74,7 @@ namespace LocalHistory
 					if (!localHistoryOpen) {
 						// calculate position backwards
 						static float exitButtonPos = 0.9125f * windowSize.width;
-						static float textSize = ImGui::CalcTextSize("$DH_Title"_T).x;
+						float        textSize = ImGui::CalcTextSize("$DH_Title"_T).x;
 						static float innerSpacing = ImGui::GetStyle().ItemInnerSpacing.x * 0.40f;
 
 						posX = exitButtonPos;
@@ -216,7 +216,7 @@ namespace LocalHistory
 		}
 	}
 
-	void Manager::AddDialogue(RE::TESObjectREFR* a_speaker, const std::string& a_response, const std::string& a_voice)
+	void Manager::AddDialogue(RE::TESObjectREFR* a_speaker, std::string a_response, std::string a_voice)
 	{
 		if (!a_speaker->IsPlayerRef()) {
 			if (!currentSpeaker) {
@@ -227,7 +227,7 @@ namespace LocalHistory
 			}
 		}
 
-		localDialogue.AddDialogue(a_speaker, a_response, a_voice);
+		localDialogue.AddDialogue(a_speaker, std::move(a_response), std::move(a_voice));
 
 		// erase duplicate opening lines
 		if (auto& dialogue = localDialogue.dialogue; dialogue.size() == 2 &&
@@ -243,7 +243,7 @@ namespace LocalHistory
 			return;
 		}
 
-		MANAGER(GlobalHistory)->SaveDialogueHistory(gameTime, localDialogue);
+		MANAGER(GlobalHistory)->SaveDialogueHistory(gameTime, std::move(localDialogue));
 	}
 
 	void Manager::UpdateDialogue()
@@ -279,6 +279,10 @@ namespace LocalHistory
 		} else if (a_evn->menuName == RE::JournalMenu::MENU_NAME) {
 			if (IsLocalHistoryOpen()) {
 				SetupLocalHistoryMenu(!a_evn->opening, false);
+			}
+		} else if (a_evn->menuName == RE::RaceSexMenu::MENU_NAME) {
+			if (!a_evn->opening) {
+				MANAGER(GlobalHistory)->RefreshPlayerName();
 			}
 		} else if (a_evn->opening) {
 			switch (REX::STR::CONST_HASH(a_evn->menuName)) {

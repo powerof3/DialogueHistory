@@ -13,8 +13,6 @@
 #include "SKSE/SKSE.h"
 
 #include <codecvt>
-#include <dxgi.h>
-#include <shlobj.h>
 #include <wrl/client.h>
 
 #include <DirectXMath.h>

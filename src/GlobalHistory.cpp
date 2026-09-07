@@ -18,7 +18,7 @@ namespace GlobalHistory
 
 		for (auto& [dayMonth, hourMinMap] : dateMap.map) {
 			for (auto it = hourMinMap.begin(); it != hourMinMap.end(); it++) {
-				it->second.timeAndLoc.clear();
+				it->second->timeAndLoc.clear();
 
 				auto node = hourMinMap.extract(it);
 				node.key().SwitchHourFormat(a_use12HourFormat);
@@ -37,20 +37,26 @@ namespace GlobalHistory
 		DrawTreeImpl(locationMap);
 	}
 
-	void DialogueHistory::SaveHistory(const std::tm& a_tm, const Dialogue& a_history, bool a_use12HourFormat)
+	void DialogueHistory::Clear()
 	{
-		history.push_back(a_history);
+		BaseHistory::Clear();
+		history.clear();
+	}
+
+	void DialogueHistory::SaveHistory(const std::tm& a_tm, Dialogue a_history, bool a_use12HourFormat)
+	{
+		auto& dialogue = history.emplace_back(std::move(a_history));
 
 		TimeStamp date;
 		date.FromYearMonthDay(a_tm.tm_year, a_tm.tm_mon, a_tm.tm_mday);
 
 		TimeStamp hourMin;
-		hourMin.FromHourMin(a_tm.tm_hour, a_tm.tm_min, a_history.speakerName, a_use12HourFormat);
+		hourMin.FromHourMin(a_tm.tm_hour, a_tm.tm_min, dialogue.speakerName, a_use12HourFormat);
 
-		dateMap.map[date][hourMin] = a_history;
+		dateMap.map[date][hourMin] = &dialogue;
 
-		TimeStamp speaker(a_history.timeStamp, a_history.speakerName);
-		locationMap.map[a_history.locName][speaker] = a_history;
+		TimeStamp speaker(dialogue.timeStamp, dialogue.speakerName);
+		locationMap.map[dialogue.locName][speaker] = &dialogue;
 	}
 
 	void DialogueHistory::SaveHistoryToFile(const std::string& a_save)
@@ -73,7 +79,7 @@ namespace GlobalHistory
 
 	void DialogueHistory::InitHistory()
 	{
-		std::string playerName = RE::PlayerCharacter::GetSingleton()->GetDisplayFullName();
+		ClearMaps();
 
 		if (!history.empty()) {
 			std::erase_if(history, [&](auto& dialogue) {
@@ -92,17 +98,18 @@ namespace GlobalHistory
 				}
 
 				dialogue.speakerName = NPCNameProvider::GetSingleton()->GetName(speakerActor);
-				dialogue.playerName = playerName;
 
 				for (auto& line : dialogue.dialogue) {
 					line.isPlayer = line.voice.empty();
-					line.name = !line.isPlayer ? dialogue.speakerName : playerName;
 					if (line.line.empty() || line.line == " ") {
 						line.line = "...";
 					}
-					line.hovered = false;
 				}
 
+				return false;
+			});
+
+			for (auto& dialogue : history) {
 				auto time = dialogue.ExtractTimeStamp();
 
 				TimeStamp date;
@@ -113,11 +120,9 @@ namespace GlobalHistory
 
 				TimeStamp speaker(dialogue.timeStamp, dialogue.speakerName);
 
-				dateMap.map[date][hourMin] = dialogue;
-				locationMap.map[dialogue.locName][speaker] = dialogue;
-
-				return false;
-			});
+				dateMap.map[date][hourMin] = &dialogue;
+				locationMap.map[dialogue.locName][speaker] = &dialogue;
+			}
 		}
 	}
 
@@ -127,10 +132,8 @@ namespace GlobalHistory
 			return;
 		}
 
-		for (auto& [dayMonth, monologues] : dateMap.map) {
-			for (auto it = monologues.monologues.begin(); it != monologues.monologues.end(); it++) {
-				it->hourMinTimeStamp.clear();
-			}
+		for (auto& monologue : history) {
+			monologue.hourMinTimeStamp.clear();
 		}
 	}
 
@@ -147,50 +150,61 @@ namespace GlobalHistory
 	void ConversationHistory::ClearCurrentHistory()
 	{
 		BaseHistory::ClearCurrentHistory();
-		currentFixedHistory = std::nullopt;
+		currentFixedHistory = nullptr;
+		currentFiltered.monologues.clear();
 	}
 
-	void ConversationHistory::SetCurrentHistory(const Monologues& a_history)
+	void ConversationHistory::Clear()
 	{
-		BaseHistory::SetCurrentHistory(a_history);
+		BaseHistory::Clear();
+		history.clear();
+	}
 
+	void ConversationHistory::SetCurrentHistory(Monologues* a_history)
+	{
 		currentFixedHistory = a_history;
-		currentFixedHistory->RefreshContents();
+		RefreshCurrentHistory();
 	}
 
 	void ConversationHistory::RefreshCurrentHistory()
 	{
-		currentHistory = currentFixedHistory;
-		if (currentHistory) {
-			if (!nameFilter.empty()) {
-				std::erase_if(currentHistory->monologues, [&](const auto& monologue) {
-					return !REX::STR::ICONTAINS(monologue.speakerName, nameFilter);
-				});
-			}
-			currentHistory->RefreshContents();
+		if (!currentFixedHistory) {
+			currentHistory = nullptr;
+			return;
 		}
+
+		if (nameFilter.empty()) {
+			currentHistory = currentFixedHistory;
+		} else {
+			currentFiltered.monologues = currentFixedHistory->monologues;
+			std::erase_if(currentFiltered.monologues, [&](const auto* monologue) {
+				return !REX::STR::ICONTAINS(monologue->speakerName, nameFilter);
+			});
+			currentHistory = &currentFiltered;
+		}
+		currentHistory->RefreshContents();
 	}
 
 	void ConversationHistory::RevertCurrentHistory()
 	{
-		currentHistory = currentFixedHistory;
-		if (currentHistory) {
-			currentHistory->RefreshContents();
-		}
+		RefreshCurrentHistory();
 	}
 
-	void ConversationHistory::SaveHistory(const std::tm& a_tm, const Monologue& a_history)
+	void ConversationHistory::SaveHistory(const std::tm& a_tm, Monologue a_history)
 	{
-		history.monologues.push_back(a_history);
+		auto& monologue = history.emplace_back(std::move(a_history));
 
-		if (MANAGER(GlobalHistory)->IsGlobalHistoryOpen() && CanShowDialogue(a_history.dialogueType)) {
+		if (MANAGER(GlobalHistory)->IsGlobalHistoryOpen() && CanShowDialogue(monologue.dialogueType)) {
 			TimeStamp date;
 			date.FromYearMonthDay(a_tm.tm_year, a_tm.tm_mon, a_tm.tm_mday);
 
-			dateMap.map[date].monologues.push_back(a_history);
-			locationMap.map[a_history.locName][date].monologues.push_back(a_history);
+			dateMap.map[date].monologues.push_back(&monologue);
+			locationMap.map[monologue.locName][date].monologues.push_back(&monologue);
+
+			dateMap.clear_filter();
+			locationMap.clear_filter();
+
 			if (currentFixedHistory) {
-				currentFixedHistory->monologues.push_back(a_history);
 				RefreshCurrentHistory();
 			}
 		}
@@ -198,12 +212,12 @@ namespace GlobalHistory
 
 	void ConversationHistory::SaveHistoryToFile(const std::string& a_save)
 	{
-		BaseHistory::SaveHistoryToFileImpl(history.monologues, a_save);
+		BaseHistory::SaveHistoryToFileImpl(history, a_save);
 	}
 
 	bool ConversationHistory::LoadHistoryFromFile(const std::string& a_save)
 	{
-		return BaseHistory::LoadHistoryFromFileImpl(history.monologues, a_save);
+		return BaseHistory::LoadHistoryFromFileImpl(history, a_save);
 	}
 
 	std::optional<std::filesystem::path> ConversationHistory::GetDirectory()
@@ -216,8 +230,10 @@ namespace GlobalHistory
 
 	void ConversationHistory::InitHistory()
 	{
+		ClearMaps();
+
 		if (!history.empty()) {
-			std::erase_if(history.monologues, [&](auto& monologue) {
+			std::erase_if(history, [&](auto& monologue) {
 				auto speakerActor = RE::TESForm::LookupByID<RE::Actor>(monologue.id.GetNumericID());
 				if (!speakerActor) {
 					return true;
@@ -242,7 +258,6 @@ namespace GlobalHistory
 				if (line.line.empty() || line.line == " ") {
 					line.line = "...";
 				}
-				line.hovered = false;
 
 				return false;
 			});
@@ -278,18 +293,27 @@ namespace GlobalHistory
 
 	void ConversationHistory::RefreshHistoryMaps()
 	{
-		dateMap.clear();
-		locationMap.clear();
-		for (auto& monologue : history.monologues) {
-			auto time = monologue.ExtractTimeStamp();
+		ClearMaps();
 
-			TimeStamp date;
-			date.FromYearMonthDay(time.tm_year, time.tm_mon, time.tm_mday);
+		std::uint64_t lastDay = std::numeric_limits<std::uint64_t>::max();
+		TimeStamp     date;
+		Monologues*   monologuesOnThisDate = nullptr;
 
-			if (CanShowDialogue(monologue.dialogueType)) {
-				dateMap.map[date].monologues.push_back(monologue);
-				locationMap.map[monologue.locName][date].monologues.push_back(monologue);
+		for (auto& monologue : history) {
+			if (!CanShowDialogue(monologue.dialogueType)) {
+				continue;
 			}
+
+			const auto day = monologue.timeStamp / 10000;  // strip hhmm
+			if (day != lastDay) {
+				auto time = monologue.ExtractTimeStamp();
+				date.FromYearMonthDay(time.tm_year, time.tm_mon, time.tm_mday);
+				monologuesOnThisDate = &dateMap.map[date];
+				lastDay = day;
+			}
+
+			monologuesOnThisDate->monologues.push_back(&monologue);
+			locationMap.map[monologue.locName][date].monologues.push_back(&monologue);
 		}
 	}
 
@@ -297,9 +321,8 @@ namespace GlobalHistory
 	{
 		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESLoadGameEvent>(this);
 		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESTopicInfoEvent>(this);
-		if (GetModuleHandle(L"TweenMenuOverhaul") != nullptr) {
+		if (REX::W32::GetModuleHandleA("TweenMenuOverhaul") != nullptr) {
 			SKSE::GetModCallbackEventSource()->AddEventSink(this);
-			skyrimSoulsInstalled = GetModuleHandle(L"SkyrimSoulsRE.dll") != nullptr;
 		}
 	}
 
@@ -565,6 +588,8 @@ namespace GlobalHistory
 
 			voiceHandle.Stop();
 
+			hoveredLine = nullptr;
+
 			if (blurMenu) {
 				RE::UIBlurManager::GetSingleton()->DecrementBlurCount();
 			}
@@ -617,9 +642,9 @@ namespace GlobalHistory
 		return use12HourFormat;
 	}
 
-	void Manager::SaveDialogueHistory(const std::tm& a_time, const Dialogue& a_dialogue)
+	void Manager::SaveDialogueHistory(const std::tm& a_time, Dialogue a_dialogue)
 	{
-		dialogueHistory.SaveHistory(a_time, a_dialogue, use12HourFormat);
+		dialogueHistory.SaveHistory(a_time, std::move(a_dialogue), use12HourFormat);
 	}
 
 	void Manager::AddConversation(const RE::TESObjectREFRPtr& a_speaker, RE::TESTopicInfo* a_info)
@@ -644,8 +669,7 @@ namespace GlobalHistory
 					voice.erase(0, 5);
 				}
 
-				Monologue monologue(time, a_speaker.get(), text, voice, dialogueItem.topic);
-				conversationHistory.SaveHistory(time, monologue);
+				conversationHistory.SaveHistory(time, Monologue(time, a_speaker.get(), std::move(text), std::move(voice), dialogueItem.topic));
 			}
 		}
 	}
@@ -653,6 +677,7 @@ namespace GlobalHistory
 	EventResult Manager::ProcessEvent(const RE::TESLoadGameEvent* a_evn, RE::BSTEventSource<RE::TESLoadGameEvent>*)
 	{
 		if (a_evn && finishLoading) {
+			RefreshPlayerName();
 			dialogueHistory.InitHistory();
 			conversationHistory.InitHistory();
 		}
@@ -752,5 +777,29 @@ namespace GlobalHistory
 		}
 
 		voiceHandle.Play();
+	}
+
+	const std::string& Manager::GetPlayerName() const
+	{
+		return playerName;
+	}
+
+	void Manager::RefreshPlayerName()
+	{
+		playerName = NPCNameProvider::GetSingleton()->GetName(RE::PlayerCharacter::GetSingleton());
+	}
+
+	bool Manager::IsLineHovered(const void* a_line) const
+	{
+		return hoveredLine == a_line;
+	}
+
+	void Manager::SetLineHovered(const void* a_line, bool a_hovered)
+	{
+		if (a_hovered) {
+			hoveredLine = a_line;
+		} else if (hoveredLine == a_line) {
+			hoveredLine = nullptr;
+		}
 	}
 }
