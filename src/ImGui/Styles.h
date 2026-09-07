@@ -22,8 +22,7 @@ namespace ImGui
 
 		void LoadStyles(CSimpleIniA& a_ini);
 
-		void OnStyleRefresh();
-		void RefreshStyle();
+		void LoadStyles();
 
 	private:
 		template <class T>
@@ -75,7 +74,7 @@ namespace ImGui
 		Style def;
 		Style user;
 
-		bool refreshStyle{ false };
+		bool refreshStyle{ true };
 	};
 
 	ImVec4 GetUserStyleColorVec4(USER_STYLE a_style);

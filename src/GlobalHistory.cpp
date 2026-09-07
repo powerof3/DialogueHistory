@@ -539,8 +539,6 @@ namespace GlobalHistory
 		menuOpenedJustNow = a_open;
 
 		if (a_open) {
-			ImGui::Styles::GetSingleton()->RefreshStyle();
-
 			if (blurMenu) {
 				RE::UIBlurManager::GetSingleton()->IncrementBlurCount();
 			}

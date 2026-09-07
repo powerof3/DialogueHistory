@@ -38,14 +38,14 @@ namespace IconFont
 		spacing = static_cast<float>(a_ini.GetDoubleValue(a_section, "fSpacing", -1.5));
 	}
 
-	void Font::LoadFont(const ImVector<ImWchar>& a_ranges)
+	void Font::LoadFont()
 	{
 		const auto& io = ImGui::GetIO();
 
 		ImFontConfig font_config;
 		font_config.GlyphExtraAdvanceX = spacing;
 
-		font = io.Fonts->AddFontFromFileTTF(name.c_str(), size, &font_config, a_ranges.Data);
+		font = io.Fonts->AddFontFromFileTTF(name.c_str(), 0.0f, &font_config);
 	}
 
 	void Manager::LoadSettings(CSimpleIniA& a_ini)
@@ -105,36 +105,16 @@ namespace IconFont
 		});
 	}
 
-	void Manager::ReloadFonts()
+	void Manager::LoadFonts()
 	{
-		if (loadedFonts) {
-			return;
-		}
+		REX::INFO("Loading fonts...");
 
-		loadedFonts = true;
+		headerFont.LoadFont();
+		buttonFont.LoadFont();
+		localHistoryFont.LoadFont();
+		globalHistoryFont.LoadFont();
 
-		REX::INFO("Reloading fonts...");
-
-		auto& io = ImGui::GetIO();
-		io.Fonts->Clear();
-
-		ImVector<ImWchar> ranges;
-
-		ImFontGlyphRangesBuilder builder;
-		builder.AddText(RE::BSScaleformManager::GetSingleton()->validNameChars.c_str());
-		builder.BuildRanges(&ranges);
-
-		headerFont.LoadFont(ranges);
-		buttonFont.LoadFont(ranges);
-		localHistoryFont.LoadFont(ranges);
-		globalHistoryFont.LoadFont(ranges);
-
-		io.Fonts->Build();
-
-		ImGui_ImplDX11_InvalidateDeviceObjects();
-		ImGui_ImplDX11_CreateDeviceObjects();
-
-		io.FontDefault = globalHistoryFont.font;
+		ImGui::GetIO().FontDefault = globalHistoryFont.font;
 	}
 
 	std::pair<ImFont*, float> Manager::GetButtonFont() const

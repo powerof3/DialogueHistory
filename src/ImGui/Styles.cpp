@@ -73,14 +73,8 @@ namespace ImGui
 #undef GET_VALUE
 	}
 
-	void Styles::OnStyleRefresh()
+	void Styles::LoadStyles()
 	{
-		if (!refreshStyle) {
-			return;
-		}
-
-		refreshStyle = false;
-
 		Settings::GetSingleton()->Load(FileType::kStyles, [this](auto& ini) {
 			LoadStyles(ini);
 		});
@@ -128,13 +122,10 @@ namespace ImGui
 			MANAGER(IconFont)->LoadSettings(ini);
 		});
 
-		MANAGER(IconFont)->ReloadFonts();
-		MANAGER(IconFont)->ResizeIcons();
-	}
+		MANAGER(IconFont)->LoadFonts();
 
-	void Styles::RefreshStyle()
-	{
-		refreshStyle = true;
+		MANAGER(IconFont)->LoadIcons();
+		MANAGER(IconFont)->ResizeIcons();
 	}
 
 	ImVec4 GetUserStyleColorVec4(USER_STYLE a_style)

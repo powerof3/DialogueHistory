@@ -63,7 +63,7 @@ namespace ImGui::Renderer
 
 				REX::INFO("ImGui initialized.");
 
-				MANAGER(IconFont)->LoadIcons();
+				ImGui::Styles::GetSingleton()->LoadStyles();
 
 				initialized.store(true);
 
@@ -91,9 +91,6 @@ namespace ImGui::Renderer
 			}
 
 			if (renderMenus.load()) {
-				// refresh style
-				ImGui::Styles::GetSingleton()->OnStyleRefresh();
-
 				ImGui_ImplDX11_NewFrame();
 				SKSE::ImGui_ImplWin32_NewFrame();
 				{

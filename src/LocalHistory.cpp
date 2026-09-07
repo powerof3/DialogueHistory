@@ -167,7 +167,6 @@ namespace LocalHistory
 			tempClosed = false;
 		} else {
 			UpdateDialogue();
-			ImGui::Styles::GetSingleton()->RefreshStyle();
 		}
 
 		ImGui::Renderer::RenderMenus(a_opened);

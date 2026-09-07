@@ -26,7 +26,7 @@ namespace IconFont
 	struct Font
 	{
 		void LoadSettings(const CSimpleIniA& a_ini, const char* a_section);
-		void LoadFont(const ImVector<ImWchar>& a_ranges);
+		void LoadFont();
 
 		std::string name{};
 		float       size{};
@@ -42,7 +42,7 @@ namespace IconFont
 		void LoadMCMSettings(const CSimpleIniA& a_ini);
 
 		void LoadIcons();
-		void ReloadFonts();
+		void LoadFonts();
 		void ResizeIcons();
 
 		std::pair<ImFont*, float> GetButtonFont() const;
@@ -68,8 +68,6 @@ namespace IconFont
 		Font buttonFont;
 		Font localHistoryFont;
 		Font globalHistoryFont;
-
-		bool loadedFonts{ false };
 
 		IconTexture unknownKey{ L"UnknownKey"sv };
 		IconTexture leftKey{ L"Left"sv };
