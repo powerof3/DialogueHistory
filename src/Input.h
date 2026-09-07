@@ -12,7 +12,7 @@ namespace Input
 	};
 
 	class Manager :
-		public REX::Singleton<Manager>
+		public REX::TSingleton<Manager>
 	{
 	public:
 		static void Register();

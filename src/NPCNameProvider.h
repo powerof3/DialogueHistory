@@ -2,7 +2,7 @@
 
 #include "NND_API.h"
 
-class NPCNameProvider : public REX::Singleton<NPCNameProvider>
+class NPCNameProvider : public REX::TSingleton<NPCNameProvider>
 {
 public:
 	const char* GetName(RE::TESObjectREFR* actor) const;

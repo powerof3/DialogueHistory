@@ -52,7 +52,7 @@ namespace GlobalHistory
 				std::erase_if(filteredMap, [](auto& item) {
 					auto& [root, monologueVec] = item;
 					std::erase_if(monologueVec.monologues, [&](const auto& monologue) {
-						return !string::icontains(monologue.speakerName, nameFilter);
+						return !REX::STR::ICONTAINS(monologue.speakerName, nameFilter);
 					});
 					return monologueVec.empty();
 				});
@@ -62,7 +62,7 @@ namespace GlobalHistory
 					std::erase_if(monologueMap, [&](auto& item) {
 						auto& [timeStamp, monologueVec] = item;
 						std::erase_if(monologueVec.monologues, [&](const auto& monologue) {
-							return !string::icontains(monologue.speakerName, nameFilter);
+							return !REX::STR::ICONTAINS(monologue.speakerName, nameFilter);
 						});
 						return monologueVec.empty();
 					});
@@ -73,7 +73,7 @@ namespace GlobalHistory
 					auto& [root, dialogueMap] = item;
 					std::erase_if(dialogueMap, [&](auto& item) {
 						const auto& [timeStamp, dialogue] = item;
-						return !string::icontains(dialogue.speakerName, nameFilter);
+						return !REX::STR::ICONTAINS(dialogue.speakerName, nameFilter);
 					});
 					return dialogueMap.empty();
 				});
@@ -173,7 +173,7 @@ namespace GlobalHistory
 				}
 			}
 
-			logger::info("{} : Cleaned up {} unused history files.", GetType(), count);
+			REX::INFO("{} : Cleaned up {} unused history files.", GetType(), count);
 		}
 
 		void Clear()
@@ -274,7 +274,7 @@ namespace GlobalHistory
 	};
 
 	class Manager :
-		public REX::Singleton<Manager>,
+		public REX::TSingleton<Manager>,
 		public RE::BSTEventSink<RE::TESLoadGameEvent>,
 		public RE::BSTEventSink<RE::TESTopicInfoEvent>,
 		public RE::BSTEventSink<SKSE::ModCallbackEvent>
@@ -334,18 +334,25 @@ namespace GlobalHistory
 	template <class HistoryData, class DateMap, class LocationMap>
 	inline std::optional<std::filesystem::path> BaseHistory<HistoryData, DateMap, LocationMap>::GetDirectoryImpl()
 	{
-		if (auto dir = logger::log_directory()) {
-			dir->remove_filename();
-			*dir /= "Saves";
-			*dir /= GetType();
-			std::error_code ec;
-			if (!std::filesystem::exists(*dir, ec)) {
-				std::filesystem::create_directory(*dir, ec);
-			}
-			return dir;
+		auto dir = SKSE::log::log_directory();
+		if (!dir) {
+			REX::ERROR("Unable to access {} directory", GetType());
+			return std::nullopt;
 		}
-		logger::error("Unable to access {} directory", GetType());
-		return std::nullopt;
+
+		dir->remove_filename();  // remove "SKSE"
+		*dir /= "Saves";
+		*dir /= GetType();
+
+		std::error_code ec;
+		if (!std::filesystem::exists(*dir, ec)) {
+			if (!std::filesystem::create_directories(*dir, ec)) {
+				REX::ERROR("Failed to create {} directory: {}", GetType(), ec.message());
+				return std::nullopt;
+			}
+		}
+
+		return dir;
 	}
 
 	template <class HistoryData, class DateMap, class LocationMap>
@@ -359,17 +366,17 @@ namespace GlobalHistory
 
 		Clear();
 
-		logger::info("Loading {} file : {}", GetType(), jsonPath->string());
+		REX::INFO("Loading {} file : {}", GetType(), jsonPath->string());
 
 		std::error_code err;
 		if (std::filesystem::exists(*jsonPath, err)) {
 			std::string buffer;
 			auto        ec = glz::read_file_json(a_history, jsonPath->string(), buffer);
 			if (ec) {
-				logger::info("\tFailed to read {} file (error: {})", GetType(), glz::format_error(ec, buffer));
+				REX::INFO("\tFailed to read {} file (error: {})", GetType(), glz::format_error(ec, buffer));
 			}
 		} else {
-			logger::info("\tFailed to load {} file (error: {})", GetType(), err.message());
+			REX::INFO("\tFailed to load {} file (error: {})", GetType(), err.message());
 		}
 
 		return true;
@@ -384,13 +391,13 @@ namespace GlobalHistory
 			return;
 		}
 
-		logger::info("Saving {} file : {}", GetType(), jsonPath->string());
+		REX::INFO("Saving {} file : {}", GetType(), jsonPath->string());
 
 		std::string buffer;
 		auto        ec = glz::write_file_json(a_history, jsonPath->string(), buffer);
 
 		if (ec) {
-			logger::info("\tFailed to save {} file: (error: {})", GetType(), glz::format_error(ec, buffer));
+			REX::INFO("\tFailed to save {} file: (error: {})", GetType(), glz::format_error(ec, buffer));
 		}
 	}
 

@@ -11,7 +11,7 @@ TimeStamp::TimeStamp(std::uint64_t a_timeStamp, const std::string& a_format) :
 
 std::uint64_t TimeStamp::GenerateTimeStamp(std::tm a_time)
 {
-	return string::to_num<std::uint64_t>(std::format("{:03}{:02}{:02}{:02}{:02}", a_time.tm_year, a_time.tm_mon, a_time.tm_mday, a_time.tm_hour, a_time.tm_min));
+	return REX::STR::TO_NUM<std::uint64_t>(std::format("{:03}{:02}{:02}{:02}{:02}", a_time.tm_year, a_time.tm_mon, a_time.tm_mday, a_time.tm_hour, a_time.tm_min));
 }
 
 std::string TimeStamp::GetMonthName(std::uint32_t a_month)
@@ -130,13 +130,13 @@ std::string TimeStamp::GetFormattedHourMin(std::uint32_t a_hour, std::uint32_t a
 
 void TimeStamp::FromYearMonthDay(std::uint32_t a_year, std::uint32_t a_month, std::uint32_t a_day)
 {
-	time = string::to_num<std::uint32_t>(std::format("{:03}{:02}{:02}", a_year, a_month, a_day));
+	time = REX::STR::TO_NUM<std::uint32_t>(std::format("{:03}{:02}{:02}", a_year, a_month, a_day));
 	format = std::format("{}##{}", GetFormattedYearMonthDay(a_year, a_month, a_day), time);
 }
 
 void TimeStamp::FromHourMin(std::uint32_t a_hour, std::uint32_t a_minute, const std::string& a_speaker, bool a_12HourFormat)
 {
-	time = string::to_num<std::uint32_t>(std::format("{:02}{:02}", a_hour, a_minute));
+	time = REX::STR::TO_NUM<std::uint32_t>(std::format("{:02}{:02}", a_hour, a_minute));
 	format = std::format("{} - {}##{}", GetFormattedHourMin(a_hour, a_minute, a_12HourFormat), a_speaker, time);
 }
 

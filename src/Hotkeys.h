@@ -7,7 +7,7 @@ namespace IconFont
 
 namespace Hotkeys
 {
-	class Manager : public REX::Singleton<Manager>
+	class Manager : public REX::TSingleton<Manager>
 	{
 	public:
 		void LoadHotKeys(const CSimpleIniA& a_ini);

@@ -35,7 +35,7 @@ namespace IconFont
 		ImFont* font{ nullptr };
 	};
 
-	class Manager final : public REX::Singleton<Manager>
+	class Manager final : public REX::TSingleton<Manager>
 	{
 	public:
 		void LoadSettings(CSimpleIniA& a_ini);
@@ -69,7 +69,6 @@ namespace IconFont
 		Font localHistoryFont;
 		Font globalHistoryFont;
 
-		bool loadFontsOnce{ false };
 		bool loadedFonts{ false };
 
 		IconTexture unknownKey{ L"UnknownKey"sv };

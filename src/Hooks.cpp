@@ -221,6 +221,6 @@ namespace Hooks
 			}
 		}
 
-		logger::info("Installed dialogue hooks");
+		REX::INFO("Installed dialogue hooks");
 	}
 }

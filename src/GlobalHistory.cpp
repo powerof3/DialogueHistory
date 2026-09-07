@@ -164,7 +164,7 @@ namespace GlobalHistory
 		if (currentHistory) {
 			if (!nameFilter.empty()) {
 				std::erase_if(currentHistory->monologues, [&](const auto& monologue) {
-					return !string::icontains(monologue.speakerName, nameFilter);
+					return !REX::STR::ICONTAINS(monologue.speakerName, nameFilter);
 				});
 			}
 			currentHistory->RefreshContents();
@@ -708,7 +708,7 @@ namespace GlobalHistory
 	void Manager::CleanupSavedFiles()
 	{
 		constexpr auto get_save_directory = []() -> std::optional<std::filesystem::path> {
-			if (auto path = logger::log_directory()) {
+			if (auto path = SKSE::log::log_directory()) {
 				path->remove_filename();  // remove "/SKSE"
 				path->append("sLocalSavePath:General"_ini.value());
 				return path;
@@ -746,7 +746,7 @@ namespace GlobalHistory
 		RE::BSResource::ID file;
 		file.GenerateFromPath(a_voiceline.c_str());
 
-		RE::BSAudioManager::GetSingleton()->BuildSoundDataFromFile(voiceHandle, file, 128 | 0x10, 128);
+		RE::BSAudioManager::GetSingleton()->GetSoundHandleByFile(voiceHandle, file, 128 | 0x10, 128);
 
 		auto soundOutput = RE::BGSDefaultObjectManager::GetSingleton()->GetObject<RE::BGSSoundOutput>(RE::DEFAULT_OBJECTS::kDialogueOutputModel2D);
 		if (soundOutput) {

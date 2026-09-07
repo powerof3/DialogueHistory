@@ -282,9 +282,9 @@ namespace LocalHistory
 				SetupLocalHistoryMenu(!a_evn->opening, false);
 			}
 		} else if (a_evn->opening) {
-			switch (string::const_hash(a_evn->menuName)) {
-			case string::const_hash(RE::MainMenu::MENU_NAME):
-			case string::const_hash(RE::LoadingMenu::MENU_NAME):
+			switch (REX::STR::CONST_HASH(a_evn->menuName)) {
+			case REX::STR::CONST_HASH(RE::MainMenu::MENU_NAME):
+			case REX::STR::CONST_HASH(RE::LoadingMenu::MENU_NAME):
 			case "CustomMenu"_h:
 				{
 					if (IsDialogueMenuOpen()) {

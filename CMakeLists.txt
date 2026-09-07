@@ -22,7 +22,7 @@ macro(find_commonlib_path)
 	if (CommonLibName AND NOT ${CommonLibName} STREQUAL "")
 		# Check extern
 		find_path(CommonLibPath
-		include/REL/Relocation.h
+		include/RE/Skyrim.h
 		PATHS extern/${CommonLibName})
 		if (${CommonLibPath} STREQUAL "CommonLibPath-NOTFOUND")
 			#Check path
@@ -70,6 +70,26 @@ else ()
 		"Variable VCPKG_ROOT is not set. Continuing without vcpkg."
 	)
 endif ()
+
+set(VCPKG_OVERLAY_PORTS "")
+
+if(DEFINED ENV{CommonLibSSEPath})
+	file(TO_CMAKE_PATH "$ENV{CommonLibSSEPath}" CLIB_SOURCE_DIR)
+endif()
+
+if(CLIB_SOURCE_DIR AND EXISTS "${CLIB_SOURCE_DIR}/cmake/ports/commonlib-shared/portfile.cmake")
+	list(APPEND VCPKG_OVERLAY_PORTS "${CLIB_SOURCE_DIR}/cmake/ports")
+elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/extern/CommonLibSSE/cmake/ports/commonlib-shared/portfile.cmake")
+	list(APPEND VCPKG_OVERLAY_PORTS "${CMAKE_CURRENT_SOURCE_DIR}/extern/CommonLibSSE/cmake/ports")
+else()
+	message(FATAL_ERROR "commonlib-shared overlay port not found in any CommonLibSSE checkout")
+endif()
+
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ports")
+	list(APPEND VCPKG_OVERLAY_PORTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ports")
+endif()
+
+message(STATUS "vcpkg overlay ports: ${VCPKG_OVERLAY_PORTS}")
 
 set(Boost_USE_STATIC_RUNTIME OFF CACHE BOOL "")
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" CACHE STRING "")
@@ -132,12 +152,13 @@ else ()
 	)
 endif()
 
+find_package(boost_regex CONFIG REQUIRED)
+find_package(boost_unordered CONFIG REQUIRED)
 find_package(directxtex CONFIG REQUIRED)
 find_package(glaze CONFIG REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 
-find_path(SRELL_INCLUDE_DIRS "srell.hpp")
 find_path(CLIB_UTIL_INCLUDE_DIRS "ClibUtil/utils.hpp")
 
 # ---- Add source files ----
@@ -190,7 +211,6 @@ target_include_directories(
 	PRIVATE
 		${CMAKE_CURRENT_BINARY_DIR}/include
 		${CMAKE_CURRENT_SOURCE_DIR}/src
-		${SRELL_INCLUDE_DIRS}
 		${CLIB_UTIL_INCLUDE_DIRS}
 )
 
@@ -198,6 +218,8 @@ target_link_libraries(
 	${PROJECT_NAME}
 	PRIVATE
 		${CommonLibName}::${CommonLibName}
+		Boost::unordered
+		Boost::regex
 		Microsoft::DirectXTex
 		Freetype::Freetype
 		glaze::glaze
