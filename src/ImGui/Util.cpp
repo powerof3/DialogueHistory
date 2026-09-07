@@ -121,4 +121,16 @@ namespace ImGui
 		const auto Size = GetNativeViewportSize();
 		return { Size.x * 0.5f, Size.y * 0.5f };
 	}
+
+	void TextWithBlurredShadow(ImDrawList* a_drawlist, const ImVec2& a_pos, const char* a_text, const char* a_textEnd)
+	{
+		const auto font = ImGui::GetFont();
+		const auto fontSize = ImGui::GetFontSize();
+
+		AddBlurredShadow(a_pos, [&](const ImVec2& origin, ImU32 color) {
+			a_drawlist->AddText(font, fontSize, origin, color, a_text, a_textEnd);
+		});
+
+		ImGui::Dummy(ImGui::CalcTextSize(a_text, a_textEnd));
+	}
 }

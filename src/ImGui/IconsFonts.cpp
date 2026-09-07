@@ -278,7 +278,7 @@ namespace ImGui
 			auto textSize = ImGui::CalcTextSize(a_text);
 
 			ImGui::SetCursorPosY(posY + (a_size.y - textSize.y) / 2);
-			ImGui::TextUnformatted(a_text);
+			ImGui::TextWithBlurredShadow(ImGui::GetWindowDrawList(), ImGui::GetCursorPos(), a_text);
 			ImGui::SetCursorPosY(posY);
 		}
 		PopStyleColor();

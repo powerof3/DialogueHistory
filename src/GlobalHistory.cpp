@@ -509,10 +509,10 @@ namespace GlobalHistory
 
 					// exit button position (1784,1015) + offset (32) at 1080p
 					static const auto windowSize = RE::BSGraphics::Renderer::GetScreenSize();
-					static float      posY = 0.93981481481f * windowSize.height;
-					static float      posX = 0.92916666666f * windowSize.width;
+					static double     posY = 0.93981481481 * windowSize.height;
+					static double     posX = 0.92916666666 * windowSize.width;
 
-					ImGui::SetCursorScreenPos({ posX, posY });
+					ImGui::SetCursorScreenPos(ImVec2{ (float)posX, (float)posY });
 					ImGui::ButtonIconWithLabel("$DH_Exit_Button"_T, icon);
 					if (ImGui::IsItemSelected()) {
 						SetGlobalHistoryOpen(false);
