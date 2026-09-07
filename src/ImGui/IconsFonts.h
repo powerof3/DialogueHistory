@@ -206,8 +206,8 @@ namespace IconFont
 		};
 
 		BUTTON_SCHEME buttonScheme{ BUTTON_SCHEME::kAutoDetect };
-		};
-	}
+	};
+}
 
 namespace ImGui
 {
