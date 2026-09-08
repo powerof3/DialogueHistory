@@ -3,10 +3,10 @@
 #include "ImGui/Renderer.h"
 #include "Input.h"
 #include "LocalHistory.h"
+#include "MenuIntegration.h"
 #include "NPCNameProvider.h"
 #include "Papyrus.h"
 #include "Settings.h"
-#include "MenuIntegration.h"
 
 void OnInit(SKSE::MessagingInterface::Message* a_msg)
 {

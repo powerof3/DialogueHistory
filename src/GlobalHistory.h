@@ -194,7 +194,7 @@ namespace GlobalHistory
 		std::deque<Entry>        history{};
 
 	protected:
-		~BaseHistory() = default; 
+		~BaseHistory() = default;
 
 		void ClearMaps()
 		{

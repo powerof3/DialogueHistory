@@ -4,7 +4,7 @@
 
 namespace LocalHistory
 {
-	class Manager :public REX::TSingleton<Manager>
+	class Manager : public REX::TSingleton<Manager>
 	{
 	public:
 		static void Register();
@@ -24,7 +24,7 @@ namespace LocalHistory
 
 		void AddDialogue(RE::TESObjectREFR* a_speaker, std::string a_response, std::string a_voice);
 		void SaveDialogueHistory();
-	
+
 		void SetupLocalHistoryMenu(bool a_opened, bool a_blurBG = true);
 
 	private:
