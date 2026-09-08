@@ -202,9 +202,6 @@ namespace GlobalHistory
 	{
 		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESLoadGameEvent>(this);
 		RE::ScriptEventSourceHolder::GetSingleton()->AddEventSink<RE::TESTopicInfoEvent>(this);
-		if (REX::W32::GetModuleHandleA("TweenMenuOverhaul") != nullptr) {
-			SKSE::GetModCallbackEventSource()->AddEventSink(this);
-		}
 	}
 
 	void Manager::LoadMCMSettings(const CSimpleIniA& a_ini)
@@ -503,17 +500,6 @@ namespace GlobalHistory
 		SetGlobalHistoryOpen(!IsGlobalHistoryOpen());
 	}
 
-	bool Manager::TryOpenFromTweenMenu(bool a_showCursor)
-	{
-		if (openFromTweenMenu) {
-			openFromTweenMenu = false;
-			SetGlobalHistoryOpen(true, a_showCursor);
-			return true;
-		}
-
-		return false;
-	}
-
 	bool Manager::WasMenuOpenJustNow() const
 	{
 		return menuOpenedJustNow;
@@ -586,22 +572,6 @@ namespace GlobalHistory
 	{
 		if (a_evn && a_evn->type == RE::TESTopicInfoEvent::TopicInfoEventType::kTopicEnd) {
 			AddConversation(a_evn->speakerRef, RE::TESForm::LookupByID<RE::TESTopicInfo>(a_evn->topicInfoFormID));
-		}
-
-		return EventResult::kContinue;
-	}
-
-	EventResult Manager::ProcessEvent(const SKSE::ModCallbackEvent* a_evn, RE::BSTEventSource<SKSE::ModCallbackEvent>*)
-	{
-		if (a_evn && a_evn->eventName == "OpenTween_DialogueHistory" && !IsGlobalHistoryOpen()) {
-			openFromTweenMenu = true;
-			// Tween Menu Overhaul closes the Tween menu then fires this event
-			// immediately. Opening on the next UI tick avoids depending on
-			// TweenMenuCameraState::Update (StopTweenCamera), which TMO often
-			// never reaches — so the flag alone would never open the history.
-			SKSE::GetTaskInterface()->AddUITask([]() {
-				MANAGER(GlobalHistory)->TryOpenFromTweenMenu(true);
-			});
 		}
 
 		return EventResult::kContinue;

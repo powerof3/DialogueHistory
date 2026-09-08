@@ -6,6 +6,7 @@
 #include "NPCNameProvider.h"
 #include "Papyrus.h"
 #include "Settings.h"
+#include "MenuIntegration.h"
 
 void OnInit(SKSE::MessagingInterface::Message* a_msg)
 {
@@ -26,8 +27,8 @@ void OnInit(SKSE::MessagingInterface::Message* a_msg)
 	case SKSE::MessagingInterface::kDataLoaded:
 		{
 			REX::INFO("{:*^50}", "DATA LOADED");
-			MANAGER(LocalHistory)->Register();
 			MANAGER(GlobalHistory)->Register();
+			MANAGER(MenuIntegration)->Register();
 
 			PhotoMode::InitGlobals();
 

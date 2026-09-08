@@ -4,9 +4,7 @@
 
 namespace LocalHistory
 {
-	class Manager :
-		public REX::TSingleton<Manager>,
-		public RE::BSTEventSink<RE::MenuOpenCloseEvent>
+	class Manager :public REX::TSingleton<Manager>
 	{
 	public:
 		static void Register();
@@ -26,13 +24,11 @@ namespace LocalHistory
 
 		void AddDialogue(RE::TESObjectREFR* a_speaker, std::string a_response, std::string a_voice);
 		void SaveDialogueHistory();
+	
+		void SetupLocalHistoryMenu(bool a_opened, bool a_blurBG = true);
 
 	private:
 		void UpdateDialogue();
-
-		void SetupLocalHistoryMenu(bool a_opened, bool a_blurBG = true);
-
-		EventResult ProcessEvent(const RE::MenuOpenCloseEvent* a_evn, RE::BSTEventSource<RE::MenuOpenCloseEvent>*) override;
 
 		// members
 		bool dialogueMenuOpen{ false };

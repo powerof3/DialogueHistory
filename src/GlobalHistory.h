@@ -277,8 +277,7 @@ namespace GlobalHistory
 	class Manager :
 		public REX::TSingleton<Manager>,
 		public RE::BSTEventSink<RE::TESLoadGameEvent>,
-		public RE::BSTEventSink<RE::TESTopicInfoEvent>,
-		public RE::BSTEventSink<SKSE::ModCallbackEvent>
+		public RE::BSTEventSink<RE::TESTopicInfoEvent>
 	{
 	public:
 		void Register();
@@ -291,7 +290,6 @@ namespace GlobalHistory
 		bool IsGlobalHistoryOpen() const;
 		void SetGlobalHistoryOpen(bool a_open, bool a_showCursor = true);
 		void ToggleActive();
-		bool TryOpenFromTweenMenu(bool a_showCursor = true);
 
 		bool WasMenuOpenJustNow() const;
 		void SetMenuOpenJustNow(bool a_open);
@@ -322,7 +320,6 @@ namespace GlobalHistory
 
 		EventResult ProcessEvent(const RE::TESLoadGameEvent* a_evn, RE::BSTEventSource<RE::TESLoadGameEvent>*) override;
 		EventResult ProcessEvent(const RE::TESTopicInfoEvent* a_evn, RE::BSTEventSource<RE::TESTopicInfoEvent>*) override;
-		EventResult ProcessEvent(const SKSE::ModCallbackEvent* a_evn, RE::BSTEventSource<SKSE::ModCallbackEvent>*) override;
 
 		// members
 		DialogueHistory     dialogueHistory;
@@ -339,7 +336,6 @@ namespace GlobalHistory
 		bool                globalHistoryOpen{ false };
 		bool                menuOpenedJustNow{ false };
 		bool                autoSelectFirstEntry{ false };
-		bool                openFromTweenMenu{ false };
 		const void*         hoveredLine{ nullptr };
 	};
 

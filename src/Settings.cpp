@@ -6,6 +6,7 @@
 #include "ImGui/IconsFonts.h"
 #include "ImGui/Renderer.h"
 #include "LocalHistory.h"
+#include "MenuIntegration.h"
 
 void Settings::LoadINI(const wchar_t* a_path, const INIFunc a_func, bool a_generate)
 {
@@ -71,6 +72,7 @@ void Settings::LoadMCMSettings() const
 		MANAGER(IconFont)->LoadMCMSettings(ini);       // button scheme
 		MANAGER(LocalHistory)->LoadMCMSettings(ini);   // menu
 		MANAGER(GlobalHistory)->LoadMCMSettings(ini);  // time format, menu
+		MANAGER(MenuIntegration)->LoadMCMSettings(ini);
 	};
 
 	Load(FileType::kMCM, load_mcm_settings);

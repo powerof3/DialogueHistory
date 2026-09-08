@@ -7,11 +7,6 @@
 
 namespace LocalHistory
 {
-	void Manager::Register()
-	{
-		RE::UI::GetSingleton()->AddEventSink<RE::MenuOpenCloseEvent>(GetSingleton());
-	}
-
 	void Manager::LoadMCMSettings(const CSimpleIniA& a_ini)
 	{
 		unpauseMenu = a_ini.GetBoolValue("Settings", "bUnpauseLocalHistory", unpauseMenu);
@@ -266,40 +261,5 @@ namespace LocalHistory
 		localDialogue.Initialize(gameTime);
 
 		localDialogue.RefreshContents();
-	}
-
-	RE::BSEventNotifyControl Manager::ProcessEvent(const RE::MenuOpenCloseEvent* a_evn, RE::BSTEventSource<RE::MenuOpenCloseEvent>*)
-	{
-		if (!a_evn) {
-			return EventResult::kContinue;
-		}
-
-		if (a_evn->menuName == RE::DialogueMenu::MENU_NAME) {
-			SetDialogueMenuOpen(a_evn->opening);
-		} else if (a_evn->menuName == RE::JournalMenu::MENU_NAME) {
-			if (IsLocalHistoryOpen()) {
-				SetupLocalHistoryMenu(!a_evn->opening, false);
-			}
-		} else if (a_evn->menuName == RE::RaceSexMenu::MENU_NAME) {
-			if (!a_evn->opening) {
-				MANAGER(GlobalHistory)->RefreshPlayerName();
-			}
-		} else if (a_evn->opening) {
-			switch (REX::STR::CONST_HASH(a_evn->menuName)) {
-			case REX::STR::CONST_HASH(RE::MainMenu::MENU_NAME):
-			case REX::STR::CONST_HASH(RE::LoadingMenu::MENU_NAME):
-			case "CustomMenu"_h:
-				{
-					if (IsDialogueMenuOpen()) {
-						SetDialogueMenuOpen(false);
-					}
-				}
-				break;
-			default:
-				break;
-			}
-		}
-
-		return EventResult::kContinue;
 	}
 }
