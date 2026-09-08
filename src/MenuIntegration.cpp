@@ -77,7 +77,7 @@ namespace MenuIntegration
 
 		if (a_evn->menuName == RE::JournalMenu::MENU_NAME) {
 			if (a_evn->opening && globalHistory.openFromPause) {
-					SetupJournalMenu();
+				SetupJournalMenu();
 			}
 			if (MANAGER(LocalHistory)->IsLocalHistoryOpen()) {
 				MANAGER(LocalHistory)->SetupLocalHistoryMenu(!a_evn->opening, false);
