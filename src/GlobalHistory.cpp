@@ -27,22 +27,6 @@ namespace GlobalHistory
 		}
 	}
 
-	void DialogueHistory::DrawDateTree()
-	{
-		DrawTreeImpl(dateMap);
-	}
-
-	void DialogueHistory::DrawLocationTree()
-	{
-		DrawTreeImpl(locationMap);
-	}
-
-	void DialogueHistory::Clear()
-	{
-		BaseHistory::Clear();
-		history.clear();
-	}
-
 	void DialogueHistory::SaveHistory(const std::tm& a_tm, Dialogue a_history, bool a_use12HourFormat)
 	{
 		auto& dialogue = history.emplace_back(std::move(a_history));
@@ -57,24 +41,6 @@ namespace GlobalHistory
 
 		TimeStamp speaker(dialogue.timeStamp, dialogue.speakerName);
 		locationMap.map[dialogue.locName][speaker] = &dialogue;
-	}
-
-	void DialogueHistory::SaveHistoryToFile(const std::string& a_save)
-	{
-		BaseHistory::SaveHistoryToFileImpl(history, a_save);
-	}
-
-	bool DialogueHistory::LoadHistoryFromFile(const std::string& a_save)
-	{
-		return BaseHistory::LoadHistoryFromFileImpl(history, a_save);
-	}
-
-	std::optional<std::filesystem::path> DialogueHistory::GetDirectory()
-	{
-		if (!directory) {
-			directory = GetDirectoryImpl();
-		}
-		return directory;
 	}
 
 	void DialogueHistory::InitHistory()
@@ -118,27 +84,11 @@ namespace GlobalHistory
 		}
 	}
 
-	void ConversationHistory::DrawDateTree()
-	{
-		DrawTreeImpl(dateMap);
-	}
-
-	void ConversationHistory::DrawLocationTree()
-	{
-		DrawTreeImpl(locationMap);
-	}
-
 	void ConversationHistory::ClearCurrentHistory()
 	{
 		BaseHistory::ClearCurrentHistory();
 		currentFixedHistory = nullptr;
 		currentFiltered.monologues.clear();
-	}
-
-	void ConversationHistory::Clear()
-	{
-		BaseHistory::Clear();
-		history.clear();
 	}
 
 	void ConversationHistory::SetCurrentHistory(Monologues* a_history)
@@ -166,11 +116,6 @@ namespace GlobalHistory
 		currentHistory->RefreshContents();
 	}
 
-	void ConversationHistory::RevertCurrentHistory()
-	{
-		RefreshCurrentHistory();
-	}
-
 	void ConversationHistory::SaveHistory(const std::tm& a_tm, Monologue a_history)
 	{
 		auto& monologue = history.emplace_back(std::move(a_history));
@@ -191,24 +136,6 @@ namespace GlobalHistory
 		}
 	}
 
-	void ConversationHistory::SaveHistoryToFile(const std::string& a_save)
-	{
-		BaseHistory::SaveHistoryToFileImpl(history, a_save);
-	}
-
-	bool ConversationHistory::LoadHistoryFromFile(const std::string& a_save)
-	{
-		return BaseHistory::LoadHistoryFromFileImpl(history, a_save);
-	}
-
-	std::optional<std::filesystem::path> ConversationHistory::GetDirectory()
-	{
-		if (!directory) {
-			directory = GetDirectoryImpl();
-		}
-		return directory;
-	}
-
 	void ConversationHistory::InitHistory()
 	{
 		ClearMaps();
@@ -220,7 +147,7 @@ namespace GlobalHistory
 
 	void ConversationHistory::LoadMCMSettings(const CSimpleIniA& a_ini)
 	{
-		showScene = a_ini.GetBoolValue("Settings", "bSceneDialogueConversationHistory", showMisc);
+		showScene = a_ini.GetBoolValue("Settings", "bSceneDialogueConversationHistory", showScene);
 		showCombat = a_ini.GetBoolValue("Settings", "bCombatDialogueConversationHistory", showCombat);
 		showFavor = a_ini.GetBoolValue("Settings", "bFavorDialogueConversationHistory", showFavor);
 		showDetection = a_ini.GetBoolValue("Settings", "bDetectionDialogueConversationHistory", showDetection);
@@ -363,8 +290,13 @@ namespace GlobalHistory
 
 					ImGui::SetCursorPosY(cursorY);
 					if (ImGui::ToggleButton("##DialogueToggle", &drawConversation)) {
-						dialogueHistory.ClearCurrentHistory();
-						conversationHistory.ClearCurrentHistory();
+						const bool hasSelection = drawConversation ?
+						                              conversationHistory.CanDrawHistory() :
+						                              dialogueHistory.CanDrawHistory();
+						if (!hasSelection) {
+							SetMenuOpenJustNow(true);
+							SetAutoSelectFirstEntry(true);
+						}
 					}
 
 					ImGui::SameLine();
@@ -388,7 +320,7 @@ namespace GlobalHistory
 					auto startPos = childSize.x * 0.25f;                                    // search box end
 					auto endPos = (childSize.x * 0.5f) - toggleButtonOffset - itemSpacing;  // "By Date" text start
 
-					ImGui::BeginChild("##Map", { (startPos + endPos) * 0.5f, childSize.y * 0.9125f }, ImGuiChildFlags_None, ImGuiWindowFlags_NoBackground);
+					ImGui::BeginChild(drawConversation ? "##MapConversation" : "##MapDialogue", { (startPos + endPos) * 0.5f, childSize.y * 0.9125f }, ImGuiChildFlags_None, ImGuiWindowFlags_NoBackground);
 					{
 						if (drawConversation) {
 							conversationHistory.DrawTree(sortByLocation);
@@ -443,7 +375,7 @@ namespace GlobalHistory
 					}
 					if (drawConversation) {
 						if (!lastNameFilter.empty() && nameFilter.empty()) {
-							conversationHistory.RevertCurrentHistory();
+							conversationHistory.RefreshCurrentHistory();
 						}
 					}
 					ImGui::SetCursorPosX(childSize.x * 0.5f - toggleButtonOffset);
@@ -514,6 +446,7 @@ namespace GlobalHistory
 	{
 		globalHistoryOpen = a_open;
 		menuOpenedJustNow = a_open;
+		autoSelectFirstEntry = a_open;
 
 		if (a_open) {
 			if (blurMenu) {
@@ -589,6 +522,16 @@ namespace GlobalHistory
 	void Manager::SetMenuOpenJustNow(bool a_open)
 	{
 		menuOpenedJustNow = a_open;
+	}
+
+	bool Manager::ShouldAutoSelectFirstEntry() const
+	{
+		return autoSelectFirstEntry;
+	}
+
+	void Manager::SetAutoSelectFirstEntry(bool a_select)
+	{
+		autoSelectFirstEntry = a_select;
 	}
 
 	bool Manager::Use12HourFormat() const

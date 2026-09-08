@@ -111,31 +111,25 @@ namespace GlobalHistory
 		std::string cachedFilter{};
 	};
 
-	template <class HistoryData, class DateMap, class LocationMap>
+	template <class Derived, class Entry, class HistoryData, class DateMap, class LocationMap>
 	struct BaseHistory
 	{
-		virtual ~BaseHistory() = default;
-
-		virtual void DrawDateTree(){};
-		virtual void DrawLocationTree(){};
-		void         DrawTree(bool a_sortByLocation)
+		void DrawTree(bool a_sortByLocation)
 		{
 			if (a_sortByLocation) {
-				DrawLocationTree();
+				derived().DrawTreeImpl(locationMap);
 			} else {
-				DrawDateTree();
+				derived().DrawTreeImpl(dateMap);
 			}
 		}
 
-		virtual void ClearCurrentHistory() { currentHistory = nullptr; }
+		void ClearCurrentHistory() { currentHistory = nullptr; }
 
-		void ClearMaps()
+		void Clear()
 		{
-			dateMap.clear();
-			locationMap.clear();
-			ClearCurrentHistory();
+			ClearMaps();
+			history.clear();
 		}
-		virtual void Clear() { ClearMaps(); }
 
 		bool CanDrawHistory() const { return currentHistory != nullptr; }
 		void DrawHistory()
@@ -145,26 +139,19 @@ namespace GlobalHistory
 			}
 		}
 
-		virtual void SetCurrentHistory(HistoryData a_history)
+		void SetCurrentHistory(HistoryData a_history)
 		{
 			currentHistory = a_history;
 			currentHistory->RefreshContents();
-		};
-		virtual const char*                          GetType() { return nullptr; }
-		virtual std::optional<std::filesystem::path> GetDirectory() { return std::nullopt; };
-		std::optional<std::filesystem::path>         GetFile(const std::string& a_save)
-		{
-			auto jsonPath = GetDirectory();
-
-			if (!jsonPath) {
-				return {};
-			}
-
-			*jsonPath /= a_save;
-			jsonPath->replace_extension(".json");
-
-			return jsonPath;
 		}
+
+		static constexpr std::string_view GetType() { return Derived::TYPE; }
+
+		std::optional<std::filesystem::path> GetDirectory();
+
+		void SaveHistoryToFile(const std::string& a_save);
+		bool LoadHistoryFromFile(const std::string& a_save);
+
 		void DeleteSavedFile(const std::string& a_save)
 		{
 			auto jsonPath = GetFile(a_save);
@@ -180,7 +167,6 @@ namespace GlobalHistory
 
 			if (auto dir = GetDirectory()) {
 				std::error_code ec;
-
 				for (const auto& entry : std::filesystem::directory_iterator(*dir)) {
 					if (entry.exists() && entry.path().extension() == ".json"sv) {
 						auto saveFileName = entry.path().stem().string();
@@ -192,7 +178,6 @@ namespace GlobalHistory
 					}
 				}
 			}
-
 			REX::INFO("{} : Cleaned up {} unused history files.", GetType(), count);
 		}
 
@@ -203,82 +188,78 @@ namespace GlobalHistory
 		}
 
 		// members
-		DialogueMap<DateMap>                 dateMap{};      // 8th of Last Seed, 4E 201 -> 13:53, Lydia
-		DialogueMap<LocationMap>             locationMap{};  // Dragonsreach -> Lydia
-		HistoryData                          currentHistory{ nullptr };
-		std::optional<std::filesystem::path> directory;
+		DialogueMap<DateMap>     dateMap{};      // 8th of Last Seed, 4E 201 -> 13:53, Lydia
+		DialogueMap<LocationMap> locationMap{};  // Dragonsreach -> Lydia
+		HistoryData              currentHistory{ nullptr };
+		std::deque<Entry>        history{};
 
 	protected:
-		template <class T>
-		bool LoadHistoryFromFileImpl(T&& a_history, const std::string& a_save);
-		template <class T>
-		void SaveHistoryToFileImpl(T&& a_history, const std::string& a_save);
+		~BaseHistory() = default; 
 
-		std::optional<std::filesystem::path> GetDirectoryImpl();
+		void ClearMaps()
+		{
+			dateMap.clear();
+			locationMap.clear();
+			derived().ClearCurrentHistory();
+		}
+
+	private:
+		Derived&       derived() { return static_cast<Derived&>(*this); }
+		const Derived& derived() const { return static_cast<const Derived&>(*this); }
+
+		std::optional<std::filesystem::path> GetFile(const std::string& a_save)
+		{
+			auto jsonPath = GetDirectory();
+			if (!jsonPath) {
+				return {};
+			}
+			*jsonPath /= a_save;
+			jsonPath->replace_extension(".json");
+			return jsonPath;
+		}
+
+		std::optional<std::filesystem::path> directory;
 	};
 
 	// Dialogue between player and NPC
-	struct DialogueHistory : public BaseHistory<Dialogue*, DialogueDate, DialogueLocation>
+	struct DialogueHistory : public BaseHistory<DialogueHistory, Dialogue, Dialogue*, DialogueDate, DialogueLocation>
 	{
 	public:
-		virtual ~DialogueHistory() override = default;
+		static constexpr std::string_view TYPE = "DialogueHistory"sv;
 
-		void        RefreshTimeStamps(bool a_use12HourFormat);
-		void        DrawDateTree() override;
-		void        DrawLocationTree() override;
-		void        Clear() override;
-		const char* GetType() override { return "DialogueHistory"; }
-		void        SaveHistory(const std::tm& a_tm, Dialogue a_history, bool a_use12HourFormat);
-		void        SaveHistoryToFile(const std::string& a_save);
-		bool        LoadHistoryFromFile(const std::string& a_save);
-
-		std::optional<std::filesystem::path> GetDirectory() override;
-
+		void RefreshTimeStamps(bool a_use12HourFormat);
+		void SaveHistory(const std::tm& a_tm, Dialogue a_history, bool a_use12HourFormat);
 		void InitHistory();
 
-		//members
-		std::deque<Dialogue> history{};
-
 	private:
+		friend BaseHistory;
+
 		template <class T>
 		void DrawTreeImpl(DialogueMap<T>& a_map);
 	};
 
-	// Standalone NPC dialogue
-	struct ConversationHistory : public BaseHistory<Monologues*, MonologueDate, MonologueLocation>
+	struct ConversationHistory : public BaseHistory<ConversationHistory, Monologue, Monologues*, MonologueDate, MonologueLocation>
 	{
 	public:
-		virtual ~ConversationHistory() override = default;
+		static constexpr std::string_view TYPE = "ConversationHistory"sv;
 
 		void LoadMCMSettings(const CSimpleIniA& a_ini);
 
 		void RefreshTimeStamps();
-		void DrawDateTree() override;
-		void DrawLocationTree() override;
 
-		void ClearCurrentHistory() override;
-		void Clear() override;
-		void SetCurrentHistory(Monologues* a_history) override;
+		void ClearCurrentHistory();
+		void SetCurrentHistory(Monologues* a_history);
 		void RefreshCurrentHistory();
-		void RevertCurrentHistory();
-
-		const char* GetType() override { return "ConversationHistory"; }
 
 		void SaveHistory(const std::tm& a_tm, Monologue a_history);
-		void SaveHistoryToFile(const std::string& a_save);
-		bool LoadHistoryFromFile(const std::string& a_save);
-
-		std::optional<std::filesystem::path> GetDirectory() override;
-
 		void InitHistory();
 
 		bool CanShowDialogue(std::int32_t a_dialogueType) const;
 		void RefreshHistoryMaps();
 
 		// members
-		std::deque<Monologue> history{};
-		Monologues*           currentFixedHistory{ nullptr };
-		Monologues            currentFiltered{};
+		Monologues* currentFixedHistory{ nullptr };
+		Monologues  currentFiltered{};
 
 		bool showScene{ true };
 		bool showCombat{ true };
@@ -287,6 +268,8 @@ namespace GlobalHistory
 		bool showMisc{ true };
 
 	private:
+		friend BaseHistory;
+
 		template <class T>
 		void DrawTreeImpl(DialogueMap<T>& a_map);
 	};
@@ -312,6 +295,9 @@ namespace GlobalHistory
 
 		bool WasMenuOpenJustNow() const;
 		void SetMenuOpenJustNow(bool a_open);
+
+		bool ShouldAutoSelectFirstEntry() const;
+		void SetAutoSelectFirstEntry(bool a_select);
 
 		bool Use12HourFormat() const;
 
@@ -343,7 +329,6 @@ namespace GlobalHistory
 		ConversationHistory conversationHistory;
 		std::string         playerName;
 		RE::BSSoundHandle   voiceHandle{};
-		const void*         hoveredLine{ nullptr };
 		bool                drawConversation{ false };
 		bool                finishLoading{ false };
 		bool                sortByLocation{ false };
@@ -353,12 +338,18 @@ namespace GlobalHistory
 		bool                hideButton{ false };
 		bool                globalHistoryOpen{ false };
 		bool                menuOpenedJustNow{ false };
+		bool                autoSelectFirstEntry{ false };
 		bool                openFromTweenMenu{ false };
+		const void*         hoveredLine{ nullptr };
 	};
 
-	template <class HistoryData, class DateMap, class LocationMap>
-	inline std::optional<std::filesystem::path> BaseHistory<HistoryData, DateMap, LocationMap>::GetDirectoryImpl()
+	template <class Derived, class Entry, class HistoryData, class DateMap, class LocationMap>
+	inline std::optional<std::filesystem::path> BaseHistory<Derived, Entry, HistoryData, DateMap, LocationMap>::GetDirectory()
 	{
+		if (directory) {
+			return directory;
+		}
+
 		auto dir = SKSE::log::log_directory();
 		if (!dir) {
 			REX::ERROR("Unable to access {} directory", GetType());
@@ -377,12 +368,12 @@ namespace GlobalHistory
 			}
 		}
 
-		return dir;
+		directory = std::move(dir);
+		return directory;
 	}
 
-	template <class HistoryData, class DateMap, class LocationMap>
-	template <class T>
-	inline bool BaseHistory<HistoryData, DateMap, LocationMap>::LoadHistoryFromFileImpl(T&& a_history, const std::string& a_save)
+	template <class Derived, class Entry, class HistoryData, class DateMap, class LocationMap>
+	inline bool BaseHistory<Derived, Entry, HistoryData, DateMap, LocationMap>::LoadHistoryFromFile(const std::string& a_save)
 	{
 		const auto& jsonPath = GetFile(a_save);
 		if (!jsonPath) {
@@ -396,7 +387,7 @@ namespace GlobalHistory
 		std::error_code err;
 		if (std::filesystem::exists(*jsonPath, err)) {
 			std::string buffer;
-			auto        ec = glz::read_file_json<glz::opts{ .error_on_unknown_keys = false }>(a_history, jsonPath->string(), buffer);
+			auto        ec = glz::read_file_json<glz::opts{ .error_on_unknown_keys = false }>(history, jsonPath->string(), buffer);
 			if (ec) {
 				REX::INFO("\tFailed to read {} file (error: {})", GetType(), glz::format_error(ec, buffer));
 			}
@@ -407,19 +398,17 @@ namespace GlobalHistory
 		return true;
 	}
 
-	template <class HistoryData, class DateMap, class LocationMap>
-	template <class T>
-	inline void BaseHistory<HistoryData, DateMap, LocationMap>::SaveHistoryToFileImpl(T&& a_history, const std::string& a_save)
+	template <class Derived, class Entry, class HistoryData, class DateMap, class LocationMap>
+	inline void BaseHistory<Derived, Entry, HistoryData, DateMap, LocationMap>::SaveHistoryToFile(const std::string& a_save)
 	{
 		const auto& jsonPath = GetFile(a_save);
 		if (!jsonPath) {
 			return;
 		}
-
 		REX::INFO("Saving {} file : {}", GetType(), jsonPath->string());
 
 		std::string buffer;
-		auto        ec = glz::write_file_json(a_history, jsonPath->string(), buffer);
+		auto        ec = glz::write_file_json(history, jsonPath->string(), buffer);
 
 		if (ec) {
 			REX::INFO("\tFailed to save {} file: (error: {})", GetType(), glz::format_error(ec, buffer));
@@ -447,7 +436,11 @@ namespace GlobalHistory
 					MANAGER(GlobalHistory)->SetMenuOpenJustNow(false);
 				}
 				if (rootOpen) {
-					for (auto& [leaf, dialogue] : leafMap) {
+					ImGui::ForEachVisibleMapEntry(leafMap, [&](const auto& leaf, const auto& dialogue) {
+						if (MANAGER(GlobalHistory)->ShouldAutoSelectFirstEntry()) {
+							SetCurrentHistory(dialogue);
+							MANAGER(GlobalHistory)->SetAutoSelectFirstEntry(false);
+						}
 						auto leafFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanAvailWidth;
 						auto is_selected = currentHistory && currentHistory == dialogue;
 						if (is_selected) {
@@ -466,7 +459,7 @@ namespace GlobalHistory
 						if (is_selected) {
 							ImGui::PopStyleColor();
 						}
-					}
+					});
 					ImGui::TreePop();
 				}
 			}
@@ -491,7 +484,11 @@ namespace GlobalHistory
 					MANAGER(GlobalHistory)->SetMenuOpenJustNow(false);
 				}
 				if (rootOpen) {
-					for (auto& [leaf, monologue] : leafMap) {
+					ImGui::ForEachVisibleMapEntry(leafMap, [&](const auto& leaf, const auto& monologue) {
+						if (MANAGER(GlobalHistory)->ShouldAutoSelectFirstEntry()) {
+							SetCurrentHistory(&a_map.map.at(root).at(leaf));
+							MANAGER(GlobalHistory)->SetAutoSelectFirstEntry(false);
+						}
 						auto leafFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanFullWidth;
 						auto is_selected = currentHistory && *currentHistory == monologue;
 						if (is_selected) {
@@ -510,19 +507,16 @@ namespace GlobalHistory
 						if (is_selected) {
 							ImGui::PopStyleColor();
 						}
-					}
+					});
 					ImGui::TreePop();
 				}
 			}
 		} else {
-			if (MANAGER(GlobalHistory)->WasMenuOpenJustNow()) {
-				ImGui::SetNextItemOpen(true);
-			}
-			if (ImGui::IsItemToggledOpen()) {
-				ClearCurrentHistory();
-				MANAGER(GlobalHistory)->SetMenuOpenJustNow(false);
-			}
-			for (auto& [leaf, monologue] : map) {
+			ImGui::ForEachVisibleMapEntry(map, [&](const auto& leaf, const auto& monologue) {
+				if (MANAGER(GlobalHistory)->ShouldAutoSelectFirstEntry()) {
+					SetCurrentHistory(&a_map.map.at(leaf));
+					MANAGER(GlobalHistory)->SetAutoSelectFirstEntry(false);
+				}
 				auto leafFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanFullWidth;
 				auto is_selected = currentHistory && *currentHistory == monologue;
 				if (is_selected) {
@@ -541,7 +535,7 @@ namespace GlobalHistory
 				if (is_selected) {
 					ImGui::PopStyleColor();
 				}
-			}
+			});
 		}
 
 		ImGui::PopStyleVar();

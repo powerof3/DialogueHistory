@@ -92,4 +92,42 @@ namespace ImGui
 	}
 
 	void TextWithBlurredShadow(ImDrawList* a_drawlist, const ImVec2& a_pos, const char* a_text, const char* a_textEnd = nullptr);
+
+	template <class Map, class Func>
+	void ForEachVisibleMapEntry(const Map& a_map, Func&& a_func)
+	{
+		const int count = static_cast<int>(a_map.size());
+
+		ImGuiListClipper clipper;
+		clipper.Begin(count);
+
+		auto it = a_map.begin();
+		int  idx = 0;
+
+		while (clipper.Step()) {
+			const int start = clipper.DisplayStart;
+
+			const int fromCurrent = std::abs(start - idx);
+			const int fromBegin = start;
+			const int fromEnd = count - start;
+
+			if (fromBegin <= fromCurrent && fromBegin <= fromEnd) {
+				it = a_map.begin();
+				std::advance(it, fromBegin);
+			} else if (fromEnd < fromCurrent) {
+				it = a_map.end();
+				std::advance(it, -fromEnd);
+			} else {
+				std::advance(it, start - idx);
+			}
+
+			idx = start;
+
+			for (; idx < clipper.DisplayEnd; ++idx, ++it) {
+				a_func(it->first, it->second);
+			}
+		}
+
+		clipper.End();
+	}
 }
