@@ -396,7 +396,7 @@ namespace GlobalHistory
 		std::error_code err;
 		if (std::filesystem::exists(*jsonPath, err)) {
 			std::string buffer;
-			auto        ec = glz::read_file_json(a_history, jsonPath->string(), buffer);
+			auto        ec = glz::read_file_json<glz::opts{ .error_on_unknown_keys = false }>(a_history, jsonPath->string(), buffer);
 			if (ec) {
 				REX::INFO("\tFailed to read {} file (error: {})", GetType(), glz::format_error(ec, buffer));
 			}

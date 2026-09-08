@@ -139,6 +139,13 @@ Speech::Line::Line(std::string a_line, std::string a_voice) :
 	voice(std::move(a_voice))
 {}
 
+void Speech::Line::Sanitize()
+{
+	if (line.empty() || line == " ") {
+		line = "...";
+	}
+}
+
 void Speech::Initialize(RE::TESObjectREFR* a_speaker)
 {
 	if (!speakerName.empty()) {
@@ -148,6 +155,9 @@ void Speech::Initialize(RE::TESObjectREFR* a_speaker)
 	if (a_speaker) {
 		id.SetNumericID(a_speaker->GetFormID());
 		speakerName = NPCNameProvider::GetSingleton()->GetName(a_speaker);
+		if ((a_speaker->IsDynamicForm() || a_speaker->GetObjectReference() && a_speaker->GetObjectReference()->IsDynamicForm()) && speakerName.empty()) {
+			tempSpeaker = speakerName;
+		}
 		RE::TESForm* cellOrLoc = a_speaker->GetCurrentLocation();
 		if (!cellOrLoc) {
 			cellOrLoc = a_speaker->GetParentCell();
@@ -170,6 +180,25 @@ void Speech::Initialize(const std::tm& a_time)
 std::tm Speech::ExtractTimeStamp() const
 {
 	return TimeStamp::ExtractTimeStamp(timeStamp);
+}
+
+bool Speech::ResolveIDs()
+{
+	auto speakerActor = RE::TESForm::LookupByID<RE::Actor>(id.GetNumericID());
+	if (speakerActor) {
+		speakerName = NPCNameProvider::GetSingleton()->GetName(speakerActor);
+	} else if (tempSpeaker) {
+		speakerName = *tempSpeaker;
+	} else {
+		return false;
+	}
+
+	locName = "$DH_UnknownLocation"_T;
+	if (auto cellOrLoc = RE::TESForm::LookupByID(loc.GetNumericID())) {
+		locName = cellOrLoc->GetName();
+	}
+
+	return true;
 }
 
 void Speech::Clear()
@@ -299,6 +328,18 @@ void Dialogue::RefreshContents()
 	refreshContents = true;
 }
 
+bool Dialogue::Resolve()
+{
+	if (!ResolveIDs()) {
+		return false;
+	}
+	for (auto& line : dialogue) {
+		line.isPlayer = line.voice.empty();
+		line.Sanitize();
+	}
+	return true;
+}
+
 Monologue::Monologue(std::tm& a_time, RE::TESObjectREFR* a_speaker, std::string a_line, std::string a_voice, RE::TESTopic* a_topic) :
 	Speech::Speech(a_time, a_speaker),
 	line(std::move(a_line), std::move(a_voice))
@@ -307,6 +348,18 @@ Monologue::Monologue(std::tm& a_time, RE::TESObjectREFR* a_speaker, std::string 
 	if (a_topic) {
 		dialogueType = a_topic->data.type.underlying();
 	}
+}
+
+bool Monologue::Resolve()
+{
+	if (!ResolveIDs()) {
+		return false;
+	}
+	if (auto topicForm = RE::TESForm::LookupByID<RE::TESTopic>(topic.GetNumericID())) {
+		dialogueType = topicForm->data.type.underlying();
+	}
+	line.Sanitize();
+	return true;
 }
 
 void Monologues::Draw()

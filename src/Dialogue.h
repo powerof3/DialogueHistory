@@ -51,6 +51,8 @@ struct Speech
 		Line() = default;
 		Line(std::string a_line, std::string a_voice);
 
+		void Sanitize();
+
 		// members
 		std::string line;
 		std::string voice;
@@ -80,14 +82,17 @@ struct Speech
 	void    Initialize(const std::tm& a_time);
 	std::tm ExtractTimeStamp() const;
 
+	bool ResolveIDs();
+
 	void Clear();
 
 	// members
-	std::uint64_t         timeStamp;
-	RE::BGSNumericIDIndex id;
-	RE::BGSNumericIDIndex loc;
-	std::string           locName;
-	std::string           speakerName;
+	std::uint64_t              timeStamp;
+	RE::BGSNumericIDIndex      id;
+	RE::BGSNumericIDIndex      loc;
+	std::string                locName;
+	std::string                speakerName;
+	std::optional<std::string> tempSpeaker{};
 };
 
 // Conversations between PC + NPC
@@ -126,6 +131,8 @@ struct Dialogue : public Speech
 	void Clear();
 	void RefreshContents();
 
+	bool Resolve();
+
 	// members
 	std::vector<Dialogue::Line> dialogue{};
 	std::string                 timeAndLoc{};
@@ -139,11 +146,9 @@ struct Dialogue : public Speech
 		static constexpr auto value = glz::object(
 			"time", &T::timeStamp,
 			"id", &T::id,
+			"speaker", &T::tempSpeaker,
 			"loc", &T::loc,
-			"lines", &T::dialogue,
-			"locName", glz::hide(&T::locName),
-			"timeLoc", glz::hide(&T::timeAndLoc),
-			"speakerName", glz::hide(&T::speakerName));
+			"lines", &T::dialogue);
 	};
 };
 
@@ -152,6 +157,8 @@ struct Monologue : public Speech
 {
 	Monologue() = default;
 	Monologue(std::tm& a_time, RE::TESObjectREFR* a_speaker, std::string a_line, std::string a_voice, RE::TESTopic* a_topic);
+
+	bool Resolve();
 
 	// members
 	Speech::Line          line{};
@@ -165,11 +172,10 @@ struct Monologue : public Speech
 		static constexpr auto value = glz::object(
 			"time", &T::timeStamp,
 			"id", &T::id,
+			"speaker", &T::tempSpeaker,
 			"loc", &T::loc,
 			"line", &T::line,
-			"topic", &T::topic,
-			"hourMin", glz::hide(&T::hourMinTimeStamp),
-			"locName", glz::hide(&T::locName));
+			"topic", &T::topic);
 	};
 };
 

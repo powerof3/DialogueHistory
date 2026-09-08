@@ -82,41 +82,22 @@ namespace GlobalHistory
 		ClearMaps();
 
 		if (!history.empty()) {
-			std::erase_if(history, [&](auto& dialogue) {
-				auto speakerActor = RE::TESForm::LookupByID<RE::Actor>(dialogue.id.GetNumericID());
-				if (!speakerActor) {
-					return true;
-				}
+			std::erase_if(history, [&](auto& dialogue) { return !dialogue.Resolve(); });
 
-				if (auto cellOrLoc = RE::TESForm::LookupByID(dialogue.loc.GetNumericID())) {
-					dialogue.locName = cellOrLoc->GetName();
-					if (dialogue.locName.empty()) {
-						dialogue.locName = "$DH_UnknownLocation"_T;
-					}
-				} else {
-					dialogue.locName = "???";
-				}
-
-				dialogue.speakerName = NPCNameProvider::GetSingleton()->GetName(speakerActor);
-
-				for (auto& line : dialogue.dialogue) {
-					line.isPlayer = line.voice.empty();
-					if (line.line.empty() || line.line == " ") {
-						line.line = "...";
-					}
-				}
-
-				return false;
-			});
+			std::uint64_t lastDay = std::numeric_limits<std::uint64_t>::max();
+			TimeStamp     date;
+			bool          use12HourFormat = MANAGER(GlobalHistory)->Use12HourFormat();
 
 			for (auto& dialogue : history) {
 				auto time = dialogue.ExtractTimeStamp();
 
-				TimeStamp date;
-				date.FromYearMonthDay(time.tm_year, time.tm_mon, time.tm_mday);
+				if (const auto day = dialogue.timeStamp / 10000; day != lastDay) {
+					date.FromYearMonthDay(time.tm_year, time.tm_mon, time.tm_mday);
+					lastDay = day;
+				}
 
 				TimeStamp hourMin;
-				hourMin.FromHourMin(time.tm_hour, time.tm_min, dialogue.speakerName, MANAGER(GlobalHistory)->Use12HourFormat());
+				hourMin.FromHourMin(time.tm_hour, time.tm_min, dialogue.speakerName, use12HourFormat);
 
 				TimeStamp speaker(dialogue.timeStamp, dialogue.speakerName);
 
@@ -233,34 +214,7 @@ namespace GlobalHistory
 		ClearMaps();
 
 		if (!history.empty()) {
-			std::erase_if(history, [&](auto& monologue) {
-				auto speakerActor = RE::TESForm::LookupByID<RE::Actor>(monologue.id.GetNumericID());
-				if (!speakerActor) {
-					return true;
-				}
-
-				if (auto cellOrLoc = RE::TESForm::LookupByID(monologue.loc.GetNumericID())) {
-					monologue.locName = cellOrLoc->GetName();
-					if (monologue.locName.empty()) {
-						monologue.locName = "$DH_UnknownLocation"_T;
-					}
-				} else {
-					monologue.locName = "???";
-				}
-
-				monologue.speakerName = NPCNameProvider::GetSingleton()->GetName(speakerActor);
-
-				if (auto topic = RE::TESForm::LookupByID<RE::TESTopic>(monologue.topic.GetNumericID())) {
-					monologue.dialogueType = topic->data.type.underlying();
-				}
-
-				auto& line = monologue.line;
-				if (line.line.empty() || line.line == " ") {
-					line.line = "...";
-				}
-
-				return false;
-			});
+			std::erase_if(history, [&](auto& monologue) { return !monologue.Resolve(); });
 		}
 	}
 
