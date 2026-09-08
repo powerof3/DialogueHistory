@@ -287,13 +287,7 @@ namespace GlobalHistory
 
 					ImGui::SetCursorPosY(cursorY);
 					if (ImGui::ToggleButton("##DialogueToggle", &drawConversation)) {
-						const bool hasSelection = drawConversation ?
-						                              conversationHistory.CanDrawHistory() :
-						                              dialogueHistory.CanDrawHistory();
-						if (!hasSelection) {
-							SetMenuOpenJustNow(true);
-							SetAutoSelectFirstEntry(true);
-						}
+						OnTreeSwitch();
 					}
 
 					ImGui::SameLine();
@@ -390,9 +384,8 @@ namespace GlobalHistory
 					if (ImGui::ToggleButton("##MapToggle", &sortByLocation)) {
 						if (drawConversation) {
 							conversationHistory.ClearCurrentHistory();
-						} else {
-							dialogueHistory.ClearCurrentHistory();
 						}
+						OnTreeSwitch();
 					}
 
 					ImGui::SameLine();
@@ -540,7 +533,7 @@ namespace GlobalHistory
 			return;
 		}
 
-		if (a_speaker->IsPlayerRef() || a_speaker->GetDistance(RE::PlayerCharacter::GetSingleton()) > "fTalkingDistance:LOD"_ini.value() || RE::MenuTopicManager::GetSingleton()->speaker.get() == a_speaker) {
+		if (a_speaker->IsPlayerRef() || a_speaker->GetDistance(RE::PlayerCharacter::GetSingleton()) > *"fTalkingDistance:LOD"_ini || RE::MenuTopicManager::GetSingleton()->speaker.get() == a_speaker) {
 			return;
 		}
 
@@ -558,6 +551,17 @@ namespace GlobalHistory
 
 				conversationHistory.SaveHistory(time, Monologue(time, a_speaker.get(), std::move(text), std::move(voice), dialogueItem.topic));
 			}
+		}
+	}
+
+	void Manager::OnTreeSwitch()
+	{
+		const bool hasSelection = drawConversation ?
+		                              conversationHistory.CanDrawHistory() :
+		                              dialogueHistory.CanDrawHistory();
+		if (!hasSelection) {
+			SetMenuOpenJustNow(true);
+			SetAutoSelectFirstEntry(true);
 		}
 	}
 

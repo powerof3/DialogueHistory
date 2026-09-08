@@ -317,6 +317,7 @@ namespace GlobalHistory
 
 	private:
 		void AddConversation(const RE::TESObjectREFRPtr& a_speaker, RE::TESTopicInfo* a_info);
+		void OnTreeSwitch();
 
 		EventResult ProcessEvent(const RE::TESLoadGameEvent* a_evn, RE::BSTEventSource<RE::TESLoadGameEvent>*) override;
 		EventResult ProcessEvent(const RE::TESTopicInfoEvent* a_evn, RE::BSTEventSource<RE::TESTopicInfoEvent>*) override;
