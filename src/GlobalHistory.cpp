@@ -441,6 +441,10 @@ namespace GlobalHistory
 
 	void Manager::SetGlobalHistoryOpen(bool a_open, bool a_showCursor)
 	{
+		if (globalHistoryOpen == a_open) {
+			return;
+		}
+
 		globalHistoryOpen = a_open;
 		menuOpenedJustNow = a_open;
 		autoSelectFirstEntry = a_open;
