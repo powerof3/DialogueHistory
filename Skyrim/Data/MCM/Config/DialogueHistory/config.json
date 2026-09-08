@@ -124,6 +124,15 @@
       "cursorFillMode": "topToBottom",
       "content": [
         {
+          "id": "bOpenFromPauseMenu:Settings",
+          "text": "$DH_OpenFromPauseMenu_Text",
+          "type": "toggle",
+          "help": "$DH_OpenFromPauseMenu_Help",
+          "valueOptions": {
+            "sourceType": "ModSettingBool"
+          }
+        },
+        {
           "id": "b12HourFormat:Settings",
           "text": "$DH_12HourFormat_Text",
           "type": "toggle",

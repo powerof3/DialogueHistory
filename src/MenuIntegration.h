@@ -111,12 +111,10 @@ namespace MenuIntegration
 
 		MenuSettings<GlobalHistory::Manager> globalHistory{
 			"OpenTween_DialogueHistory",
-			"$DH_DialogueHistory_Menu",
+			"$DH_Title_PauseMenu",
 			"dh_orig_onCategoryButtonPress",
 			"dh_hooked"
 		};
-
-		bool dialogueHistoryInjected{ false };
 	};
 
 	template <class F>
