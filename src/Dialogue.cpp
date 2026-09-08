@@ -155,7 +155,7 @@ void Speech::Initialize(RE::TESObjectREFR* a_speaker)
 	if (a_speaker) {
 		id.SetNumericID(a_speaker->GetFormID());
 		speakerName = NPCNameProvider::GetSingleton()->GetName(a_speaker);
-		if ((a_speaker->IsDynamicForm() || a_speaker->GetObjectReference() && a_speaker->GetObjectReference()->IsDynamicForm()) && speakerName.empty()) {
+		if ((a_speaker->IsDynamicForm() || a_speaker->GetObjectReference() && a_speaker->GetObjectReference()->IsDynamicForm()) && !speakerName.empty()) {
 			tempSpeaker = speakerName;
 		}
 		RE::TESForm* cellOrLoc = a_speaker->GetCurrentLocation();
@@ -208,6 +208,7 @@ void Speech::Clear()
 	loc = {};
 	locName.clear();
 	speakerName.clear();
+	tempSpeaker.reset();
 }
 
 Dialogue::Dialogue(const std::tm& a_time, RE::TESObjectREFR* a_speaker) :

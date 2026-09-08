@@ -325,7 +325,7 @@ namespace GlobalHistory
 		// members
 		DialogueHistory     dialogueHistory;
 		ConversationHistory conversationHistory;
-		std::string         playerName;
+		mutable std::string playerName;
 		RE::BSSoundHandle   voiceHandle{};
 		bool                drawConversation{ false };
 		bool                finishLoading{ false };

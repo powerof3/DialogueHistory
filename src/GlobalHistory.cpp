@@ -75,10 +75,6 @@ namespace GlobalHistory
 
 	void ConversationHistory::RefreshTimeStamps()
 	{
-		if (dateMap.empty()) {
-			return;
-		}
-
 		for (auto& monologue : history) {
 			monologue.hourMinTimeStamp.clear();
 		}
@@ -656,12 +652,15 @@ namespace GlobalHistory
 
 	const std::string& Manager::GetPlayerName() const
 	{
+		if (playerName.empty()) {
+			playerName = RE::PlayerCharacter::GetSingleton()->GetDisplayFullName();
+		}
 		return playerName;
 	}
 
 	void Manager::RefreshPlayerName()
 	{
-		playerName = NPCNameProvider::GetSingleton()->GetName(RE::PlayerCharacter::GetSingleton());
+		playerName = RE::PlayerCharacter::GetSingleton()->GetDisplayFullName();
 	}
 
 	bool Manager::IsLineHovered(const void* a_line) const

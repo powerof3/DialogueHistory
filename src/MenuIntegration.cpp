@@ -76,17 +76,14 @@ namespace MenuIntegration
 		}
 
 		if (a_evn->menuName == RE::JournalMenu::MENU_NAME) {
-			if (a_evn->opening) {
-				if (globalHistory.openFromPause) {
+			if (a_evn->opening && globalHistory.openFromPause) {
 					SetupJournalMenu();
-				}
 			}
-		} else if (a_evn->menuName == RE::DialogueMenu::MENU_NAME) {
-			MANAGER(LocalHistory)->SetDialogueMenuOpen(a_evn->opening);
-		} else if (a_evn->menuName == RE::JournalMenu::MENU_NAME) {
 			if (MANAGER(LocalHistory)->IsLocalHistoryOpen()) {
 				MANAGER(LocalHistory)->SetupLocalHistoryMenu(!a_evn->opening, false);
 			}
+		} else if (a_evn->menuName == RE::DialogueMenu::MENU_NAME) {
+			MANAGER(LocalHistory)->SetDialogueMenuOpen(a_evn->opening);
 		} else if (a_evn->menuName == RE::RaceSexMenu::MENU_NAME) {
 			if (!a_evn->opening) {
 				MANAGER(GlobalHistory)->RefreshPlayerName();

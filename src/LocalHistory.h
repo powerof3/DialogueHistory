@@ -7,8 +7,6 @@ namespace LocalHistory
 	class Manager : public REX::TSingleton<Manager>
 	{
 	public:
-		static void Register();
-
 		void LoadMCMSettings(const CSimpleIniA& a_ini);
 
 		void Draw();
